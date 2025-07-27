@@ -1,10 +1,14 @@
 package com.example.budget.ui.expense
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -27,7 +31,7 @@ fun ExpenseScreen(
                 title = { Text("Add Expense") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        // Icon for back
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -37,7 +41,7 @@ fun ExpenseScreen(
                 viewModel.saveExpense()
                 navController.popBackStack()
             }) {
-                // Icon for save
+                Icon(Icons.Default.Done, contentDescription = "Save Expense")
             }
         }
     ) { innerPadding ->
@@ -49,7 +53,8 @@ fun ExpenseScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             DateSelector(
-                date = uiState.date
+                date = uiState.date,
+                onDateChange = { viewModel.onDateChange(it) }
             )
             CategorySelector(
                 categories = uiState.allCategories,
@@ -73,11 +78,29 @@ fun ExpenseScreen(
 }
 
 @Composable
-fun DateSelector(date: Date) {
+fun DateSelector(date: Date, onDateChange: (Date) -> Unit) {
+    val context = LocalContext.current
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    Text("Date: ${dateFormat.format(date)}")
-    // In a real app, you'd use a DatePickerDialog here.
-    // For simplicity, we'll just show the current date.
+
+    val calendar = Calendar.getInstance()
+    calendar.time = date
+
+    val datePickerDialog = android.app.DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            val newDate = Calendar.getInstance().apply {
+                set(year, month, dayOfMonth)
+            }.time
+            onDateChange(newDate)
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
+
+    Button(onClick = { datePickerDialog.show() }) {
+        Text("Date: ${dateFormat.format(date)}")
+    }
 }
 
 @Composable
