@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -102,7 +103,7 @@ fun SummaryHeader() {
     ) {
         Text("Category", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f))
         Text("Budgeted", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
-        Text("Actual", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
+        Text("Expense", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
         Text("Delta", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
     }
 }
@@ -124,16 +125,17 @@ fun SummaryRow(row: SummaryRow) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(row.category.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f))
-                Text(String.format("%.2f", row.budgeted), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
-                Text(String.format("%.2f", row.actual), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
+                Text(row.category.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(String.format("%.2f", row.budgeted), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
+                Text(String.format("%.2f", row.actual), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
                 Text(
                     text = String.format("%.2f", row.delta),
                     color = if (row.delta >= 0) positiveDeltaColor else negativeDeltaColor,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1.5f),
-                    textAlign = TextAlign.End
+                    textAlign = TextAlign.End,
+                    maxLines = 1
                 )
             }
             if (row.budgeted > 0) {
@@ -164,15 +166,16 @@ fun SummaryTotals(uiState: SummaryUiState) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text("Totals", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f))
-        Text(String.format("%.2f", totalBudgeted), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
-        Text(String.format("%.2f", totalActual), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
+        Text(String.format("%.2f", totalBudgeted), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
+        Text(String.format("%.2f", totalActual), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
         Text(
             text = String.format("%.2f", totalDelta),
             color = if (totalDelta >= 0) positiveDeltaColor else negativeDeltaColor,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1.5f),
-            textAlign = TextAlign.End
+            textAlign = TextAlign.End,
+            maxLines = 1
         )
     }
 } 

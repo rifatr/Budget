@@ -40,13 +40,17 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
     }
 
     fun onOverallBudgetChange(newBudget: String) {
-        _uiState.value = _uiState.value.copy(overallBudgetInput = newBudget)
+        if (newBudget.matches(Regex("^\\d{0,6}(\\.\\d{0,2})?\$"))) {
+            _uiState.value = _uiState.value.copy(overallBudgetInput = newBudget)
+        }
     }
 
     fun onCategoryBudgetChange(categoryId: Int, newBudget: String) {
-        val newCategoryBudgets = _uiState.value.categoryBudgetsInput.toMutableMap()
-        newCategoryBudgets[categoryId] = newBudget
-        _uiState.value = _uiState.value.copy(categoryBudgetsInput = newCategoryBudgets)
+        if (newBudget.matches(Regex("^\\d{0,6}(\\.\\d{0,2})?\$"))) {
+            val newCategoryBudgets = _uiState.value.categoryBudgetsInput.toMutableMap()
+            newCategoryBudgets[categoryId] = newBudget
+            _uiState.value = _uiState.value.copy(categoryBudgetsInput = newCategoryBudgets)
+        }
     }
 
     fun saveBudget() {
@@ -61,6 +65,15 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
                 categoryBudgets = categoryBudgets
             )
             budgetRepository.insertOrUpdateBudget(newBudget)
+        }
+    }
+
+    fun addCategory(categoryName: String) {
+        viewModelScope.launch {
+            budgetRepository.insertCategory(Category(name = categoryName))
+            _uiState.value = _uiState.value.copy(
+                allCategories = budgetRepository.getAllCategories().first()
+            )
         }
     }
 } 
