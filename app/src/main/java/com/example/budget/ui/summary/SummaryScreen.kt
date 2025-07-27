@@ -1,15 +1,18 @@
 package com.example.budget.ui.summary
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,7 +48,7 @@ fun SummaryScreen(
                 title = { Text("Summary for $month/$year") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -66,19 +69,20 @@ fun SummaryScreen(
                     .padding(innerPadding)
                     .fillMaxSize()
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item {
                     SummaryHeader()
                 }
                 item {
-                    Divider()
+                    HorizontalDivider()
                 }
                 items(uiState.summary.values.toList()) { row ->
                     SummaryRow(row)
                 }
                 item {
-                    Divider()
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider()
                 }
                 item {
                     SummaryTotals(uiState)
@@ -96,34 +100,50 @@ fun SummaryHeader() {
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text("Category", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-        Text("Budgeted", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), textAlign = TextAlign.End)
-        Text("Actual", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), textAlign = TextAlign.End)
-        Text("Delta", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), textAlign = TextAlign.End)
+        Text("Category", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f))
+        Text("Budgeted", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
+        Text("Actual", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
+        Text("Delta", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
     }
 }
 
 @Composable
 fun SummaryRow(row: SummaryRow) {
+    val positiveDeltaColor = Color(0xFF388E3C) // A more subtle green
+    val negativeDeltaColor = MaterialTheme.colorScheme.error
+    val progress = if (row.budgeted > 0) (row.actual / row.budgeted).toFloat() else 0f
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(row.category.name, modifier = Modifier.weight(1f))
-            Text(String.format("%.2f", row.budgeted), modifier = Modifier.weight(1f), textAlign = TextAlign.End)
-            Text(String.format("%.2f", row.actual), modifier = Modifier.weight(1f), textAlign = TextAlign.End)
-            Text(
-                text = String.format("%.2f", row.delta),
-                color = if (row.delta >= 0) Color.Green else Color.Red,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.End
-            )
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(row.category.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f))
+                Text(String.format("%.2f", row.budgeted), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
+                Text(String.format("%.2f", row.actual), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
+                Text(
+                    text = String.format("%.2f", row.delta),
+                    color = if (row.delta >= 0) positiveDeltaColor else negativeDeltaColor,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1.5f),
+                    textAlign = TextAlign.End
+                )
+            }
+            if (row.budgeted > 0) {
+                Spacer(modifier = Modifier.height(8.dp))
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxWidth(),
+                    color = if (progress > 1f) negativeDeltaColor else MaterialTheme.colorScheme.primary,
+                )
+            }
         }
     }
 }
@@ -133,21 +153,25 @@ fun SummaryTotals(uiState: SummaryUiState) {
     val totalBudgeted = uiState.summary.values.sumOf { it.budgeted }
     val totalActual = uiState.summary.values.sumOf { it.actual }
     val totalDelta = totalBudgeted - totalActual
+    val positiveDeltaColor = Color(0xFF388E3C)
+    val negativeDeltaColor = MaterialTheme.colorScheme.error
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(top = 16.dp, bottom = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("Totals", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-        Text(String.format("%.2f", totalBudgeted), fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), textAlign = TextAlign.End)
-        Text(String.format("%.2f", totalActual), fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), textAlign = TextAlign.End)
+        Text("Totals", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f))
+        Text(String.format("%.2f", totalBudgeted), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
+        Text(String.format("%.2f", totalActual), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
         Text(
             text = String.format("%.2f", totalDelta),
-            color = if (totalDelta >= 0) Color.Green else Color.Red,
+            color = if (totalDelta >= 0) positiveDeltaColor else negativeDeltaColor,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1.5f),
             textAlign = TextAlign.End
         )
     }
