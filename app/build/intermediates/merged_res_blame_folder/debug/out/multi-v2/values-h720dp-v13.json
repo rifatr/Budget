@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.budget.app-mergeDebugResources-66:/values-h720dp-v13/values-h720dp-v13.xml",
+            "outputFile": "com.example.budget.app-mergeDebugResources-67:/values-h720dp-v13/values-h720dp-v13.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\lutfar.rahman\\.gradle\\caches\\8.9\\transforms\\10cba7169d8a778877888034c4a04077\\transformed\\appcompat-1.6.1\\res\\values-h720dp-v13\\values-h720dp-v13.xml",
+                    "source": "C:\\Users\\lutfar.rahman\\.gradle\\caches\\transforms-3\\90d403245fd99a741d30bfbeb56453c2\\transformed\\appcompat-1.6.1\\res\\values-h720dp-v13\\values-h720dp-v13.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

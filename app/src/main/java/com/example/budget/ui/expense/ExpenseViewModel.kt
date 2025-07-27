@@ -46,8 +46,8 @@ class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewMod
     }
 
     fun onAmountChange(newAmount: String) {
-        // Only allow digits and a single decimal point
-        if (newAmount.matches(Regex("^\\d*\\.?\\d*\$"))) {
+        // Enforce 6 digits before the decimal point and 2 digits after
+        if (newAmount.matches(Regex("^\\d{0,6}(\\.\\d{0,2})?\$"))) {
             _uiState.value = _uiState.value.copy(amount = newAmount)
             validateInput()
         }

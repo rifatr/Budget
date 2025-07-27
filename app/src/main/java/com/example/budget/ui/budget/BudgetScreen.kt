@@ -3,13 +3,15 @@ package com.example.budget.ui.budget
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -24,6 +26,8 @@ fun BudgetScreen(
     viewModel: BudgetViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showAddCategoryDialog by remember { mutableStateOf(false) }
+    var newCategoryName by remember { mutableStateOf("") }
 
     LaunchedEffect(month, year) {
         viewModel.initialize(month, year)
@@ -35,7 +39,7 @@ fun BudgetScreen(
                 title = { Text("Budget for $month/$year") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        // Icon for back
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -45,7 +49,7 @@ fun BudgetScreen(
                 viewModel.saveBudget()
                 navController.popBackStack()
             }) {
-                // Icon for save
+                Icon(Icons.Default.Done, contentDescription = "Save Budget")
             }
         }
     ) { innerPadding ->
@@ -64,6 +68,22 @@ fun BudgetScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Category Budgets", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Button(onClick = { showAddCategoryDialog = true }) {
+                        Icon(Icons.Default.Add, contentDescription = "Add Category")
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Add Category")
+                    }
+                }
+            }
+
             items(uiState.allCategories) { category ->
                 OutlinedTextField(
                     value = uiState.categoryBudgetsInput[category.id] ?: "",
@@ -73,5 +93,37 @@ fun BudgetScreen(
                 )
             }
         }
+    }
+
+    if (showAddCategoryDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddCategoryDialog = false },
+            title = { Text("Add New Category") },
+            text = {
+                OutlinedTextField(
+                    value = newCategoryName,
+                    onValueChange = { newCategoryName = it },
+                    label = { Text("Category Name") }
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (newCategoryName.isNotBlank()) {
+                            viewModel.addCategory(newCategoryName)
+                            newCategoryName = ""
+                            showAddCategoryDialog = false
+                        }
+                    }
+                ) {
+                    Text("Add")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showAddCategoryDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 } 

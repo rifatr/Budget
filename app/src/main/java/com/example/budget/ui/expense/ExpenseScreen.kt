@@ -2,11 +2,9 @@ package com.example.budget.ui.expense
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
@@ -18,6 +16,7 @@ import com.example.budget.ui.AppViewModelProvider
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +32,7 @@ fun ExpenseScreen(
                 title = { Text("Add Expense") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -41,10 +40,12 @@ fun ExpenseScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    viewModel.saveExpense()
-                    navController.popBackStack()
+                    if (uiState.isEntryValid) {
+                        viewModel.saveExpense()
+                        navController.popBackStack()
+                    }
                 },
-                enabled = uiState.isEntryValid
+                containerColor = if (uiState.isEntryValid) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
             ) {
                 Icon(Icons.Default.Done, contentDescription = "Save Expense")
             }

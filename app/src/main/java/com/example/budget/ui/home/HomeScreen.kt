@@ -1,6 +1,11 @@
 package com.example.budget.ui.home
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Assessment
+import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,7 +35,12 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Budget Tracker") }
+                title = { Text("Budget Tracker") },
+                actions = {
+                    IconButton(onClick = { navController.navigate(Screen.Settings.route) }) {
+                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                    }
+                }
             )
         }
     ) { innerPadding ->
@@ -51,24 +61,28 @@ fun HomeScreen(
                 onClick = { navController.navigate(Screen.Budget.createRoute(uiState.selectedMonth, uiState.selectedYear)) },
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Icon(Icons.Default.AccountBalanceWallet, contentDescription = "Budget")
                 Text("Budget")
             }
             Button(
                 onClick = { navController.navigate(Screen.Expense.route) },
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Icon(Icons.Default.MonetizationOn, contentDescription = "Expense")
                 Text("Expense")
             }
             Button(
                 onClick = { navController.navigate(Screen.Summary.createRoute(uiState.selectedMonth, uiState.selectedYear)) },
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Icon(Icons.Default.Assessment, contentDescription = "Summary")
                 Text("Summary")
             }
             Button(
                 onClick = { navController.navigate(Screen.Settings.route) },
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Icon(Icons.Default.Settings, contentDescription = "Settings")
                 Text("Settings")
             }
         }
