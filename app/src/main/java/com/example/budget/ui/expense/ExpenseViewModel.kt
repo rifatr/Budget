@@ -17,7 +17,8 @@ data class ExpenseUiState(
     val date: Date = Date(),
     val category: Category? = null,
     val amount: String = "",
-    val description: String = ""
+    val description: String = "",
+    val isEntryValid: Boolean = false
 )
 
 class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewModel() {
@@ -30,19 +31,26 @@ class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewMod
             _uiState.value = _uiState.value.copy(
                 allCategories = budgetRepository.getAllCategories().first()
             )
+            validateInput()
         }
     }
 
     fun onDateChange(newDate: Date) {
         _uiState.value = _uiState.value.copy(date = newDate)
+        validateInput()
     }
 
     fun onCategoryChange(newCategory: Category) {
         _uiState.value = _uiState.value.copy(category = newCategory)
+        validateInput()
     }
 
     fun onAmountChange(newAmount: String) {
-        _uiState.value = _uiState.value.copy(amount = newAmount)
+        // Only allow digits and a single decimal point
+        if (newAmount.matches(Regex("^\\d*\\.?\\d*\$"))) {
+            _uiState.value = _uiState.value.copy(amount = newAmount)
+            validateInput()
+        }
     }
 
     fun onDescriptionChange(newDescription: String) {
@@ -50,6 +58,8 @@ class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewMod
     }
 
     fun saveExpense() {
+        if (!uiState.value.isEntryValid) return
+
         viewModelScope.launch {
             val amount = _uiState.value.amount.toDoubleOrNull() ?: return@launch
             val category = _uiState.value.category ?: return@launch
@@ -60,6 +70,12 @@ class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewMod
                 description = _uiState.value.description
             )
             budgetRepository.insertExpense(newExpense)
+        }
+    }
+
+    private fun validateInput() {
+        with(_uiState.value) {
+            _uiState.value = copy(isEntryValid = category != null && amount.isNotBlank() && amount.toDoubleOrNull() != null)
         }
     }
 } 

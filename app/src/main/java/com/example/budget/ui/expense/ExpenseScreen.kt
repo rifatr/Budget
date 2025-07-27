@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -16,6 +17,7 @@ import com.example.budget.data.db.Category
 import com.example.budget.ui.AppViewModelProvider
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.foundation.text.KeyboardOptions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,10 +39,13 @@ fun ExpenseScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                viewModel.saveExpense()
-                navController.popBackStack()
-            }) {
+            FloatingActionButton(
+                onClick = {
+                    viewModel.saveExpense()
+                    navController.popBackStack()
+                },
+                enabled = uiState.isEntryValid
+            ) {
                 Icon(Icons.Default.Done, contentDescription = "Save Expense")
             }
         }
@@ -65,7 +70,9 @@ fun ExpenseScreen(
                 value = uiState.amount,
                 onValueChange = { viewModel.onAmountChange(it) },
                 label = { Text("Amount") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                isError = uiState.amount.toDoubleOrNull() == null && uiState.amount.isNotBlank(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
             )
             OutlinedTextField(
                 value = uiState.description,
