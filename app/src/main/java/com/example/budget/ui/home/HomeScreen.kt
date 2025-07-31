@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Assessment
@@ -36,6 +37,8 @@ import com.example.budget.ui.Screen
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,53 +64,61 @@ fun HomeScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.Center
         ) {
             MonthYearSelector(
                 selectedMonth = uiState.selectedMonth,
                 selectedYear = uiState.selectedYear,
                 onDateChange = { month, year -> viewModel.onDateChange(month, year) }
             )
-
+            
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            // First row of buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.Center
             ) {
                 SquareButton(
                     onClick = { navController.navigate(Screen.Budget.createRoute(uiState.selectedMonth, uiState.selectedYear)) },
                     icon = Icons.Default.AccountBalanceWallet,
                     text = "Budget",
                     contentDescription = "Budget",
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.size(120.dp)
                 )
+                Spacer(modifier = Modifier.width(24.dp))
                 SquareButton(
                     onClick = { navController.navigate(Screen.Expense.route) },
                     icon = Icons.Default.MonetizationOn,
                     text = "Expense",
                     contentDescription = "Expense",
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.size(120.dp)
                 )
             }
             
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Second row of buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.Center
             ) {
                 SquareButton(
                     onClick = { navController.navigate(Screen.Summary.createRoute(uiState.selectedMonth, uiState.selectedYear)) },
                     icon = Icons.Default.Assessment,
                     text = "Summary",
                     contentDescription = "Summary",
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.size(120.dp)
                 )
+                Spacer(modifier = Modifier.width(24.dp))
                 SquareButton(
                     onClick = { navController.navigate(Screen.Settings.route) },
                     icon = Icons.Default.Settings,
                     text = "Settings",
                     contentDescription = "Settings",
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.size(120.dp)
                 )
             }
         }
@@ -182,33 +193,34 @@ fun SquareButton(
 ) {
     Card(
         modifier = modifier
-            .aspectRatio(1f)
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        )
+        ),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(36.dp),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelLarge,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                fontWeight = FontWeight.Medium
             )
         }
     }
