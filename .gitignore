@@ -6,6 +6,13 @@ build/
 # Local configuration file (sdk path, etc)
 local.properties
 
+# Keystore properties (contains sensitive signing information)
+keystore.properties
+*.keystore
+
+# APK files (generated binaries)
+*.apk
+
 # Android Studio files
 .idea/
 *.iml
