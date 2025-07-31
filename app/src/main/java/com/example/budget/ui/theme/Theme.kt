@@ -22,50 +22,50 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = DeepPurple,
+    primary = SoftIndigo,
     onPrimary = Color.White,
-    primaryContainer = MidnightBlue,
-    onPrimaryContainer = Color.White,
-    secondary = Rose,
+    primaryContainer = DeepTwilight,
+    onPrimaryContainer = MistBlue,
+    secondary = LightSlate,
     onSecondary = Color.White,
-    secondaryContainer = Cherry,
-    onSecondaryContainer = Color.White,
-    tertiary = Teal,
+    secondaryContainer = NightSky,
+    onSecondaryContainer = CloudBlue,
+    tertiary = SoftTeal,
     onTertiary = Color.White,
-    tertiaryContainer = Aqua,
+    tertiaryContainer = MintGreen,
     onTertiaryContainer = Color.Black,
     background = DarkBackground,
     onBackground = Color.White,
     surface = DarkSurface,
     onSurface = Color.White,
-    surfaceVariant = Color(0xFF2A2B32),
-    onSurfaceVariant = Color(0xFFE1E2E9),
-    outline = Color(0xFF8B909A),
-    error = Color(0xFFFF6B6B),
+    surfaceVariant = Color(0xFF394A5A),
+    onSurfaceVariant = Color(0xFFE8F0F8),
+    outline = Color(0xFF95A5B5),
+    error = Color(0xFFFF7A7A),
     onError = Color.White
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = OceanBlue,
+    primary = SerenityBlue,
     onPrimary = Color.White,
-    primaryContainer = SkyBlue,
-    onPrimaryContainer = Color.White,
-    secondary = Coral,
+    primaryContainer = MistBlue,
+    onPrimaryContainer = DeepTwilight,
+    secondary = TranquillBlue,
     onSecondary = Color.White,
-    secondaryContainer = Peach,
-    onSecondaryContainer = Color.White,
-    tertiary = Mint,
+    secondaryContainer = CloudBlue,
+    onSecondaryContainer = DeepTwilight,
+    tertiary = SoftTeal,
     onTertiary = Color.White,
-    tertiaryContainer = Lavender,
-    onTertiaryContainer = Color.Black,
+    tertiaryContainer = MintGreen,
+    onTertiaryContainer = DeepTwilight,
     background = LightBackground,
-    onBackground = Color(0xFF1A1B23),
+    onBackground = Color(0xFF2C3E50),
     surface = LightSurface,
-    onSurface = Color(0xFF1A1B23),
-    surfaceVariant = Color(0xFFE8EAED),
-    onSurfaceVariant = Color(0xFF44474E),
-    outline = Color(0xFF74777F),
-    error = Color(0xFFDC3545),
+    onSurface = Color(0xFF2C3E50),
+    surfaceVariant = Color(0xFFF0F6FF),
+    onSurfaceVariant = Color(0xFF4A5568),
+    outline = Color(0xFF7A8A9A),
+    error = Color(0xFFE74C3C),
     onError = Color.White
 )
 
@@ -110,14 +110,14 @@ fun GradientBackground(
     val gradientColors = if (isDark) {
         listOf(
             DarkBackground,
-            Color(0xFF1E2028),
-            Color(0xFF252832)
+            Color(0xFF2F3F4F),
+            Color(0xFF384A5A)
         )
     } else {
         listOf(
-            GradientStart,
-            GradientMiddle,
-            GradientEnd
+            GradientStart,    // Soft sky blue
+            GradientMiddle,   // Calm blue  
+            GradientEnd       // Almost white
         )
     }
     
