@@ -282,6 +282,65 @@ public final class ExpenseDao_Impl implements ExpenseDao {
     }, $completion);
   }
 
+  @Override
+  public Flow<List<Expense>> getAllExpensesFlow() {
+    final String _sql = "SELECT * FROM expenses ORDER BY date DESC";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    return CoroutinesRoom.createFlow(__db, false, new String[] {"expenses"}, new Callable<List<Expense>>() {
+      @Override
+      @NonNull
+      public List<Expense> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfDate = CursorUtil.getColumnIndexOrThrow(_cursor, "date");
+          final int _cursorIndexOfCategoryId = CursorUtil.getColumnIndexOrThrow(_cursor, "categoryId");
+          final int _cursorIndexOfAmount = CursorUtil.getColumnIndexOrThrow(_cursor, "amount");
+          final int _cursorIndexOfDescription = CursorUtil.getColumnIndexOrThrow(_cursor, "description");
+          final List<Expense> _result = new ArrayList<Expense>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final Expense _item;
+            final int _tmpId;
+            _tmpId = _cursor.getInt(_cursorIndexOfId);
+            final Date _tmpDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfDate);
+            }
+            final Date _tmp_1 = __dateConverter.fromTimestamp(_tmp);
+            if (_tmp_1 == null) {
+              throw new IllegalStateException("Expected NON-NULL 'java.util.Date', but it was NULL.");
+            } else {
+              _tmpDate = _tmp_1;
+            }
+            final int _tmpCategoryId;
+            _tmpCategoryId = _cursor.getInt(_cursorIndexOfCategoryId);
+            final double _tmpAmount;
+            _tmpAmount = _cursor.getDouble(_cursorIndexOfAmount);
+            final String _tmpDescription;
+            if (_cursor.isNull(_cursorIndexOfDescription)) {
+              _tmpDescription = null;
+            } else {
+              _tmpDescription = _cursor.getString(_cursorIndexOfDescription);
+            }
+            _item = new Expense(_tmpId,_tmpDate,_tmpCategoryId,_tmpAmount,_tmpDescription);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+        }
+      }
+
+      @Override
+      protected void finalize() {
+        _statement.release();
+      }
+    });
+  }
+
   @NonNull
   public static List<Class<?>> getRequiredConverters() {
     return Collections.emptyList();

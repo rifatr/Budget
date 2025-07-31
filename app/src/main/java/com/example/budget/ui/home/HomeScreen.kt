@@ -13,11 +13,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,6 +45,8 @@ import java.util.Calendar
 import java.util.Locale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.platform.LocalConfiguration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,24 +68,27 @@ fun HomeScreen(
             )
         }
     ) { innerPadding ->
-        Box(
+        Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+            // Month/Year selector at the top
+            MonthYearSelector(
+                selectedMonth = uiState.selectedMonth,
+                selectedYear = uiState.selectedYear,
+                onDateChange = { month, year -> viewModel.onDateChange(month, year) }
+            )
+            
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            // Centered 2x2 Grid of main buttons
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                MonthYearSelector(
-                    selectedMonth = uiState.selectedMonth,
-                    selectedYear = uiState.selectedYear,
-                    onDateChange = { month, year -> viewModel.onDateChange(month, year) }
-                )
-                
-                Spacer(modifier = Modifier.height(48.dp))
-                
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -100,7 +111,6 @@ fun HomeScreen(
                             modifier = Modifier.size(120.dp)
                         )
                     }
-                    
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(24.dp)
                     ) {
@@ -135,7 +145,8 @@ fun MonthYearSelector(
         val monthDate = Calendar.getInstance().apply { set(Calendar.MONTH, it - 1) }.time
         SimpleDateFormat("MMMM", Locale.getDefault()).format(monthDate)
     }
-    val years = (selectedYear - 5..selectedYear + 5).toList()
+    val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+    val years = (currentYear - 5 .. currentYear + 5).toList()
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -163,6 +174,9 @@ fun Dropdown(
     onItemSelected: (Int) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val maxDropdownHeight = (screenHeight * 0.4f) // 40% of screen height
 
     Box {
         Button(
@@ -171,32 +185,61 @@ fun Dropdown(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             ),
-            shape = RoundedCornerShape(20.dp),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
-            modifier = Modifier.padding(horizontal = 4.dp)
+            shape = RoundedCornerShape(16.dp),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
+            modifier = Modifier
+                .height(48.dp)
+                .widthIn(min = 100.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            Text(
-                text = items[selectedIndex],
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = items[selectedIndex],
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1
+                )
+                Icon(
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = if (expanded) "Collapse" else "Expand",
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
+            offset = DpOffset(0.dp, 4.dp),
+            modifier = Modifier
+                .heightIn(max = maxDropdownHeight)
+                .widthIn(min = 140.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(12.dp)
+                )
         ) {
             items.forEachIndexed { index, item ->
                 DropdownMenuItem(
                     text = { 
                         Text(
                             text = item,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (index == selectedIndex) 
+                                MaterialTheme.colorScheme.primary 
+                            else 
+                                MaterialTheme.colorScheme.onSurface
                         ) 
                     },
                     onClick = {
                         onItemSelected(index)
                         expanded = false
-                    }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
                 )
             }
         }

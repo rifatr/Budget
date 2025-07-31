@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CallMade
-import androidx.compose.material.icons.filled.CallReceived
+import androidx.compose.material.icons.automirrored.filled.CallReceived
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.CallMade
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -61,7 +61,7 @@ fun SettingsScreen(
                 title = { Text("Settings") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -128,7 +128,7 @@ fun SettingsScreen(
                     )
                     Text(" Exporting...")
                 } else {
-                    Icon(Icons.Default.CallMade, contentDescription = "Export Data")
+                    Icon(Icons.AutoMirrored.Filled.CallMade, contentDescription = "Export Data")
                     Text(" Export Data")
                 }
             }
@@ -151,7 +151,7 @@ fun SettingsScreen(
                     )
                     Text(" Importing...")
                 } else {
-                    Icon(Icons.Default.CallReceived, contentDescription = "Import Data")
+                    Icon(Icons.AutoMirrored.Filled.CallReceived, contentDescription = "Import Data")
                     Text(" Import Data")
                 }
             }
