@@ -1,38 +1,141 @@
 # Budget Tracker
 
-A simple and intuitive Android application to help you manage your personal finances, track your expenses, and stay on top of your budget.
+A beautiful and comprehensive Android expense tracking app built with Jetpack Compose and modern Android development practices.
 
 ## Features
 
-- **Monthly Budgeting**: Set a total monthly budget and define category-specific limits to keep your spending in check.
-- **Expense Tracking**: Easily record your daily expenses with details such as date, category, amount, and an optional description.
-- **User-Defined Categories**: Create, edit, and delete your own expense categories to tailor the app to your needs.
-- **Monthly Summary**: Get a clear overview of your financial health with a monthly summary that shows your budget, expenses, and the difference for each category.
-- **Data Export/Import**: Back up your financial data by exporting it to a JSON file, and restore it whenever you need to.
-- **Month and Year Selection**: Navigate through your financial history by easily selecting the month and year you want to review.
-- **Persistent Storage**: All your data is stored locally on your device, ensuring privacy and offline access.
+### 🏠 Home Screen
+- Clean, intuitive interface with monthly budget overview
+- Month/year selector for navigating different periods
+- Quick access to all major features
+- Stunning Material 3 design with icons
 
-## Getting Started
+### 💰 Budget Management
+- Set overall monthly budget limits
+- Create custom expense categories 
+- Set category-wise budget limits
+- Template system for reusing budgets across months
+- Smart prompts when logging expenses for uncategorized items
 
-To get a local copy up and running, follow these simple steps:
+### 📊 Expense Tracking
+- Log expenses with date, category, amount, and optional description
+- Editable date selection with date picker
+- Input validation (amount limited to 6 digits before decimal, 2 after)
+- Comprehensive expense history with search and delete functionality
+- Real-time validation and error handling
 
-1.  **Clone the repository**:
-    ```sh
-    git clone git@github.com:rifatr/Budget.git
-    ```
-2.  **Open in Android Studio**:
-    -   Launch Android Studio and select "Open an existing Android Studio project".
-    -   Navigate to the cloned repository and click "OK".
-3.  **Build and Run**:
-    -   Let Android Studio sync the project and download the required dependencies.
-    -   Click the "Run" button or press `Shift`+`F10` to build and run the app on an emulator or a physical device.
+### 📈 Summary & Analytics
+- Monthly summary table showing budgeted vs actual expenses
+- Delta calculations (remaining/overspent amounts)
+- Progress indicators for each category
+- Beautiful card-based layout with totals
+- Visual feedback for budget performance
+
+### ⚙️ Settings & Data Management
+- **Export/Import Functionality**: 
+  - Export all data to JSON format
+  - Import data from JSON files
+  - Perfect for backups and data migration
+  - Real-time status feedback with success/error messages
+  - Loading indicators during operations
+- **Category Management**: Create, edit, and delete custom categories
+- **Data Persistence**: All data stored locally using Room database
+
+### 🎨 User Experience
+- **Beautiful UI**: Modern Material 3 design with smooth animations
+- **Input Validation**: Smart validation preventing invalid data entry
+- **Error Handling**: Comprehensive error handling with user-friendly messages
+- **Performance**: Optimized with proper state management and efficient database queries
+- **Accessibility**: Proper content descriptions and keyboard navigation
 
 ## Technologies Used
 
-- **Kotlin**: The primary programming language for building modern Android apps.
-- **Jetpack Compose**: A modern toolkit for building native Android UI.
-- **Room Persistence Library**: Provides an abstraction layer over SQLite to allow for more robust database access.
-- **MVVM Architecture**: The Model-View-ViewModel architectural pattern is used to separate the business logic from the UI.
-- **Navigation Compose**: A framework for navigating between composables while taking advantage of the Navigation component's infrastructure and features.
-- **Gson**: A Java library that can be used to convert Java Objects into their JSON representation and vice-versa.
-- **Gradle**: The build automation tool used for building Android applications.
+- **Language**: Kotlin
+- **UI Framework**: Jetpack Compose
+- **Architecture**: MVVM (Model-View-ViewModel)
+- **Database**: Room with SQLite
+- **Navigation**: Jetpack Compose Navigation
+- **State Management**: StateFlow and Compose State
+- **Data Serialization**: Gson for JSON export/import
+- **Dependency Injection**: Manual DI with Application class
+- **Build System**: Gradle with Kotlin DSL
+
+## Getting Started
+
+### Prerequisites
+- Android Studio Arctic Fox or later
+- Android SDK 24 or higher
+- Kotlin 1.9.22
+
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   ```
+
+2. Open the project in Android Studio
+
+3. Sync the project and let Gradle download dependencies
+
+4. Run the app on an emulator or physical device
+
+### Building
+To build the debug APK:
+```bash
+./gradlew assembleDebug
+```
+
+To build the release APK:
+```bash
+./gradlew assembleRelease
+```
+
+## Project Structure
+
+```
+app/src/main/java/com/example/budget/
+├── data/
+│   ├── db/           # Room database entities, DAOs, converters
+│   ├── BudgetRepository.kt  # Data access layer
+│   └── AppContainer.kt      # Dependency injection
+├── ui/
+│   ├── home/         # Home screen UI and ViewModel
+│   ├── budget/       # Budget management UI
+│   ├── expense/      # Expense tracking UI
+│   ├── summary/      # Summary/analytics UI
+│   ├── settings/     # Settings and data management UI
+│   └── theme/        # App theming and colors
+├── BudgetApp.kt      # Application class
+└── MainActivity.kt   # Main activity
+```
+
+## Key Features in Detail
+
+### Data Export/Import
+- **Export**: Creates a pretty-printed JSON file containing all categories, expenses, and budgets
+- **Import**: Completely replaces existing data with imported data
+- **Format**: Human-readable JSON with proper date formatting
+- **Validation**: Comprehensive error handling for corrupted files
+
+### Smart Budget Management
+- **Templates**: Set up budget templates that can be reused
+- **Prompts**: App prompts to create budgets when logging expenses without budgets
+- **Validation**: Input validation prevents invalid budget amounts
+
+### Advanced Expense Tracking
+- **History**: View all expenses with category names, dates, and amounts
+- **Validation**: Real-time input validation with visual feedback
+- **Flexibility**: Edit dates, amounts, and descriptions easily
+
+## Contributing
+
+This project follows modern Android development best practices:
+- MVVM architecture with clear separation of concerns
+- Reactive programming with StateFlow
+- Type-safe database operations with Room
+- Comprehensive input validation
+- Material 3 design guidelines
+
+## License
+
+[Add your license here]
