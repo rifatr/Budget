@@ -10,16 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.budget.ui.BudgetAppNavigation
 import com.example.budget.ui.theme.BudgetTheme
+import com.example.budget.ui.theme.GradientBackground
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             BudgetTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
+                GradientBackground {
                     val navController = rememberNavController()
                     BudgetAppNavigation(navController = navController)
                 }
