@@ -1,6 +1,17 @@
 package com.example.budget.ui.home
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Assessment
@@ -15,6 +26,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -50,40 +63,52 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             MonthYearSelector(
                 selectedMonth = uiState.selectedMonth,
                 selectedYear = uiState.selectedYear,
                 onDateChange = { month, year -> viewModel.onDateChange(month, year) }
             )
-            Button(
-                onClick = { navController.navigate(Screen.Budget.createRoute(uiState.selectedMonth, uiState.selectedYear)) },
-                modifier = Modifier.fillMaxWidth()
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Icon(Icons.Default.AccountBalanceWallet, contentDescription = "Budget")
-                Text("Budget")
+                SquareButton(
+                    onClick = { navController.navigate(Screen.Budget.createRoute(uiState.selectedMonth, uiState.selectedYear)) },
+                    icon = Icons.Default.AccountBalanceWallet,
+                    text = "Budget",
+                    contentDescription = "Budget",
+                    modifier = Modifier.weight(1f)
+                )
+                SquareButton(
+                    onClick = { navController.navigate(Screen.Expense.route) },
+                    icon = Icons.Default.MonetizationOn,
+                    text = "Expense",
+                    contentDescription = "Expense",
+                    modifier = Modifier.weight(1f)
+                )
             }
-            Button(
-                onClick = { navController.navigate(Screen.Expense.route) },
-                modifier = Modifier.fillMaxWidth()
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Icon(Icons.Default.MonetizationOn, contentDescription = "Expense")
-                Text("Expense")
-            }
-            Button(
-                onClick = { navController.navigate(Screen.Summary.createRoute(uiState.selectedMonth, uiState.selectedYear)) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.Assessment, contentDescription = "Summary")
-                Text("Summary")
-            }
-            Button(
-                onClick = { navController.navigate(Screen.Settings.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.Settings, contentDescription = "Settings")
-                Text("Settings")
+                SquareButton(
+                    onClick = { navController.navigate(Screen.Summary.createRoute(uiState.selectedMonth, uiState.selectedYear)) },
+                    icon = Icons.Default.Assessment,
+                    text = "Summary",
+                    contentDescription = "Summary",
+                    modifier = Modifier.weight(1f)
+                )
+                SquareButton(
+                    onClick = { navController.navigate(Screen.Settings.route) },
+                    icon = Icons.Default.Settings,
+                    text = "Settings",
+                    contentDescription = "Settings",
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
@@ -143,6 +168,48 @@ fun Dropdown(
                     }
                 )
             }
+        }
+    }
+} 
+
+@Composable
+fun SquareButton(
+    onClick: () -> Unit,
+    icon: ImageVector,
+    text: String,
+    contentDescription: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .aspectRatio(1f)
+            .clickable { onClick() },
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         }
     }
 } 
