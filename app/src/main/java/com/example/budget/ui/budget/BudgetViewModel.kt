@@ -70,10 +70,18 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
 
     fun addCategory(categoryName: String) {
         viewModelScope.launch {
-            budgetRepository.insertCategory(Category(name = categoryName))
-            _uiState.value = _uiState.value.copy(
-                allCategories = budgetRepository.getAllCategories().first()
-            )
+            // Check if category with this name already exists
+            val existingCategories = budgetRepository.getAllCategories().first()
+            val categoryExists = existingCategories.any { 
+                it.name.equals(categoryName.trim(), ignoreCase = true) 
+            }
+            
+            if (!categoryExists && categoryName.trim().isNotBlank()) {
+                budgetRepository.insertCategory(Category(name = categoryName.trim()))
+                _uiState.value = _uiState.value.copy(
+                    allCategories = budgetRepository.getAllCategories().first()
+                )
+            }
         }
     }
 } 

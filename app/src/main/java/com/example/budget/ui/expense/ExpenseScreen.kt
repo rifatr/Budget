@@ -31,6 +31,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.background
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.ui.text.style.TextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,19 +58,6 @@ fun ExpenseScreen(
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    if (uiState.isEntryValid) {
-                        viewModel.saveExpense()
-                        navController.popBackStack()
-                    }
-                },
-                containerColor = if (uiState.isEntryValid) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
-            ) {
-                Icon(Icons.Default.Done, contentDescription = "Save Expense")
-            }
         }
     ) { innerPadding ->
         Column(
@@ -77,29 +67,90 @@ fun ExpenseScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            DateSelector(
-                date = uiState.date,
-                onDateChange = { viewModel.onDateChange(it) }
-            )
-            CategorySelector(
-                categories = uiState.allCategories,
-                selectedCategory = uiState.category,
-                onCategoryChange = { viewModel.onCategoryChange(it) }
-            )
+            // Date and Category side by side
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Date selector on the left
+                Box(modifier = Modifier.weight(1f)) {
+                    DateSelector(
+                        date = uiState.date,
+                        onDateChange = { viewModel.onDateChange(it) }
+                    )
+                }
+                
+                // Category selector on the right
+                Box(modifier = Modifier.weight(1f)) {
+                    CategorySelector(
+                        categories = uiState.allCategories,
+                        selectedCategory = uiState.category,
+                        onCategoryChange = { viewModel.onCategoryChange(it) }
+                    )
+                }
+            }
+            
+            // Amount field with numerical keyboard
             OutlinedTextField(
                 value = uiState.amount,
                 onValueChange = { viewModel.onAmountChange(it) },
                 label = { Text("Amount") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = uiState.amount.toDoubleOrNull() == null && uiState.amount.isNotBlank(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                leadingIcon = {
+                    Text(
+                        text = "৳",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             )
+            
+            // Description field
             OutlinedTextField(
                 value = uiState.description,
                 onValueChange = { viewModel.onDescriptionChange(it) },
                 label = { Text("Description (Optional)") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2,
+                maxLines = 3
             )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Create button at the bottom
+            Button(
+                onClick = { 
+                    viewModel.saveExpense()
+                    navController.popBackStack()
+                },
+                enabled = uiState.isEntryValid,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                shape = RoundedCornerShape(16.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Done,
+                        contentDescription = "Create Expense"
+                    )
+                    Text(
+                        text = "Create Expense",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
         }
     }
 
@@ -117,7 +168,7 @@ fun ExpenseScreen(
 @Composable
 fun DateSelector(date: Date, onDateChange: (Date) -> Unit) {
     val context = LocalContext.current
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
 
     val calendar = Calendar.getInstance()
     calendar.time = date
@@ -135,8 +186,42 @@ fun DateSelector(date: Date, onDateChange: (Date) -> Unit) {
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
-    Button(onClick = { datePickerDialog.show() }) {
-        Text("Date: ${dateFormat.format(date)}")
+    Button(
+        onClick = { datePickerDialog.show() },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        ),
+        shape = RoundedCornerShape(16.dp),
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Date",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = "Change date",
+                    modifier = Modifier.size(14.dp)
+                )
+                Text(
+                    text = dateFormat.format(date),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
     }
 }
 
@@ -147,6 +232,9 @@ fun CategorySelector(
     onCategoryChange: (Category) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val maxDropdownHeight = (screenHeight * 0.4f) // 40% of screen height
 
     Box {
         Button(
@@ -161,22 +249,35 @@ fun CategorySelector(
                 .fillMaxWidth()
                 .height(56.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = selectedCategory?.name ?: "Select Category",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.weight(1f)
+                    text = "Category",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                 )
-                Icon(
-                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = if (expanded) "Collapse" else "Expand",
-                    modifier = Modifier.size(20.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = selectedCategory?.name ?: "Select",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
         }
         DropdownMenu(
@@ -184,8 +285,8 @@ fun CategorySelector(
             onDismissRequest = { expanded = false },
             offset = DpOffset(0.dp, 4.dp),
             modifier = Modifier
-                .heightIn(max = 200.dp)
-                .fillMaxWidth()
+                .heightIn(max = maxDropdownHeight)
+                .widthIn(min = 140.dp, max = 200.dp)
                 .background(
                     color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(12.dp)
@@ -310,7 +411,7 @@ fun ExpenseHistoryItem(
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "Amount: $${String.format("%.2f", expense.amount)}",
+                    text = "Amount: ৳${String.format("%.2f", expense.amount)}",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary

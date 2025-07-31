@@ -28,6 +28,7 @@ fun BudgetScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showAddCategoryDialog by remember { mutableStateOf(false) }
     var newCategoryName by remember { mutableStateOf("") }
+    var showDuplicateError by remember { mutableStateOf(false) }
 
     LaunchedEffect(month, year) {
         viewModel.initialize(month, year)
@@ -58,7 +59,8 @@ fun BudgetScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 80.dp) // Add bottom padding for FAB
         ) {
             item {
                 OutlinedTextField(
@@ -97,22 +99,46 @@ fun BudgetScreen(
 
     if (showAddCategoryDialog) {
         AlertDialog(
-            onDismissRequest = { showAddCategoryDialog = false },
+            onDismissRequest = { 
+                showAddCategoryDialog = false
+                newCategoryName = ""
+                showDuplicateError = false
+            },
             title = { Text("Add New Category") },
             text = {
-                OutlinedTextField(
-                    value = newCategoryName,
-                    onValueChange = { newCategoryName = it },
-                    label = { Text("Category Name") }
-                )
+                Column {
+                    OutlinedTextField(
+                        value = newCategoryName,
+                        onValueChange = { 
+                            newCategoryName = it
+                            showDuplicateError = false // Reset error when user types
+                        },
+                        label = { Text("Category Name") },
+                        isError = showDuplicateError,
+                        supportingText = if (showDuplicateError) {
+                            { Text("Category already exists", color = MaterialTheme.colorScheme.error) }
+                        } else null
+                    )
+                }
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        if (newCategoryName.isNotBlank()) {
-                            viewModel.addCategory(newCategoryName)
-                            newCategoryName = ""
-                            showAddCategoryDialog = false
+                        val trimmedName = newCategoryName.trim()
+                        if (trimmedName.isNotBlank()) {
+                            // Check for duplicates in UI state
+                            val categoryExists = uiState.allCategories.any { 
+                                it.name.equals(trimmedName, ignoreCase = true) 
+                            }
+                            
+                            if (categoryExists) {
+                                showDuplicateError = true
+                            } else {
+                                viewModel.addCategory(trimmedName)
+                                newCategoryName = ""
+                                showAddCategoryDialog = false
+                                showDuplicateError = false
+                            }
                         }
                     }
                 ) {
@@ -120,7 +146,11 @@ fun BudgetScreen(
                 }
             },
             dismissButton = {
-                Button(onClick = { showAddCategoryDialog = false }) {
+                Button(onClick = { 
+                    showAddCategoryDialog = false
+                    newCategoryName = ""
+                    showDuplicateError = false
+                }) {
                     Text("Cancel")
                 }
             }
