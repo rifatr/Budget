@@ -6,15 +6,19 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CallMade
 import androidx.compose.material.icons.filled.CallReceived
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +33,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(factory = com.example.budget.ui.AppViewModelProvider.Factory)
 ) {
     val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsState()
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -70,6 +75,40 @@ fun SettingsScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Status message
+            uiState.lastOperationStatus?.let { status ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (uiState.lastOperationSuccess) 
+                            MaterialTheme.colorScheme.primaryContainer 
+                        else 
+                            MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = status,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (uiState.lastOperationSuccess) 
+                                MaterialTheme.colorScheme.onPrimaryContainer 
+                            else 
+                                MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.weight(1f)
+                        )
+                        TextButton(onClick = { viewModel.clearStatus() }) {
+                            Text("Dismiss")
+                        }
+                    }
+                }
+            }
+
             Button(
                 onClick = {
                     val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -79,11 +118,21 @@ fun SettingsScreen(
                     }
                     exportLauncher.launch(intent)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !uiState.isExporting && !uiState.isImporting
             ) {
-                Icon(Icons.Default.CallMade, contentDescription = "Export Data")
-                Text("Export Data")
+                if (uiState.isExporting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Text(" Exporting...")
+                } else {
+                    Icon(Icons.Default.CallMade, contentDescription = "Export Data")
+                    Text(" Export Data")
+                }
             }
+            
             Button(
                 onClick = {
                     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -92,10 +141,19 @@ fun SettingsScreen(
                     }
                     importLauncher.launch(intent)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !uiState.isExporting && !uiState.isImporting
             ) {
-                Icon(Icons.Default.CallReceived, contentDescription = "Import Data")
-                Text("Import Data")
+                if (uiState.isImporting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Text(" Importing...")
+                } else {
+                    Icon(Icons.Default.CallReceived, contentDescription = "Import Data")
+                    Text(" Import Data")
+                }
             }
         }
     }

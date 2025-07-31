@@ -23,6 +23,7 @@ class BudgetRepository(
     // Expense operations
     fun getExpensesForMonth(startDate: Date, endDate: Date): Flow<List<Expense>> =
         expenseDao.getExpensesForMonth(startDate, endDate)
+    fun getAllExpenses(): Flow<List<Expense>> = expenseDao.getAllExpensesFlow()
     suspend fun insertExpense(expense: Expense) = expenseDao.insertExpense(expense)
     suspend fun deleteExpense(expense: Expense) = expenseDao.deleteExpense(expense)
 

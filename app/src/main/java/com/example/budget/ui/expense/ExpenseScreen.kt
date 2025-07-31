@@ -1,17 +1,26 @@
 package com.example.budget.ui.expense
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.budget.data.db.Category
+import com.example.budget.data.db.Expense
 import com.example.budget.ui.AppViewModelProvider
 import java.text.SimpleDateFormat
 import java.util.*
@@ -33,6 +42,11 @@ fun ExpenseScreen(
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { viewModel.showExpenseHistory() }) {
+                        Icon(Icons.Default.History, contentDescription = "Expense History")
                     }
                 }
             )
@@ -82,6 +96,16 @@ fun ExpenseScreen(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
+
+    // Expense History Dialog
+    if (uiState.showHistory) {
+        ExpenseHistoryDialog(
+            expenses = uiState.expenseHistory,
+            categoryMap = uiState.categoryMap,
+            onDismiss = { viewModel.hideExpenseHistory() },
+            onDeleteExpense = { viewModel.deleteExpense(it) }
+        )
     }
 }
 
@@ -134,6 +158,136 @@ fun CategorySelector(
                         onCategoryChange(category)
                         expanded = false
                     }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpenseHistoryDialog(
+    expenses: List<Expense>,
+    categoryMap: Map<Int, String>,
+    onDismiss: () -> Unit,
+    onDeleteExpense: (Expense) -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.8f)
+                .padding(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Expense History",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    TextButton(onClick = onDismiss) {
+                        Text("Close")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (expenses.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "No expenses recorded yet",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(expenses) { expense ->
+                            ExpenseHistoryItem(
+                                expense = expense,
+                                categoryMap = categoryMap,
+                                onDeleteExpense = onDeleteExpense
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpenseHistoryItem(
+    expense: Expense,
+    categoryMap: Map<Int, String>,
+    onDeleteExpense: (Expense) -> Unit
+) {
+    val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Category: ${categoryMap[expense.categoryId] ?: "Unknown"}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = "Amount: $${String.format("%.2f", expense.amount)}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = dateFormat.format(expense.date),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (!expense.description.isNullOrBlank()) {
+                    Text(
+                        text = expense.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            
+            IconButton(
+                onClick = { onDeleteExpense(expense) },
+                colors = IconButtonDefaults.iconButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete expense"
                 )
             }
         }
