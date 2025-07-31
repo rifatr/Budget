@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import com.example.budget.ui.budget.BudgetScreen
 import com.example.budget.ui.expense.ExpenseScreen
 import com.example.budget.ui.home.HomeScreen
+import com.example.budget.ui.info.InfoScreen
 import com.example.budget.ui.settings.SettingsScreen
 import com.example.budget.ui.summary.SummaryScreen
 
@@ -45,6 +46,9 @@ fun BudgetAppNavigation(navController: NavHostController) {
         }
         composable(Screen.Settings.route) {
             SettingsScreen(navController)
+        }
+        composable(Screen.Info.route) {
+            InfoScreen(navController)
         }
     }
 } 

@@ -10,4 +10,5 @@ sealed class Screen(val route: String) {
         fun createRoute(month: Int, year: Int) = "summary/$month/$year"
     }
     object Settings : Screen("settings")
+    object Info : Screen("info")
 } 
