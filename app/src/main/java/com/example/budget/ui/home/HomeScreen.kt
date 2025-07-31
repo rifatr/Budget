@@ -138,14 +138,16 @@ fun MonthYearSelector(
     val years = (selectedYear - 5..selectedYear + 5).toList()
 
     Row(
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.Center
     ) {
         Dropdown(
             items = months,
             selectedIndex = selectedMonth - 1,
             onItemSelected = { index -> onDateChange(index + 1, selectedYear) }
         )
+        Spacer(modifier = Modifier.width(16.dp))
         Dropdown(
             items = years.map { it.toString() },
             selectedIndex = years.indexOf(selectedYear),
@@ -163,8 +165,21 @@ fun Dropdown(
     var expanded by remember { mutableStateOf(false) }
 
     Box {
-        Button(onClick = { expanded = true }) {
-            Text(items[selectedIndex])
+        Button(
+            onClick = { expanded = true },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ),
+            shape = RoundedCornerShape(20.dp),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
+            modifier = Modifier.padding(horizontal = 4.dp)
+        ) {
+            Text(
+                text = items[selectedIndex],
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Medium
+            )
         }
         DropdownMenu(
             expanded = expanded,
@@ -172,7 +187,12 @@ fun Dropdown(
         ) {
             items.forEachIndexed { index, item ->
                 DropdownMenuItem(
-                    text = { Text(item) },
+                    text = { 
+                        Text(
+                            text = item,
+                            style = MaterialTheme.typography.bodyMedium
+                        ) 
+                    },
                     onClick = {
                         onItemSelected(index)
                         expanded = false
