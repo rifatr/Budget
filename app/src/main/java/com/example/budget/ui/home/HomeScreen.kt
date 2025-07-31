@@ -60,66 +60,66 @@ fun HomeScreen(
             )
         }
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            MonthYearSelector(
-                selectedMonth = uiState.selectedMonth,
-                selectedYear = uiState.selectedYear,
-                onDateChange = { month, year -> viewModel.onDateChange(month, year) }
-            )
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // First row of buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                SquareButton(
-                    onClick = { navController.navigate(Screen.Budget.createRoute(uiState.selectedMonth, uiState.selectedYear)) },
-                    icon = Icons.Default.AccountBalanceWallet,
-                    text = "Budget",
-                    contentDescription = "Budget",
-                    modifier = Modifier.size(120.dp)
+                MonthYearSelector(
+                    selectedMonth = uiState.selectedMonth,
+                    selectedYear = uiState.selectedYear,
+                    onDateChange = { month, year -> viewModel.onDateChange(month, year) }
                 )
-                Spacer(modifier = Modifier.width(24.dp))
-                SquareButton(
-                    onClick = { navController.navigate(Screen.Expense.route) },
-                    icon = Icons.Default.MonetizationOn,
-                    text = "Expense",
-                    contentDescription = "Expense",
-                    modifier = Modifier.size(120.dp)
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Second row of buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                SquareButton(
-                    onClick = { navController.navigate(Screen.Summary.createRoute(uiState.selectedMonth, uiState.selectedYear)) },
-                    icon = Icons.Default.Assessment,
-                    text = "Summary",
-                    contentDescription = "Summary",
-                    modifier = Modifier.size(120.dp)
-                )
-                Spacer(modifier = Modifier.width(24.dp))
-                SquareButton(
-                    onClick = { navController.navigate(Screen.Settings.route) },
-                    icon = Icons.Default.Settings,
-                    text = "Settings",
-                    contentDescription = "Settings",
-                    modifier = Modifier.size(120.dp)
-                )
+                
+                Spacer(modifier = Modifier.height(48.dp))
+                
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(24.dp)
+                    ) {
+                        SquareButton(
+                            onClick = { navController.navigate(Screen.Budget.createRoute(uiState.selectedMonth, uiState.selectedYear)) },
+                            icon = Icons.Default.AccountBalanceWallet,
+                            text = "Budget",
+                            contentDescription = "Budget",
+                            modifier = Modifier.size(120.dp)
+                        )
+                        SquareButton(
+                            onClick = { navController.navigate(Screen.Expense.route) },
+                            icon = Icons.Default.MonetizationOn,
+                            text = "Expense",
+                            contentDescription = "Expense",
+                            modifier = Modifier.size(120.dp)
+                        )
+                    }
+                    
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(24.dp)
+                    ) {
+                        SquareButton(
+                            onClick = { navController.navigate(Screen.Summary.createRoute(uiState.selectedMonth, uiState.selectedYear)) },
+                            icon = Icons.Default.Assessment,
+                            text = "Summary",
+                            contentDescription = "Summary",
+                            modifier = Modifier.size(120.dp)
+                        )
+                        SquareButton(
+                            onClick = { navController.navigate(Screen.Settings.route) },
+                            icon = Icons.Default.Settings,
+                            text = "Settings",
+                            contentDescription = "Settings",
+                            modifier = Modifier.size(120.dp)
+                        )
+                    }
+                }
             }
         }
     }
