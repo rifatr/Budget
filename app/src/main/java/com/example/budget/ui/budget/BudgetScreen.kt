@@ -3,6 +3,7 @@ package com.example.budget.ui.budget
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
@@ -15,6 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.ui.AppViewModelProvider
 import java.text.SimpleDateFormat
@@ -29,6 +38,10 @@ fun BudgetScreen(
     val app = context.applicationContext as com.example.budget.BudgetApp
     val selectedCurrency by app.container.currencyPreferences.selectedCurrency.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
+    
+    // Keyboard and focus management
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     
     // Current month/year state
     val calendar = Calendar.getInstance()
@@ -62,6 +75,12 @@ fun BudgetScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                    })
+                }
         ) {
             // Month/Year Selector
             MonthYearSelector(
@@ -96,6 +115,17 @@ fun BudgetScreen(
                                 onValueChange = viewModel::updateTotalBudgetInput,
                                 label = { Text("Monthly Budget") },
                                 modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Decimal,
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        keyboardController?.hide()
+                                        focusManager.clearFocus()
+                                        viewModel.saveBudget()
+                                    }
+                                ),
                                 leadingIcon = {
                                     Text(
                                         text = selectedCurrency.symbol,
@@ -104,7 +134,11 @@ fun BudgetScreen(
                                     )
                                 },
                                 trailingIcon = {
-                                    IconButton(onClick = viewModel::saveBudget) {
+                                    IconButton(onClick = {
+                                        keyboardController?.hide()
+                                        focusManager.clearFocus()
+                                        viewModel.saveBudget()
+                                    }) {
                                         Icon(Icons.Default.Done, contentDescription = "Save")
                                     }
                                 }
@@ -142,6 +176,16 @@ fun BudgetScreen(
                                     viewModel.updateCategoryBudget(category.id, value)
                                 },
                                 label = { Text("Budget") },
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Decimal,
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        keyboardController?.hide()
+                                        focusManager.clearFocus()
+                                    }
+                                ),
                                 leadingIcon = {
                                     Text(
                                         text = selectedCurrency.symbol,
@@ -149,7 +193,7 @@ fun BudgetScreen(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 },
-                                modifier = Modifier.width(120.dp)
+                                modifier = Modifier.width(140.dp)
                             )
                         }
                     }
@@ -176,6 +220,12 @@ fun BudgetScreen(
                             showDuplicateError = false
                         },
                         label = { Text("Category Name") },
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Next
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                        ),
                         isError = showDuplicateError,
                         supportingText = if (showDuplicateError) {
                             { Text("Category already exists") }
@@ -186,6 +236,27 @@ fun BudgetScreen(
                         value = newCategoryBudget,
                         onValueChange = { newCategoryBudget = it },
                         label = { Text("Budget Amount") },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Decimal,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                                // Trigger add action if fields are valid
+                                val existingCategory = uiState.allCategories.find { 
+                                    it.name.trim().equals(newCategoryName.trim(), ignoreCase = true) 
+                                }
+                                if (existingCategory == null && newCategoryName.isNotBlank()) {
+                                    viewModel.addCategory(newCategoryName, newCategoryBudget.toDoubleOrNull() ?: 0.0)
+                                    showAddCategoryDialog = false
+                                    newCategoryName = ""
+                                    newCategoryBudget = ""
+                                    showDuplicateError = false
+                                }
+                            }
+                        ),
                         leadingIcon = {
                             Text(
                                 text = selectedCurrency.symbol,

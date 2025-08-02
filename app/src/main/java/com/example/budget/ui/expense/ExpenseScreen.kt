@@ -3,6 +3,7 @@ package com.example.budget.ui.expense
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
@@ -14,6 +15,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -27,6 +32,8 @@ import com.example.budget.ui.AppViewModelProvider
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.background
@@ -45,6 +52,10 @@ fun ExpenseScreen(
     val selectedCurrency by app.container.currencyPreferences.selectedCurrency.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
 
+    // Keyboard and focus management
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -61,7 +72,13 @@ fun ExpenseScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(16.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                    })
+                },
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Date and Category side by side
@@ -87,14 +104,20 @@ fun ExpenseScreen(
                 }
             }
             
-            // Amount field with numerical keyboard
+            // Amount field
             OutlinedTextField(
                 value = uiState.amount,
                 onValueChange = { viewModel.onAmountChange(it) },
                 label = { Text("Amount") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = uiState.amount.toDoubleOrNull() == null && uiState.amount.isNotBlank(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                ),
                 leadingIcon = {
                     Text(
                         text = selectedCurrency.symbol,
@@ -111,7 +134,16 @@ fun ExpenseScreen(
                 label = { Text("Description (Optional)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
-                maxLines = 3
+                maxLines = 3,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                    }
+                )
             )
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -119,6 +151,8 @@ fun ExpenseScreen(
             // Create button at the bottom
             Button(
                 onClick = { 
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
                     viewModel.saveExpense()
                     // Don't navigate back, just save and reset
                 },

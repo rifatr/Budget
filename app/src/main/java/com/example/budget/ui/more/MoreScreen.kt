@@ -7,18 +7,26 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.budget.BudgetApp
 import com.example.budget.ui.Screen
+import com.example.budget.ui.setup.CurrencySelectionDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreScreen(navController: NavController) {
+    val context = LocalContext.current
+    val app = context.applicationContext as BudgetApp
+    val selectedCurrency by app.container.currencyPreferences.selectedCurrency.collectAsState()
+    var showCurrencyDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -36,8 +44,17 @@ fun MoreScreen(navController: NavController) {
             SectionHeader("App Management")
             
             MenuItem(
-                icon = Icons.Default.Settings,
-                title = "Settings",
+                icon = Icons.Default.AttachMoney,
+                title = "Currency",
+                subtitle = "${selectedCurrency.symbol} ${selectedCurrency.displayName} (${selectedCurrency.code})",
+                onClick = { showCurrencyDialog = true }
+            )
+            
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            
+            MenuItem(
+                icon = Icons.Default.Storage,
+                title = "Data",
                 subtitle = "Export & Import data",
                 onClick = { navController.navigate(Screen.Settings.route) }
             )
@@ -86,6 +103,18 @@ fun MoreScreen(navController: NavController) {
                 }
             }
         }
+    }
+    
+    // Currency Selection Dialog
+    if (showCurrencyDialog) {
+        CurrencySelectionDialog(
+            initialCurrency = selectedCurrency,
+            onCurrencySelected = { currency ->
+                app.container.currencyPreferences.setSelectedCurrency(currency)
+                showCurrencyDialog = false
+            },
+            onDismiss = { showCurrencyDialog = false }
+        )
     }
 }
 
