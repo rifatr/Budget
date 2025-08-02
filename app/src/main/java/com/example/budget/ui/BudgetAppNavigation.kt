@@ -39,14 +39,34 @@ fun BudgetAppNavigation(navController: NavHostController = rememberNavController
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
 
                 bottomNavItems.forEach { item ->
                     NavigationBarItem(
-                        icon = { Icon(item.icon, contentDescription = item.label) },
-                        label = { Text(item.label) },
+                        icon = { 
+                            Icon(
+                                item.icon, 
+                                contentDescription = item.label,
+                                tint = if (currentRoute == item.screen.route) 
+                                    MaterialTheme.colorScheme.primary 
+                                else 
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            ) 
+                        },
+                        label = { 
+                            Text(
+                                item.label,
+                                color = if (currentRoute == item.screen.route) 
+                                    MaterialTheme.colorScheme.primary 
+                                else 
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            ) 
+                        },
                         selected = currentRoute == item.screen.route,
                         onClick = {
                             navController.navigate(item.screen.route) {
@@ -59,7 +79,14 @@ fun BudgetAppNavigation(navController: NavHostController = rememberNavController
                                 // Restore state when re-selecting a previously selected tab
                                 restoreState = true
                             }
-                        }
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                 }
             }
@@ -71,13 +98,13 @@ fun BudgetAppNavigation(navController: NavHostController = rememberNavController
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Expense.route) {
-                ExpenseScreen(navController)
+                ExpenseScreen()
             }
             composable(Screen.Budget.route) {
-                BudgetScreen(navController)
+                BudgetScreen()
             }
             composable(Screen.Summary.route) {
-                SummaryScreen(navController)
+                SummaryScreen()
             }
             composable(Screen.More.route) {
                 MoreScreen(navController)
