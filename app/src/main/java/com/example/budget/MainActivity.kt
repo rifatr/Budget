@@ -18,8 +18,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             BudgetTheme {
                 GradientBackground {
-                    val navController = rememberNavController()
-                    BudgetAppNavigation(navController = navController)
+                    BudgetAppNavigation()
                 }
             }
         }

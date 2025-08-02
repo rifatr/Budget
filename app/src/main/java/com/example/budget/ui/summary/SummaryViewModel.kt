@@ -20,7 +20,11 @@ data class SummaryUiState(
     val budget: Budget?,
     val expenses: List<Expense>,
     val categories: List<Category>,
-    val summary: Map<Category, SummaryRow>
+    val summary: Map<Category, SummaryRow>,
+    val isLoading: Boolean = false,
+    val summaryRows: List<SummaryRow> = emptyList(),
+    val totalBudget: Double = 0.0,
+    val totalSpent: Double = 0.0
 )
 
 data class SummaryRow(
@@ -39,13 +43,16 @@ class SummaryViewModel(private val budgetRepository: BudgetRepository) : ViewMod
             budget = null,
             expenses = emptyList(),
             categories = emptyList(),
-            summary = emptyMap()
+            summary = emptyMap(),
+            isLoading = true
         )
     )
     val uiState: StateFlow<SummaryUiState> = _uiState.asStateFlow()
 
     fun initialize(month: Int, year: Int) {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            
             val (startDate, endDate) = getMonthDateRange(year, month)
             combine(
                 budgetRepository.getBudgetForMonth(month, year),
@@ -62,13 +69,22 @@ class SummaryViewModel(private val budgetRepository: BudgetRepository) : ViewMod
                         delta = budgeted - actual
                     )
                 }
+                
+                val summaryRows = summary.values.toList()
+                val totalBudget = budget?.overallBudget ?: 0.0
+                val totalSpent = expenses.sumOf { it.amount }
+                
                 SummaryUiState(
                     selectedMonth = month,
                     selectedYear = year,
                     budget = budget,
                     expenses = expenses,
                     categories = categories,
-                    summary = summary
+                    summary = summary,
+                    isLoading = false,
+                    summaryRows = summaryRows,
+                    totalBudget = totalBudget,
+                    totalSpent = totalSpent
                 )
             }.collect {
                 _uiState.value = it

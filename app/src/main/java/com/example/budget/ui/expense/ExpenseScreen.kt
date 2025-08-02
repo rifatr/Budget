@@ -46,12 +46,7 @@ fun ExpenseScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Add Expense") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
+                title = { Text("Expense") },
                 actions = {
                     IconButton(onClick = { viewModel.showExpenseHistory() }) {
                         Icon(Icons.Default.History, contentDescription = "Expense History")
@@ -123,33 +118,21 @@ fun ExpenseScreen(
             Button(
                 onClick = { 
                     viewModel.saveExpense()
-                    navController.popBackStack()
+                    // Don't navigate back, just save and reset
                 },
                 enabled = uiState.isEntryValid,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(),
+                shape = RoundedCornerShape(8.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Done,
-                        contentDescription = "Create Expense"
-                    )
-                    Text(
-                        text = "Create Expense",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+                Text(
+                    text = "Create Expense",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }

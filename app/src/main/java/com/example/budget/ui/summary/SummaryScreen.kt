@@ -13,11 +13,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,65 +27,154 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.budget.ui.AppViewModelProvider
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SummaryScreen(
     navController: NavController,
-    month: Int,
-    year: Int,
     viewModel: SummaryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    
+    // Current month/year state
+    val calendar = Calendar.getInstance()
+    var selectedMonth by remember { mutableStateOf(calendar.get(Calendar.MONTH) + 1) }
+    var selectedYear by remember { mutableStateOf(calendar.get(Calendar.YEAR)) }
 
-    LaunchedEffect(month, year) {
-        viewModel.initialize(month, year)
+    LaunchedEffect(selectedMonth, selectedYear) {
+        viewModel.initialize(selectedMonth, selectedYear)
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Summary for $month/$year") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
+                title = { Text("Summary") }
             )
         }
     ) { innerPadding ->
-        if (uiState.summary.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("No data for this month.", style = MaterialTheme.typography.titleMedium)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            // Month/Year Selector
+            MonthYearSelector(
+                selectedMonth = selectedMonth,
+                selectedYear = selectedYear,
+                onMonthChange = { selectedMonth = it },
+                onYearChange = { selectedYear = it },
+                modifier = Modifier.padding(16.dp)
+            )
+            
+            if (uiState.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        SummaryHeader()
+                    }
+
+                    items(uiState.summaryRows) { row ->
+                        SummaryRow(row = row)
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        SummaryTotals(uiState)
+                    }
+                }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+        }
+    }
+}
+
+@Composable
+private fun MonthYearSelector(
+    selectedMonth: Int,
+    selectedYear: Int,
+    onMonthChange: (Int) -> Unit,
+    onYearChange: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var showMonthDropdown by remember { mutableStateOf(false) }
+    var showYearDropdown by remember { mutableStateOf(false) }
+    
+    val months = (1..12).map { month ->
+        val calendar = Calendar.getInstance().apply { set(Calendar.MONTH, month - 1) }
+        SimpleDateFormat("MMMM", Locale.getDefault()).format(calendar.time) to month
+    }
+    
+    val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+    val years = (currentYear - 5..currentYear + 5).toList()
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Month Selector
+        Box(modifier = Modifier.weight(1f)) {
+            OutlinedButton(
+                onClick = { showMonthDropdown = true },
+                modifier = Modifier.fillMaxWidth()
             ) {
-                item {
-                    SummaryHeader()
+                Text(months.find { it.second == selectedMonth }?.first ?: "")
+                Icon(
+                    if (showMonthDropdown) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = null
+                )
+            }
+            
+            DropdownMenu(
+                expanded = showMonthDropdown,
+                onDismissRequest = { showMonthDropdown = false }
+            ) {
+                months.forEach { (monthName, monthNumber) ->
+                    DropdownMenuItem(
+                        text = { Text(monthName) },
+                        onClick = {
+                            onMonthChange(monthNumber)
+                            showMonthDropdown = false
+                        }
+                    )
                 }
-                item {
-                    HorizontalDivider()
-                }
-                items(uiState.summary.values.toList()) { row ->
-                    SummaryRow(row)
-                }
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    HorizontalDivider()
-                }
-                item {
-                    SummaryTotals(uiState)
+            }
+        }
+        
+        // Year Selector
+        Box(modifier = Modifier.weight(1f)) {
+            OutlinedButton(
+                onClick = { showYearDropdown = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(selectedYear.toString())
+                Icon(
+                    if (showYearDropdown) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = null
+                )
+            }
+            
+            DropdownMenu(
+                expanded = showYearDropdown,
+                onDismissRequest = { showYearDropdown = false }
+            ) {
+                years.forEach { year ->
+                    DropdownMenuItem(
+                        text = { Text(year.toString()) },
+                        onClick = {
+                            onYearChange(year)
+                            showYearDropdown = false
+                        }
+                    )
                 }
             }
         }

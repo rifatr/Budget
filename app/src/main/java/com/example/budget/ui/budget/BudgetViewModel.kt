@@ -16,8 +16,8 @@ data class BudgetUiState(
     val selectedYear: Int,
     val allCategories: List<Category> = emptyList(),
     val budget: Budget? = null,
-    val overallBudgetInput: String = "",
-    val categoryBudgetsInput: Map<Int, String> = emptyMap()
+    val totalBudgetInput: String = "",
+    val categoryBudgets: Map<Int, Double> = emptyMap()
 )
 
 class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewModel() {
@@ -33,42 +33,41 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
             _uiState.value = _uiState.value.copy(
                 allCategories = categories,
                 budget = budget,
-                overallBudgetInput = budget?.overallBudget?.toString() ?: "",
-                categoryBudgetsInput = budget?.categoryBudgets?.mapValues { it.value.toString() } ?: emptyMap()
+                totalBudgetInput = budget?.overallBudget?.toString() ?: "",
+                categoryBudgets = budget?.categoryBudgets ?: emptyMap()
             )
         }
     }
 
-    fun onOverallBudgetChange(newBudget: String) {
+    fun updateTotalBudgetInput(newBudget: String) {
         if (newBudget.matches(Regex("^\\d{0,6}(\\.\\d{0,2})?\$"))) {
-            _uiState.value = _uiState.value.copy(overallBudgetInput = newBudget)
+            _uiState.value = _uiState.value.copy(totalBudgetInput = newBudget)
         }
     }
 
-    fun onCategoryBudgetChange(categoryId: Int, newBudget: String) {
+    fun updateCategoryBudget(categoryId: Int, newBudget: String) {
         if (newBudget.matches(Regex("^\\d{0,6}(\\.\\d{0,2})?\$"))) {
-            val newCategoryBudgets = _uiState.value.categoryBudgetsInput.toMutableMap()
-            newCategoryBudgets[categoryId] = newBudget
-            _uiState.value = _uiState.value.copy(categoryBudgetsInput = newCategoryBudgets)
+            val newCategoryBudgets = _uiState.value.categoryBudgets.toMutableMap()
+            newCategoryBudgets[categoryId] = newBudget.toDoubleOrNull() ?: 0.0
+            _uiState.value = _uiState.value.copy(categoryBudgets = newCategoryBudgets)
         }
     }
 
     fun saveBudget() {
         viewModelScope.launch {
-            val overallBudget = _uiState.value.overallBudgetInput.toDoubleOrNull() ?: 0.0
-            val categoryBudgets = _uiState.value.categoryBudgetsInput.mapValues { it.value.toDoubleOrNull() ?: 0.0 }
+            val totalBudget = _uiState.value.totalBudgetInput.toDoubleOrNull() ?: 0.0
             val newBudget = Budget(
                 id = _uiState.value.budget?.id ?: 0,
                 month = _uiState.value.selectedMonth,
                 year = _uiState.value.selectedYear,
-                overallBudget = overallBudget,
-                categoryBudgets = categoryBudgets
+                overallBudget = totalBudget,
+                categoryBudgets = _uiState.value.categoryBudgets
             )
             budgetRepository.insertOrUpdateBudget(newBudget)
         }
     }
 
-    fun addCategory(categoryName: String) {
+    fun addCategory(categoryName: String, budgetAmount: Double = 0.0) {
         viewModelScope.launch {
             // Check if category with this name already exists
             val existingCategories = budgetRepository.getAllCategories().first()
@@ -77,9 +76,21 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
             }
             
             if (!categoryExists && categoryName.trim().isNotBlank()) {
-                budgetRepository.insertCategory(Category(name = categoryName.trim()))
+                val newCategory = Category(name = categoryName.trim())
+                budgetRepository.insertCategory(newCategory)
+                
+                // Update the UI state with new categories
+                val updatedCategories = budgetRepository.getAllCategories().first()
+                val addedCategory = updatedCategories.find { it.name.equals(categoryName.trim(), ignoreCase = true) }
+                
+                val updatedCategoryBudgets = _uiState.value.categoryBudgets.toMutableMap()
+                if (addedCategory != null && budgetAmount > 0.0) {
+                    updatedCategoryBudgets[addedCategory.id] = budgetAmount
+                }
+                
                 _uiState.value = _uiState.value.copy(
-                    allCategories = budgetRepository.getAllCategories().first()
+                    allCategories = updatedCategories,
+                    categoryBudgets = updatedCategoryBudgets
                 )
             }
         }
