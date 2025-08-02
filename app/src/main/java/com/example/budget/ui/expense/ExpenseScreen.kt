@@ -40,6 +40,9 @@ import androidx.compose.ui.text.style.TextAlign
 fun ExpenseScreen(
     viewModel: ExpenseViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val context = LocalContext.current
+    val app = context.applicationContext as com.example.budget.BudgetApp
+    val selectedCurrency by app.container.currencyPreferences.selectedCurrency.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
@@ -94,7 +97,7 @@ fun ExpenseScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 leadingIcon = {
                     Text(
-                        text = "৳",
+                        text = selectedCurrency.symbol,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -141,6 +144,7 @@ fun ExpenseScreen(
         ExpenseHistoryDialog(
             expenses = uiState.expenseHistory,
             categoryMap = uiState.categoryMap,
+            currencySymbol = selectedCurrency.symbol,
             onDismiss = { viewModel.hideExpenseHistory() },
             onDeleteExpense = { viewModel.deleteExpense(it) }
         )
@@ -303,6 +307,7 @@ fun CategorySelector(
 fun ExpenseHistoryDialog(
     expenses: List<Expense>,
     categoryMap: Map<Int, String>,
+    currencySymbol: String,
     onDismiss: () -> Unit,
     onDeleteExpense: (Expense) -> Unit
 ) {
@@ -355,6 +360,7 @@ fun ExpenseHistoryDialog(
                             ExpenseHistoryItem(
                                 expense = expense,
                                 categoryMap = categoryMap,
+                                currencySymbol = currencySymbol,
                                 onDeleteExpense = onDeleteExpense
                             )
                         }
@@ -369,6 +375,7 @@ fun ExpenseHistoryDialog(
 fun ExpenseHistoryItem(
     expense: Expense,
     categoryMap: Map<Int, String>,
+    currencySymbol: String,
     onDeleteExpense: (Expense) -> Unit
 ) {
     val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
@@ -393,7 +400,7 @@ fun ExpenseHistoryItem(
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "Amount: ৳${String.format("%.2f", expense.amount)}",
+                    text = "Amount: ${currencySymbol}${String.format("%.2f", expense.amount)}",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary

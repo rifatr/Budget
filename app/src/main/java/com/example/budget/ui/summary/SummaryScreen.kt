@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.budget.ui.AppViewModelProvider
@@ -35,6 +36,9 @@ import java.util.*
 fun SummaryScreen(
     viewModel: SummaryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val context = LocalContext.current
+    val app = context.applicationContext as com.example.budget.BudgetApp
+    val selectedCurrency by app.container.currencyPreferences.selectedCurrency.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     
     // Current month/year state
@@ -84,12 +88,12 @@ fun SummaryScreen(
                     }
 
                     items(uiState.summaryRows) { row ->
-                        SummaryRow(row = row)
+                        SummaryRow(row = row, currencySymbol = selectedCurrency.symbol)
                     }
 
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
-                        SummaryTotals(uiState)
+                        SummaryTotals(uiState = uiState, currencySymbol = selectedCurrency.symbol)
                     }
                 }
             }
@@ -196,7 +200,7 @@ fun SummaryHeader() {
 }
 
 @Composable
-fun SummaryRow(row: SummaryRow) {
+fun SummaryRow(row: SummaryRow, currencySymbol: String) {
     val positiveDeltaColor = Color(0xFF388E3C) // A more subtle green
     val negativeDeltaColor = MaterialTheme.colorScheme.error
     val progress = if (row.budgeted > 0) (row.actual / row.budgeted).toFloat() else 0f
@@ -213,10 +217,10 @@ fun SummaryRow(row: SummaryRow) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(row.category.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(String.format("%.2f", row.budgeted), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
-                Text(String.format("%.2f", row.actual), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
+                Text("$currencySymbol${String.format("%.2f", row.budgeted)}", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
+                Text("$currencySymbol${String.format("%.2f", row.actual)}", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
                 Text(
-                    text = String.format("%.2f", row.delta),
+                    text = "$currencySymbol${String.format("%.2f", row.delta)}",
                     color = if (row.delta >= 0) positiveDeltaColor else negativeDeltaColor,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
@@ -238,7 +242,7 @@ fun SummaryRow(row: SummaryRow) {
 }
 
 @Composable
-fun SummaryTotals(uiState: SummaryUiState) {
+fun SummaryTotals(uiState: SummaryUiState, currencySymbol: String) {
     val totalBudgeted = uiState.summary.values.sumOf { it.budgeted }
     val totalActual = uiState.summary.values.sumOf { it.actual }
     val totalDelta = totalBudgeted - totalActual
@@ -253,10 +257,10 @@ fun SummaryTotals(uiState: SummaryUiState) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text("Totals", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f))
-        Text(String.format("%.2f", totalBudgeted), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
-        Text(String.format("%.2f", totalActual), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
+        Text("$currencySymbol${String.format("%.2f", totalBudgeted)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
+        Text("$currencySymbol${String.format("%.2f", totalActual)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
         Text(
-            text = String.format("%.2f", totalDelta),
+            text = "$currencySymbol${String.format("%.2f", totalDelta)}",
             color = if (totalDelta >= 0) positiveDeltaColor else negativeDeltaColor,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,

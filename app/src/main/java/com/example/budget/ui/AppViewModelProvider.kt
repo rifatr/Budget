@@ -7,17 +7,11 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.budget.BudgetApp
 import com.example.budget.ui.budget.BudgetViewModel
 import com.example.budget.ui.expense.ExpenseViewModel
-import com.example.budget.ui.home.HomeViewModel
 import com.example.budget.ui.settings.SettingsViewModel
 import com.example.budget.ui.summary.SummaryViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
-        // Initializer for HomeViewModel
-        initializer {
-            HomeViewModel(budgetApplication().container.budgetRepository)
-        }
-
         // Initializer for BudgetViewModel
         initializer {
             BudgetViewModel(budgetApplication().container.budgetRepository)

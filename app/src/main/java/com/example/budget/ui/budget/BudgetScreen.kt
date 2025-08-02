@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -15,8 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.example.budget.ui.AppViewModelProvider
 import java.text.SimpleDateFormat
 import java.util.*
@@ -26,6 +25,9 @@ import java.util.*
 fun BudgetScreen(
     viewModel: BudgetViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val context = LocalContext.current
+    val app = context.applicationContext as com.example.budget.BudgetApp
+    val selectedCurrency by app.container.currencyPreferences.selectedCurrency.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     
     // Current month/year state
@@ -94,6 +96,13 @@ fun BudgetScreen(
                                 onValueChange = viewModel::updateTotalBudgetInput,
                                 label = { Text("Monthly Budget") },
                                 modifier = Modifier.fillMaxWidth(),
+                                leadingIcon = {
+                                    Text(
+                                        text = selectedCurrency.symbol,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                },
                                 trailingIcon = {
                                     IconButton(onClick = viewModel::saveBudget) {
                                         Icon(Icons.Default.Done, contentDescription = "Save")
@@ -133,6 +142,13 @@ fun BudgetScreen(
                                     viewModel.updateCategoryBudget(category.id, value)
                                 },
                                 label = { Text("Budget") },
+                                leadingIcon = {
+                                    Text(
+                                        text = selectedCurrency.symbol,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                },
                                 modifier = Modifier.width(120.dp)
                             )
                         }
@@ -169,7 +185,14 @@ fun BudgetScreen(
                     OutlinedTextField(
                         value = newCategoryBudget,
                         onValueChange = { newCategoryBudget = it },
-                        label = { Text("Budget Amount") }
+                        label = { Text("Budget Amount") },
+                        leadingIcon = {
+                            Text(
+                                text = selectedCurrency.symbol,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     )
                 }
             },
