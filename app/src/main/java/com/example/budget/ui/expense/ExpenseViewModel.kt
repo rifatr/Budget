@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.budget.data.BudgetRepository
 import com.example.budget.data.db.Category
 import com.example.budget.data.db.Expense
+import com.example.budget.ui.budget.ValidationConstants
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +22,9 @@ data class ExpenseUiState(
     val isEntryValid: Boolean = false,
     val expenseHistory: List<Expense> = emptyList(),
     val showHistory: Boolean = false,
-    val categoryMap: Map<Int, String> = emptyMap()
+    val categoryMap: Map<Int, String> = emptyMap(),
+    val showSuccessMessage: Boolean = false,
+    val successMessage: String = ""
 )
 
 class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewModel() {
@@ -51,8 +54,8 @@ class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewMod
     }
 
     fun onAmountChange(newAmount: String) {
-        // Enforce 6 digits before the decimal point and 2 digits after
-        if (newAmount.matches(Regex("^\\d{0,6}(\\.\\d{0,2})?\$"))) {
+        // Enforce amount validation using constants
+        if (newAmount.matches(ValidationConstants.AMOUNT_VALIDATION_REGEX)) {
             _uiState.value = _uiState.value.copy(amount = newAmount)
             validateInput()
         }
@@ -77,12 +80,18 @@ class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewMod
             budgetRepository.insertExpense(newExpense)
             budgetRepository.incrementCategoryUsage(category.id)
             
-            // Reset form but keep the same category selected (it's now more used)
+            // Show success message
             _uiState.value = _uiState.value.copy(
                 amount = "",
-                description = ""
+                description = "",
+                showSuccessMessage = true,
+                successMessage = "Expense of ${category.name} added successfully!"
             )
             validateInput()
+            
+            // Hide success message after 3 seconds
+            kotlinx.coroutines.delay(3000)
+            _uiState.value = _uiState.value.copy(showSuccessMessage = false)
         }
     }
 
@@ -113,11 +122,11 @@ class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewMod
     fun deleteExpense(expense: Expense) {
         viewModelScope.launch {
             budgetRepository.deleteExpense(expense)
-            // Refresh the history list
-            val allExpenses = budgetRepository.getAllExpenses().first()
-            _uiState.value = _uiState.value.copy(
-                expenseHistory = allExpenses.sortedByDescending { it.date }
-            )
+            showExpenseHistory() // Refresh the list
         }
+    }
+    
+    fun dismissSuccessMessage() {
+        _uiState.value = _uiState.value.copy(showSuccessMessage = false)
     }
 } 

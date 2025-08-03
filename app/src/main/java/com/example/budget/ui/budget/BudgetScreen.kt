@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.ui.AppViewModelProvider
+import com.example.budget.ui.budget.ValidationConstants
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -92,7 +94,7 @@ fun BudgetScreen(
             )
             
             LazyColumn(
-                contentPadding = PaddingValues(bottom = 80.dp),
+                contentPadding = PaddingValues(bottom = 100.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(horizontal = 16.dp)
             ) {
@@ -193,9 +195,57 @@ fun BudgetScreen(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 },
-                                modifier = Modifier.width(140.dp)
+                                modifier = Modifier.width(180.dp)
                             )
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    // Success Message Snackbar
+    if (uiState.showSuccessMessage) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Done,
+                        contentDescription = "Success",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = uiState.successMessage,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(
+                        onClick = { viewModel.dismissSuccessMessage() }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Dismiss",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
                     }
                 }
             }
@@ -216,8 +266,11 @@ fun BudgetScreen(
                     OutlinedTextField(
                         value = newCategoryName,
                         onValueChange = { 
-                            newCategoryName = it
-                            showDuplicateError = false
+                            // Limit category name to specified length
+                            if (it.length <= ValidationConstants.CATEGORY_NAME_MAX_LENGTH) {
+                                newCategoryName = it
+                                showDuplicateError = false
+                            }
                         },
                         label = { Text("Category Name") },
                         keyboardOptions = KeyboardOptions(
@@ -229,12 +282,19 @@ fun BudgetScreen(
                         isError = showDuplicateError,
                         supportingText = if (showDuplicateError) {
                             { Text("Category already exists") }
-                        } else null
+                        } else {
+                            { Text("${newCategoryName.length}/${ValidationConstants.CATEGORY_NAME_MAX_LENGTH} characters") }
+                        }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = newCategoryBudget,
-                        onValueChange = { newCategoryBudget = it },
+                        onValueChange = { 
+                            // Apply same numeric validation as other budget fields
+                            if (it.matches(ValidationConstants.AMOUNT_VALIDATION_REGEX)) {
+                                newCategoryBudget = it
+                            }
+                        },
                         label = { Text("Budget Amount") },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Decimal,
