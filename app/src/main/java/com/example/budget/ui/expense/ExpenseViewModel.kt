@@ -31,8 +31,10 @@ class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewMod
 
     init {
         viewModelScope.launch {
+            val categories = budgetRepository.getAllCategoriesByUsage().first()
             _uiState.value = _uiState.value.copy(
-                allCategories = budgetRepository.getAllCategories().first()
+                allCategories = categories,
+                category = categories.firstOrNull() // Pre-select most used category
             )
             validateInput()
         }
@@ -73,6 +75,14 @@ class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewMod
                 description = _uiState.value.description
             )
             budgetRepository.insertExpense(newExpense)
+            budgetRepository.incrementCategoryUsage(category.id)
+            
+            // Reset form but keep the same category selected (it's now more used)
+            _uiState.value = _uiState.value.copy(
+                amount = "",
+                description = ""
+            )
+            validateInput()
         }
     }
 

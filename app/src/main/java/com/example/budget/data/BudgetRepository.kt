@@ -17,8 +17,10 @@ class BudgetRepository(
 
     // Category operations
     fun getAllCategories(): Flow<List<Category>> = categoryDao.getAllCategories()
+    fun getAllCategoriesByUsage(): Flow<List<Category>> = categoryDao.getAllCategoriesByUsage()
     suspend fun insertCategory(category: Category) = categoryDao.insertCategory(category)
     suspend fun deleteCategory(category: Category) = categoryDao.deleteCategory(category)
+    suspend fun incrementCategoryUsage(categoryId: Int) = categoryDao.incrementUsageCount(categoryId)
 
     // Expense operations
     fun getExpensesForMonth(startDate: Date, endDate: Date): Flow<List<Expense>> =

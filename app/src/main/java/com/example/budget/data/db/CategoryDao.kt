@@ -12,6 +12,9 @@ interface CategoryDao {
     @Query("SELECT * FROM categories ORDER BY name ASC")
     fun getAllCategories(): Flow<List<Category>>
 
+    @Query("SELECT * FROM categories ORDER BY usageCount DESC, name ASC")
+    fun getAllCategoriesByUsage(): Flow<List<Category>>
+
     @Query("SELECT * FROM categories")
     suspend fun getAllCategoriesList(): List<Category>
 
@@ -20,6 +23,9 @@ interface CategoryDao {
 
     @Delete
     suspend fun deleteCategory(category: Category)
+
+    @Query("UPDATE categories SET usageCount = usageCount + 1 WHERE id = :categoryId")
+    suspend fun incrementUsageCount(categoryId: Int)
 
     @Query("DELETE FROM categories")
     suspend fun clearAll()
