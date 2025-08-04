@@ -171,31 +171,46 @@ fun BudgetScreen(
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.weight(1f)
                             )
-                            OutlinedTextField(
-                                value = uiState.categoryBudgets[category.id]?.toString() ?: "",
-                                onValueChange = { value ->
-                                    viewModel.updateCategoryBudget(category.id, value)
-                                },
-                                label = { Text("Budget") },
-                                keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Decimal,
-                                    imeAction = ImeAction.Done
-                                ),
-                                keyboardActions = KeyboardActions(
-                                    onDone = {
+                            Box(
+                                modifier = Modifier.width(180.dp)
+                            ) {
+                                OutlinedTextField(
+                                    value = uiState.categoryBudgets[category.id]?.toString() ?: "",
+                                    onValueChange = { value ->
+                                        viewModel.updateCategoryBudget(category.id, value)
+                                    },
+                                    label = { Text("Budget") },
+                                    keyboardOptions = KeyboardOptions(
+                                        keyboardType = KeyboardType.Decimal,
+                                        imeAction = ImeAction.Done
+                                    ),
+                                    keyboardActions = KeyboardActions(
+                                        onDone = {
+                                            keyboardController?.hide()
+                                            focusManager.clearFocus()
+                                            viewModel.saveBudget()
+                                        }
+                                    ),
+                                    leadingIcon = {
+                                        Text(
+                                            text = selectedCurrency.symbol,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                IconButton(
+                                    onClick = {
                                         keyboardController?.hide()
                                         focusManager.clearFocus()
-                                    }
-                                ),
-                                leadingIcon = {
-                                    Text(
-                                        text = selectedCurrency.symbol,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                },
-                                modifier = Modifier.width(180.dp)
-                            )
+                                        viewModel.saveBudget()
+                                    },
+                                    modifier = Modifier.align(Alignment.CenterEnd)
+                                ) {
+                                    Icon(Icons.Default.Done, contentDescription = "Save")
+                                }
+                            }
                         }
                     }
                 }

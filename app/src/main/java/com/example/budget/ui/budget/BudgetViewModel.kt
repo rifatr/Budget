@@ -59,8 +59,9 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
 
     fun updateCategoryBudget(categoryId: Int, newBudget: String) {
         if (newBudget.matches(ValidationConstants.AMOUNT_VALIDATION_REGEX)) {
+            val newBudgetAmount = newBudget.toDoubleOrNull() ?: 0.0
             val newCategoryBudgets = _uiState.value.categoryBudgets.toMutableMap()
-            newCategoryBudgets[categoryId] = newBudget.toDoubleOrNull() ?: 0.0
+            newCategoryBudgets[categoryId] = newBudgetAmount
             _uiState.value = _uiState.value.copy(categoryBudgets = newCategoryBudgets)
         }
     }
@@ -68,6 +69,22 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
     fun saveBudget() {
         viewModelScope.launch {
             val totalBudget = _uiState.value.totalBudgetInput.toDoubleOrNull() ?: 0.0
+            val categoryBudgetsSum = _uiState.value.categoryBudgets.values.sum()
+            
+            // Check if category budgets exceed total budget
+            if (categoryBudgetsSum > totalBudget) {
+                // Show error message
+                _uiState.value = _uiState.value.copy(
+                    showSuccessMessage = true,
+                    successMessage = "Error: Category budgets (${categoryBudgetsSum}) exceed total budget (${totalBudget})!"
+                )
+                
+                // Hide error message after 3 seconds
+                kotlinx.coroutines.delay(3000)
+                _uiState.value = _uiState.value.copy(showSuccessMessage = false)
+                return@launch
+            }
+            
             val newBudget = Budget(
                 id = _uiState.value.budget?.id ?: 0,
                 month = _uiState.value.selectedMonth,
