@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">Budget</string>
+    
+    <!-- Widget Strings -->
+    <string name="expense_widget_description">Quick expense entry widget</string>
+    <string name="quick_expense">Quick Expense</string>
+    <string name="quick_add_expense">+ Add Expense</string>
+    <string name="tap_to_add_expense">Tap to open expense screen</string>
+    <string name="amount_hint">Amount</string>
+    <string name="add_expense">Add Expense</string>
+    <string name="category_hint">Category</string>
+    <string name="expense_added">Expense added successfully!</string>
+    <string name="error_invalid_amount">Please enter a valid amount</string>
+    <string name="error_no_category">Please select a category</string>
 </resources> 

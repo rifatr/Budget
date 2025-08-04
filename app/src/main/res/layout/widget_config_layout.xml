@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/beautiful_gradient_background">
+
+    <!-- Main Content Card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:orientation="vertical"
+        android:background="@drawable/main_card_background"
+        android:padding="32dp"
+        android:elevation="12dp">
+
+        <!-- App Icon -->
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@mipmap/ic_launcher"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Quick Add Expense"
+            android:textColor="#1A1A1A"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Amount Input -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Amount *"
+            android:textColor="#333333"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+        
+        <EditText
+            android:id="@+id/config_amount_input"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/amount_input_background"
+            android:hint="Enter amount"
+            android:textColor="#333333"
+            android:textColorHint="#999999"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:inputType="numberDecimal"
+            android:maxLength="9"
+            android:padding="16dp"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"
+            android:elevation="2dp" />
+
+        <!-- Category Selection -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Category *"
+            android:textColor="#333333"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+        
+        <!-- Category Button -->
+        <Button
+            android:id="@+id/config_category_button"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/category_button_background"
+            android:text="Select Category"
+            android:textColor="#333333"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:elevation="2dp"
+            android:drawableEnd="@drawable/ic_arrow_drop_down"
+            android:drawablePadding="8dp"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <!-- Add Button (Primary) -->
+            <Button
+                android:id="@+id/config_add_button"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="2"
+                android:background="@drawable/primary_button_background"
+                android:text="Add Expense"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="12dp"
+                android:elevation="4dp"
+                android:enabled="false" />
+
+            <!-- Open App Button -->
+            <Button
+                android:id="@+id/config_cancel_button"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:background="@drawable/secondary_button_background"
+                android:text="Open App"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:layout_marginStart="12dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout> 

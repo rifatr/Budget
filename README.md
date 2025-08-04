@@ -51,6 +51,15 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 - **Keyboard Handling**: Smart keyboard dismissal and field navigation
 - **Perfect Alignment**: Properly centered text and UI elements
 
+### 📱 Home Screen Widget
+- **Quick Expense Entry**: 1x1 home screen widget for instant expense logging
+- **Beautiful Design**: Compact blue circular button with plus icon
+- **Smart UI**: Dedicated expense entry screen with gradient background
+- **Category Selection**: Dynamic category dropdown with most-used categories first
+- **Input Validation**: Real-time amount validation (6 digits before, 2 after decimal)
+- **Currency Support**: Uses your selected currency symbol in confirmations
+- **Seamless Experience**: Returns to home screen after adding expense
+
 ## 🏗️ Architecture
 
 ### Tech Stack
@@ -124,6 +133,9 @@ app/src/main/java/com/example/budget/
 │   ├── Navigation.kt          # Route definitions
 │   ├── BudgetAppNavigation.kt # Main navigation with bottom tabs
 │   └── AppViewModelProvider.kt # ViewModel factory
+├── widget/
+│   ├── ExpenseWidgetProvider.kt      # Widget provider and lifecycle
+│   └── ExpenseWidgetConfigActivity.kt # Widget quick expense entry UI
 ├── BudgetApp.kt               # Application class with DI setup
 └── MainActivity.kt            # Main activity with currency setup
 ```
@@ -193,9 +205,10 @@ app/src/main/java/com/example/budget/
 
 ### Daily Usage
 1. **Add Expense**: Use Expense tab with date picker and category selection
-2. **Check Progress**: View Summary tab for budget vs spending overview
-3. **Adjust Budgets**: Modify budgets in Budget tab as needed
-4. **Data Management**: Export backups or change currency in More tab
+2. **Quick Entry**: Use home screen widget for instant expense logging
+3. **Check Progress**: View Summary tab for budget vs spending overview
+4. **Adjust Budgets**: Modify budgets in Budget tab as needed
+5. **Data Management**: Export backups or change currency in More tab
 
 ## 🔄 Data Backup
 
@@ -210,6 +223,24 @@ app/src/main/java/com/example/budget/
 2. Tap "Import Data"
 3. Select your backup JSON file
 4. Data automatically restored
+
+## 🎯 Widget Usage
+
+### Adding Widget to Home Screen
+1. Long press on your home screen
+2. Tap "Widgets" 
+3. Find "Budget Tracker" in the list
+4. Drag the "Expense Widget" to your home screen
+5. Widget appears as a compact blue circular button
+
+### Using the Widget
+1. Tap the widget button on your home screen
+2. Beautiful expense entry screen opens with gradient background
+3. Enter expense amount with automatic validation
+4. Select category from dropdown (most-used categories appear first)
+5. Tap "Add Expense" to save
+6. Success message shows with your currency symbol
+7. Automatically returns to home screen
 
 ## 👨‍💻 Developer Information
 
@@ -232,7 +263,7 @@ app/src/main/java/com/example/budget/
 - **Recurring Expenses**: Support for recurring transactions
 - **Cloud Sync**: Backup to cloud storage
 - **Dark Mode**: Enhanced dark theme support
-- **Widgets**: Home screen widgets for quick expense entry
+- **Advanced Widgets**: Configurable widget sizes and more widget types
 
 ## 🤝 Contributing
 

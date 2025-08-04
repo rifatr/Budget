@@ -19,10 +19,14 @@ import com.example.budget.ui.theme.GradientBackground
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Check if opened from widget
+        val openExpenseScreen = intent.getBooleanExtra("open_expense_screen", false)
+        
         setContent {
             BudgetTheme {
                 GradientBackground {
-                    MainContent()
+                    MainContent(openExpenseScreen = openExpenseScreen)
                 }
             }
         }
@@ -30,7 +34,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun MainContent() {
+private fun MainContent(openExpenseScreen: Boolean = false) {
     val app = LocalContext.current.applicationContext as BudgetApp
     val isFirstLaunch by app.container.currencyPreferences.isFirstLaunch.collectAsState()
     
@@ -42,6 +46,6 @@ private fun MainContent() {
             }
         )
     } else {
-        BudgetAppNavigation()
+        BudgetAppNavigation(startWithExpenseScreen = openExpenseScreen)
     }
 } 

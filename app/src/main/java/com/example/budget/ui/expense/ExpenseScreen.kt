@@ -337,7 +337,7 @@ fun CategorySelector(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = selectedCategory?.name ?: "Select",
+                        text = selectedCategory?.name ?: "Create in Budget menu",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.weight(1f),
@@ -345,11 +345,13 @@ fun CategorySelector(
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
                     )
-                    Icon(
-                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = if (expanded) "Collapse" else "Expand",
-                        modifier = Modifier.size(16.dp)
-                    )
+                    if (selectedCategory != null) {
+                        Icon(
+                            imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = if (expanded) "Collapse" else "Expand",
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
         }

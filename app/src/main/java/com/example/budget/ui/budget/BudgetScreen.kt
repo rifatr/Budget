@@ -27,7 +27,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.ui.AppViewModelProvider
-import com.example.budget.ui.budget.ValidationConstants
 import java.text.SimpleDateFormat
 import java.util.*
 

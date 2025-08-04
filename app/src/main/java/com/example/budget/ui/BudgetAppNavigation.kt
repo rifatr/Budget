@@ -29,13 +29,27 @@ data class BottomNavItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BudgetAppNavigation(navController: NavHostController = rememberNavController()) {
+fun BudgetAppNavigation(
+    navController: NavHostController = rememberNavController(),
+    startWithExpenseScreen: Boolean = false
+) {
     val bottomNavItems = listOf(
         BottomNavItem(Screen.Expense, Icons.Default.MonetizationOn, "Expense"),
         BottomNavItem(Screen.Budget, Icons.Default.AccountBalanceWallet, "Budget"),
         BottomNavItem(Screen.Summary, Icons.Default.Assessment, "Summary"),
         BottomNavItem(Screen.More, Icons.Default.MoreHoriz, "More")
     )
+
+    // Navigate to expense screen if opened from widget
+    LaunchedEffect(startWithExpenseScreen) {
+        if (startWithExpenseScreen) {
+            navController.navigate(Screen.Expense.route) {
+                popUpTo(Screen.Expense.route) {
+                    inclusive = true
+                }
+            }
+        }
+    }
 
     Scaffold(
         bottomBar = {
