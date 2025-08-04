@@ -34,6 +34,8 @@ fun CurrencySelectionDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
+                .wrapContentHeight()
+                .heightIn(max = 500.dp)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
@@ -47,7 +49,7 @@ fun CurrencySelectionDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "🏦 Welcome to Budget Tracker",
+                    text = "Welcome to Budget Tracker",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -66,7 +68,9 @@ fun CurrencySelectionDialog(
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 300.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(Currency.values()) { currency ->
