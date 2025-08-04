@@ -34,8 +34,7 @@ fun CurrencySelectionDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight()
-                .heightIn(max = 500.dp)
+                .fillMaxHeight(0.85f)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
@@ -44,7 +43,7 @@ fun CurrencySelectionDialog(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -65,12 +64,12 @@ fun CurrencySelectionDialog(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 300.dp),
+                        .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(Currency.values()) { currency ->
@@ -82,7 +81,7 @@ fun CurrencySelectionDialog(
                     }
                 }
                 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 
                 Button(
                     onClick = { onCurrencySelected(selectedCurrency) },
