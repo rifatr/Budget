@@ -34,12 +34,20 @@ class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewMod
 
     init {
         viewModelScope.launch {
-            val categories = budgetRepository.getAllCategoriesByUsage().first()
-            _uiState.value = _uiState.value.copy(
-                allCategories = categories,
-                category = categories.firstOrNull() // Pre-select most used category
-            )
-            validateInput()
+            budgetRepository.getAllCategoriesByUsage().collect { categories ->
+                val currentCategory = _uiState.value.category
+                val updatedCategory = if (currentCategory != null && categories.contains(currentCategory)) {
+                    currentCategory // Keep current selection if it still exists
+                } else {
+                    categories.firstOrNull() // Pre-select most used category if no current selection or it was deleted
+                }
+                
+                _uiState.value = _uiState.value.copy(
+                    allCategories = categories,
+                    category = updatedCategory
+                )
+                validateInput()
+            }
         }
     }
 
