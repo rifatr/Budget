@@ -25,7 +25,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.example.budget.data.db.Category
 import com.example.budget.data.db.Expense
 import com.example.budget.ui.AppViewModelProvider
@@ -34,7 +33,6 @@ import java.util.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.background
 import androidx.compose.ui.unit.DpOffset
@@ -484,12 +482,12 @@ fun ExpenseHistoryItem(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "Category: ${categoryMap[expense.categoryId] ?: "Unknown"}",
+                    text = categoryMap[expense.categoryId] ?: "Unknown",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "Amount: ${currencySymbol}${String.format("%.2f", expense.amount)}",
+                    text = "Amount: ${currencySymbol}${String.format(Locale.US, "%.2f", expense.amount)}",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -513,7 +511,7 @@ fun ExpenseHistoryItem(
             IconButton(
                 onClick = { onDeleteExpense(expense) },
                 colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = MaterialTheme.colorScheme.error
+                    contentColor = MaterialTheme.colorScheme.errorContainer
                 )
             ) {
                 Icon(
