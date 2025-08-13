@@ -46,6 +46,7 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 
 ### 🎨 Modern UI/UX
 - **Bottom Navigation**: Expense, Budget, Summary, More tabs with visual feedback
+- **Swipe Navigation**: Natural left/right swipe gestures between tabs with smart constraints
 - **Gradient Theme**: Eye-soothing soft blue gradient design
 - **Material 3**: Latest Material Design components and principles
 - **Keyboard Handling**: Smart keyboard dismissal and field navigation
@@ -67,7 +68,7 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 - **UI Framework**: Jetpack Compose
 - **Architecture**: MVVM (Model-View-ViewModel)
 - **Database**: Room with SQLite
-- **Navigation**: Jetpack Compose Navigation with Bottom Tabs
+- **Navigation**: Jetpack Compose Navigation with Swipe-enabled Bottom Tabs
 - **State Management**: StateFlow and Compose State
 - **Data Serialization**: Gson for JSON export/import
 - **Persistence**: SharedPreferences for user settings
@@ -116,7 +117,7 @@ For release build (requires keystore setup):
 ```
 app/src/main/java/com/example/budget/
 ├── data/
-│   ├── db/                     # Room database (entities, DAOs, converters)
+│   ├── db/                    # Room database (entities, DAOs, converters)
 │   ├── Currency.kt            # Currency enum and definitions
 │   ├── CurrencyPreferences.kt # Currency preference management
 │   ├── BudgetRepository.kt    # Data access layer
@@ -131,7 +132,7 @@ app/src/main/java/com/example/budget/
 │   ├── setup/                 # Currency selection dialog
 │   ├── theme/                 # App theming and gradient colors
 │   ├── Navigation.kt          # Route definitions
-│   ├── BudgetAppNavigation.kt # Main navigation with bottom tabs
+│   ├── BudgetAppNavigation.kt # Main navigation with swipe-enabled bottom tabs
 │   └── AppViewModelProvider.kt # ViewModel factory
 ├── widget/
 │   ├── ExpenseWidgetProvider.kt      # Widget provider and lifecycle
@@ -175,7 +176,9 @@ app/src/main/java/com/example/budget/
 - **Typography**: Clear hierarchy with proper font weights
 
 ### User Experience
-- **Intuitive Navigation**: Bottom tabs for easy access to main features
+- **Intuitive Navigation**: Bottom tabs with swipe gestures for easy access to main features
+- **Smart Swipe Constraints**: Edge tabs prevent overscroll (Expense blocks left swipe, More blocks right swipe)
+- **Smooth Transitions**: Fluid page animations with HorizontalPager
 - **Quick Actions**: History button in expense screen for easy access
 - **Visual Feedback**: Loading states, success messages, and error handling
 - **Accessibility**: Proper content descriptions and keyboard navigation
@@ -205,10 +208,11 @@ app/src/main/java/com/example/budget/
 
 ### Daily Usage
 1. **Add Expense**: Use Expense tab with date picker and category selection
-2. **Quick Entry**: Use home screen widget for instant expense logging
-3. **Check Progress**: View Summary tab for budget vs spending overview
-4. **Adjust Budgets**: Modify budgets in Budget tab as needed
-5. **Data Management**: Export backups or change currency in More tab
+2. **Navigate Tabs**: Swipe left/right between tabs or tap bottom navigation
+3. **Quick Entry**: Use home screen widget for instant expense logging
+4. **Check Progress**: View Summary tab for budget vs spending overview
+5. **Adjust Budgets**: Modify budgets in Budget tab as needed
+6. **Data Management**: Export backups or change currency in More tab
 
 ## 🔄 Data Backup
 

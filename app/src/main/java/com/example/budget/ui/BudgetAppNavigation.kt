@@ -1,12 +1,20 @@
 package com.example.budget.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -19,6 +27,7 @@ import com.example.budget.ui.info.InfoScreen
 import com.example.budget.ui.more.MoreScreen
 import com.example.budget.ui.settings.SettingsScreen
 import com.example.budget.ui.summary.SummaryScreen
+import kotlinx.coroutines.launch
 import java.util.*
 
 data class BottomNavItem(
@@ -27,7 +36,7 @@ data class BottomNavItem(
     val label: String
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun BudgetAppNavigation(
     navController: NavHostController = rememberNavController(),
@@ -40,14 +49,17 @@ fun BudgetAppNavigation(
         BottomNavItem(Screen.More, Icons.Default.MoreHoriz, "More")
     )
 
-    // Navigate to expense screen if opened from widget
+    // Pager state for swipe navigation
+    val pagerState = rememberPagerState(
+        initialPage = if (startWithExpenseScreen) 0 else 0,
+        pageCount = { bottomNavItems.size }
+    )
+    val coroutineScope = rememberCoroutineScope()
+
+    // Sync pager with navigation
     LaunchedEffect(startWithExpenseScreen) {
         if (startWithExpenseScreen) {
-            navController.navigate(Screen.Expense.route) {
-                popUpTo(Screen.Expense.route) {
-                    inclusive = true
-                }
-            }
+            pagerState.scrollToPage(0) // Expense tab
         }
     }
 
@@ -57,16 +69,13 @@ fun BudgetAppNavigation(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 contentColor = MaterialTheme.colorScheme.onSurface
             ) {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry?.destination?.route
-
-                bottomNavItems.forEach { item ->
+                bottomNavItems.forEachIndexed { index, item ->
                     NavigationBarItem(
                         icon = { 
                             Icon(
                                 item.icon, 
                                 contentDescription = item.label,
-                                tint = if (currentRoute == item.screen.route) 
+                                tint = if (pagerState.currentPage == index) 
                                     MaterialTheme.colorScheme.primary 
                                 else 
                                     MaterialTheme.colorScheme.onSurfaceVariant
@@ -75,23 +84,16 @@ fun BudgetAppNavigation(
                         label = { 
                             Text(
                                 item.label,
-                                color = if (currentRoute == item.screen.route) 
+                                color = if (pagerState.currentPage == index) 
                                     MaterialTheme.colorScheme.primary 
                                 else 
                                     MaterialTheme.colorScheme.onSurfaceVariant
                             ) 
                         },
-                        selected = currentRoute == item.screen.route,
+                        selected = pagerState.currentPage == index,
                         onClick = {
-                            navController.navigate(item.screen.route) {
-                                // Pop up to the start destination to avoid large back stack
-                                popUpTo(navController.graph.startDestinationId) {
-                                    saveState = true
-                                }
-                                // Avoid multiple copies of the same destination when re-selecting tab
-                                launchSingleTop = true
-                                // Restore state when re-selecting a previously selected tab
-                                restoreState = true
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
                             }
                         },
                         colors = NavigationBarItemDefaults.colors(
@@ -106,29 +108,86 @@ fun BudgetAppNavigation(
             }
         }
     ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Expense.route,
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable(Screen.Expense.route) {
-                ExpenseScreen()
+        Box(modifier = Modifier.padding(innerPadding)) {
+            SwipeableTabPager(
+                pagerState = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                when (page) {
+                    0 -> ExpenseScreen()
+                    1 -> BudgetScreen()
+                    2 -> SummaryScreen()
+                    3 -> MoreScreen(navController)
+                }
             }
-            composable(Screen.Budget.route) {
-                BudgetScreen()
-            }
-            composable(Screen.Summary.route) {
-                SummaryScreen()
-            }
-            composable(Screen.More.route) {
-                MoreScreen(navController)
-            }
-            composable(Screen.Info.route) {
-                InfoScreen(navController)
-            }
-            composable(Screen.Settings.route) {
-                SettingsScreen(navController)
+            
+            // Handle navigation to non-main tabs (Info, Settings)
+            NavHost(
+                navController = navController,
+                startDestination = "hidden", // Hidden route for non-main screens
+                modifier = Modifier.fillMaxSize()
+            ) {
+                composable("hidden") { 
+                    // Empty composable for the hidden start destination
+                }
+                composable(Screen.Info.route) {
+                    InfoScreen(navController)
+                }
+                composable(Screen.Settings.route) {
+                    SettingsScreen(navController)
+                }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun SwipeableTabPager(
+    pagerState: PagerState,
+    modifier: Modifier = Modifier,
+    content: @Composable (page: Int) -> Unit
+) {
+    var isDragging by remember { mutableStateOf(false) }
+    var dragStartX by remember { mutableStateOf(0f) }
+    var currentDragAmount by remember { mutableStateOf(0f) }
+    
+    HorizontalPager(
+        state = pagerState,
+        modifier = modifier.pointerInput(pagerState.currentPage) {
+            detectHorizontalDragGestures(
+                onDragStart = { offset ->
+                    isDragging = true
+                    dragStartX = offset.x
+                    currentDragAmount = 0f
+                },
+                onDragEnd = {
+                    isDragging = false
+                    currentDragAmount = 0f
+                },
+                onHorizontalDrag = { change, dragAmount ->
+                    currentDragAmount += dragAmount
+                    val currentPage = pagerState.currentPage
+                    
+                    // Calculate intended swipe direction
+                    val swipeDirection = if (currentDragAmount > 0) "left" else "right"
+                    
+                    // Block left swipe on Expense tab (can't go to previous page)
+                    if (currentPage == 0 && swipeDirection == "left") {
+                        change.consume()
+                        return@detectHorizontalDragGestures
+                    }
+                    
+                    // Block right swipe on More tab (can't go to next page)  
+                    if (currentPage == 3 && swipeDirection == "right") {
+                        change.consume()
+                        return@detectHorizontalDragGestures
+                    }
+                }
+            )
+        },
+        userScrollEnabled = true
+    ) { page ->
+        content(page)
     }
 } 
