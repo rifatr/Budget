@@ -278,10 +278,29 @@ fun BudgetScreen(
         }
     }
 
+    // Temporary test button to verify messages work - place it at the top
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.End
+    ) {
+        Button(
+            onClick = { viewModel.testMessage() },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary
+            )
+        ) {
+            Text("Test Message")
+        }
+    }
+
     // Success Message Snackbar
     if (uiState.showSuccessMessage) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 80.dp), // Add bottom padding to avoid overlap with FAB
             contentAlignment = Alignment.BottomCenter
         ) {
             Card(
@@ -289,9 +308,9 @@ fun BudgetScreen(
                     .fillMaxWidth()
                     .padding(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                    containerColor = MaterialTheme.colorScheme.primary
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -302,14 +321,14 @@ fun BudgetScreen(
                     Icon(
                         imageVector = Icons.Default.Done,
                         contentDescription = "Success",
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = uiState.successMessage,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.weight(1f)
                     )
                     IconButton(
@@ -318,7 +337,7 @@ fun BudgetScreen(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Dismiss",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }

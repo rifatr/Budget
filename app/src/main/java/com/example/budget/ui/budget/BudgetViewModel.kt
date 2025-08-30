@@ -180,6 +180,19 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
                     categoryBudgets = updatedCategoryBudgets
                 )
                 
+                // If budget amount is provided, save the budget to database
+                if (budgetAmount > 0.0) {
+                    val totalBudget = _uiState.value.totalBudgetInput.toDoubleOrNull() ?: 0.0
+                    val newBudget = Budget(
+                        id = _uiState.value.budget?.id ?: 0,
+                        month = _uiState.value.selectedMonth,
+                        year = _uiState.value.selectedYear,
+                        overallBudget = totalBudget,
+                        categoryBudgets = updatedCategoryBudgets
+                    )
+                    budgetRepository.insertOrUpdateBudget(newBudget)
+                }
+                
                 val message = if (budgetAmount > 0.0) {
                     "Category '$trimmedName' added with budget ${String.format("%.2f", budgetAmount)}!"
                 } else {
@@ -205,6 +218,18 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
             )
             // Hide message after 2 seconds (shorter for cancel messages)
             kotlinx.coroutines.delay(2000)
+            _uiState.value = _uiState.value.copy(showSuccessMessage = false)
+        }
+    }
+    
+    // Temporary test function to verify messages work
+    fun testMessage() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                showSuccessMessage = true,
+                successMessage = "Test message - confirmations are working!"
+            )
+            kotlinx.coroutines.delay(3000)
             _uiState.value = _uiState.value.copy(showSuccessMessage = false)
         }
     }
