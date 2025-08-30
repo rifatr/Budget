@@ -10,6 +10,11 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.unit.sp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -69,6 +74,109 @@ fun BudgetScreen(
                 onClick = { showAddCategoryDialog = true }
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Category")
+            }
+        },
+        snackbarHost = {
+            // Beautiful Message Display with success/error distinction
+            if (uiState.showSuccessMessage) {
+                val isError = uiState.successMessage.startsWith("Error:")
+                val cleanMessage = if (isError) uiState.successMessage.removePrefix("Error: ") else uiState.successMessage
+                
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isError) {
+                            MaterialTheme.colorScheme.errorContainer
+                        } else {
+                            MaterialTheme.colorScheme.secondaryContainer
+                        }
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Beautiful gradient background circle for icon
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(
+                                    color = if (isError) {
+                                        MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
+                                    } else {
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                                    },
+                                    shape = androidx.compose.foundation.shape.CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (isError) {
+                                    Icons.Default.Warning
+                                } else {
+                                    Icons.Default.CheckCircle
+                                },
+                                contentDescription = if (isError) "Error" else "Success",
+                                tint = if (isError) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    MaterialTheme.colorScheme.primary
+                                },
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        
+                        Spacer(modifier = Modifier.width(16.dp))
+                        
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = if (isError) "Error" else "Success",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = if (isError) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    MaterialTheme.colorScheme.primary
+                                },
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = cleanMessage,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (isError) {
+                                    MaterialTheme.colorScheme.onErrorContainer
+                                } else {
+                                    MaterialTheme.colorScheme.onSecondaryContainer
+                                },
+                                lineHeight = 20.sp
+                            )
+                        }
+                        
+                        IconButton(
+                            onClick = { viewModel.dismissSuccessMessage() },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Dismiss",
+                                tint = if (isError) {
+                                    MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
+                                } else {
+                                    MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                                },
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
             }
         }
     ) { innerPadding ->
