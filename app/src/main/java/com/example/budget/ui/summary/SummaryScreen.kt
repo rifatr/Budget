@@ -15,6 +15,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -109,9 +115,6 @@ private fun MonthYearSelector(
     onYearChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showMonthDropdown by remember { mutableStateOf(false) }
-    var showYearDropdown by remember { mutableStateOf(false) }
-    
     val months = (1..12).map { month ->
         val calendar = Calendar.getInstance().apply { set(Calendar.MONTH, month - 1) }
         SimpleDateFormat("MMMM", Locale.getDefault()).format(calendar.time) to month
@@ -126,59 +129,117 @@ private fun MonthYearSelector(
     ) {
         // Month Selector
         Box(modifier = Modifier.weight(1f)) {
-            OutlinedButton(
-                onClick = { showMonthDropdown = true },
+            BeautifulSelector(
+                label = "Month",
+                value = months.find { it.second == selectedMonth }?.first ?: "January",
+                options = months.map { it.first },
+                onSelectionChange = { selectedMonthName ->
+                    val monthValue = months.find { it.first == selectedMonthName }?.second ?: 1
+                    onMonthChange(monthValue)
+                }
+            )
+        }
+
+        // Year Selector
+        Box(modifier = Modifier.weight(1f)) {
+            BeautifulSelector(
+                label = "Year",
+                value = selectedYear.toString(),
+                options = years.map { it.toString() },
+                onSelectionChange = { selectedYearString ->
+                    onYearChange(selectedYearString.toInt())
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun BeautifulSelector(
+    label: String,
+    value: String,
+    options: List<String>,
+    onSelectionChange: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val maxDropdownHeight = 300.dp
+
+    Box {
+        Button(
+            onClick = { expanded = true },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ),
+            shape = RoundedCornerShape(16.dp),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(months.find { it.second == selectedMonth }?.first ?: "")
-                Icon(
-                    if (showMonthDropdown) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = null
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                 )
-            }
-            
-            DropdownMenu(
-                expanded = showMonthDropdown,
-                onDismissRequest = { showMonthDropdown = false }
-            ) {
-                months.forEach { (monthName, monthNumber) ->
-                    DropdownMenuItem(
-                        text = { Text(monthName) },
-                        onClick = {
-                            onMonthChange(monthNumber)
-                            showMonthDropdown = false
-                        }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        modifier = Modifier.size(16.dp)
                     )
                 }
             }
         }
-        
-        // Year Selector
-        Box(modifier = Modifier.weight(1f)) {
-            OutlinedButton(
-                onClick = { showYearDropdown = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(selectedYear.toString())
-                Icon(
-                    if (showYearDropdown) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = null
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            offset = DpOffset(0.dp, 4.dp),
+            modifier = Modifier
+                .heightIn(max = maxDropdownHeight)
+                .widthIn(min = 120.dp, max = 180.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(12.dp)
                 )
-            }
-            
-            DropdownMenu(
-                expanded = showYearDropdown,
-                onDismissRequest = { showYearDropdown = false }
-            ) {
-                years.forEach { year ->
-                    DropdownMenuItem(
-                        text = { Text(year.toString()) },
-                        onClick = {
-                            onYearChange(year)
-                            showYearDropdown = false
-                        }
-                    )
-                }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { 
+                        Text(
+                            text = option,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (option == value) 
+                                MaterialTheme.colorScheme.primary 
+                            else 
+                                MaterialTheme.colorScheme.onSurface
+                        ) 
+                    },
+                    onClick = {
+                        onSelectionChange(option)
+                        expanded = false
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                )
             }
         }
     }
