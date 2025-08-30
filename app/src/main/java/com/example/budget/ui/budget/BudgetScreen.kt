@@ -278,22 +278,7 @@ fun BudgetScreen(
         }
     }
 
-    // Temporary test button to verify messages work - place it at the top
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.End
-    ) {
-        Button(
-            onClick = { viewModel.testMessage() },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary
-            )
-        ) {
-            Text("Test Message")
-        }
-    }
+
 
     // Success Message Snackbar
     if (uiState.showSuccessMessage) {

@@ -222,17 +222,7 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
         }
     }
     
-    // Temporary test function to verify messages work
-    fun testMessage() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                showSuccessMessage = true,
-                successMessage = "Test message - confirmations are working!"
-            )
-            kotlinx.coroutines.delay(3000)
-            _uiState.value = _uiState.value.copy(showSuccessMessage = false)
-        }
-    }
+
     
     fun saveCategoryBudget(categoryId: Int) {
         viewModelScope.launch {
