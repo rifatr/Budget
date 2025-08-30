@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 // Validation Constants
 object ValidationConstants {
-    const val CATEGORY_NAME_MAX_LENGTH = 12
+    const val CATEGORY_NAME_MAX_LENGTH = 24
     const val AMOUNT_DIGITS_BEFORE_DECIMAL = 6
     const val AMOUNT_DIGITS_AFTER_DECIMAL = 2
     
@@ -30,7 +30,22 @@ data class BudgetUiState(
     val categoryBudgets: Map<Int, Double> = emptyMap(),
     val showSuccessMessage: Boolean = false,
     val successMessage: String = ""
-)
+) {
+    // Calculate total categorized budget
+    val totalCategorizedBudget: Double
+        get() = categoryBudgets.values.sum()
+    
+    // Calculate remaining uncategorized budget
+    val uncategorizedBudget: Double
+        get() {
+            val totalBudget = totalBudgetInput.toDoubleOrNull() ?: 0.0
+            return maxOf(0.0, totalBudget - totalCategorizedBudget)
+        }
+    
+    // Check if total budget is set
+    val hasTotalBudget: Boolean
+        get() = totalBudgetInput.isNotBlank() && (totalBudgetInput.toDoubleOrNull() ?: 0.0) > 0.0
+}
 
 class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewModel() {
 
@@ -68,59 +83,92 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
 
     fun saveBudget() {
         viewModelScope.launch {
-            val totalBudget = _uiState.value.totalBudgetInput.toDoubleOrNull() ?: 0.0
-            val categoryBudgetsSum = _uiState.value.categoryBudgets.values.sum()
-            
-            // Check if category budgets exceed total budget
-            if (categoryBudgetsSum > totalBudget) {
-                // Show error message
-                _uiState.value = _uiState.value.copy(
-                    showSuccessMessage = true,
-                    successMessage = "Error: Category budgets (${categoryBudgetsSum}) exceed total budget (${totalBudget})!"
+            try {
+                val totalBudget = _uiState.value.totalBudgetInput.toDoubleOrNull() ?: 0.0
+                val categoryBudgetsSum = _uiState.value.categoryBudgets.values.sum()
+                
+                // Validate total budget
+                if (totalBudget <= 0.0) {
+                    showErrorMessage("Please set a valid total budget amount!")
+                    return@launch
+                }
+                
+                // Check if category budgets exceed total budget
+                if (categoryBudgetsSum > totalBudget) {
+                    val remaining = totalBudget - categoryBudgetsSum
+                    showErrorMessage("Category budgets exceed total budget by ${String.format("%.2f", -remaining)}!")
+                    return@launch
+                }
+                
+                val newBudget = Budget(
+                    id = _uiState.value.budget?.id ?: 0,
+                    month = _uiState.value.selectedMonth,
+                    year = _uiState.value.selectedYear,
+                    overallBudget = totalBudget,
+                    categoryBudgets = _uiState.value.categoryBudgets
                 )
                 
-                // Hide error message after 3 seconds
-                kotlinx.coroutines.delay(3000)
-                _uiState.value = _uiState.value.copy(showSuccessMessage = false)
-                return@launch
+                budgetRepository.insertOrUpdateBudget(newBudget)
+                
+                // Show success message
+                showSuccessMessage("Budget saved successfully!")
+                
+            } catch (e: Exception) {
+                showErrorMessage("Failed to save budget: ${e.message}")
             }
-            
-            val newBudget = Budget(
-                id = _uiState.value.budget?.id ?: 0,
-                month = _uiState.value.selectedMonth,
-                year = _uiState.value.selectedYear,
-                overallBudget = totalBudget,
-                categoryBudgets = _uiState.value.categoryBudgets
-            )
-            budgetRepository.insertOrUpdateBudget(newBudget)
-            
-            // Show success message
-            _uiState.value = _uiState.value.copy(
-                showSuccessMessage = true,
-                successMessage = "Budget saved successfully!"
-            )
-            
-            // Hide success message after 3 seconds
-            kotlinx.coroutines.delay(3000)
-            _uiState.value = _uiState.value.copy(showSuccessMessage = false)
         }
     }
 
     fun addCategory(categoryName: String, budgetAmount: Double = 0.0) {
         viewModelScope.launch {
-            // Check if category with this name already exists
-            val existingCategories = budgetRepository.getAllCategories().first()
-            val categoryExists = existingCategories.any { 
-                it.name.equals(categoryName.trim(), ignoreCase = true) 
-            }
-            
-            if (!categoryExists && categoryName.trim().isNotBlank()) {
-                val newCategory = Category(name = categoryName.trim())
+            try {
+                val trimmedName = categoryName.trim()
+                
+                // Validate category name
+                if (trimmedName.isBlank()) {
+                    showErrorMessage("Category name cannot be empty!")
+                    return@launch
+                }
+                
+                if (trimmedName.length > ValidationConstants.CATEGORY_NAME_MAX_LENGTH) {
+                    showErrorMessage("Category name must be ${ValidationConstants.CATEGORY_NAME_MAX_LENGTH} characters or less!")
+                    return@launch
+                }
+                
+                // Check if category with this name already exists
+                val existingCategories = budgetRepository.getAllCategories().first()
+                val categoryExists = existingCategories.any { 
+                    it.name.equals(trimmedName, ignoreCase = true) 
+                }
+                
+                if (categoryExists) {
+                    showErrorMessage("Category '$trimmedName' already exists!")
+                    return@launch
+                }
+                
+                // Validate budget amount if provided
+                if (budgetAmount > 0.0) {
+                    val totalBudget = _uiState.value.totalBudgetInput.toDoubleOrNull() ?: 0.0
+                    val currentCategorizedBudget = _uiState.value.categoryBudgets.values.sum()
+                    val remainingBudget = totalBudget - currentCategorizedBudget
+                    
+                    if (totalBudget <= 0.0) {
+                        showErrorMessage("Please set a total budget first before adding category budgets!")
+                        return@launch
+                    }
+                    
+                    if (budgetAmount > remainingBudget) {
+                        showErrorMessage("Budget amount (${String.format("%.2f", budgetAmount)}) exceeds remaining budget (${String.format("%.2f", remainingBudget)})!")
+                        return@launch
+                    }
+                }
+                
+                val newCategory = Category(name = trimmedName)
                 budgetRepository.insertCategory(newCategory)
                 
                 // Update the UI state with new categories
                 val updatedCategories = budgetRepository.getAllCategories().first()
-                val addedCategory = updatedCategories.find { it.name.equals(categoryName.trim(), ignoreCase = true) }
+                val addedCategory = updatedCategories.find { it.name.equals(trimmedName, ignoreCase = true) }
                 
                 val updatedCategoryBudgets = _uiState.value.categoryBudgets.toMutableMap()
                 if (addedCategory != null && budgetAmount > 0.0) {
@@ -129,19 +177,43 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
                 
                 _uiState.value = _uiState.value.copy(
                     allCategories = updatedCategories,
-                    categoryBudgets = updatedCategoryBudgets,
-                    showSuccessMessage = true,
-                    successMessage = "Category '${categoryName.trim()}' added successfully!"
+                    categoryBudgets = updatedCategoryBudgets
                 )
                 
-                // Hide success message after 3 seconds
-                kotlinx.coroutines.delay(3000)
-                _uiState.value = _uiState.value.copy(showSuccessMessage = false)
+                val message = if (budgetAmount > 0.0) {
+                    "Category '$trimmedName' added with budget ${String.format("%.2f", budgetAmount)}!"
+                } else {
+                    "Category '$trimmedName' added successfully!"
+                }
+                showSuccessMessage(message)
+                
+            } catch (e: Exception) {
+                showErrorMessage("Failed to add category: ${e.message}")
             }
         }
     }
     
     fun dismissSuccessMessage() {
+        _uiState.value = _uiState.value.copy(showSuccessMessage = false)
+    }
+    
+    private suspend fun showSuccessMessage(message: String) {
+        _uiState.value = _uiState.value.copy(
+            showSuccessMessage = true,
+            successMessage = message
+        )
+        // Hide message after 3 seconds
+        kotlinx.coroutines.delay(3000)
+        _uiState.value = _uiState.value.copy(showSuccessMessage = false)
+    }
+    
+    private suspend fun showErrorMessage(message: String) {
+        _uiState.value = _uiState.value.copy(
+            showSuccessMessage = true,
+            successMessage = "Error: $message"
+        )
+        // Hide message after 4 seconds for errors (longer to read)
+        kotlinx.coroutines.delay(4000)
         _uiState.value = _uiState.value.copy(showSuccessMessage = false)
     }
 } 

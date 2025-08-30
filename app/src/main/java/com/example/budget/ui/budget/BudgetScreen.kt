@@ -148,6 +148,66 @@ fun BudgetScreen(
                     }
                 }
 
+                // Budget Summary Section
+                if (uiState.hasTotalBudget) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (uiState.uncategorizedBudget >= 0) 
+                                    MaterialTheme.colorScheme.primaryContainer 
+                                else 
+                                    MaterialTheme.colorScheme.errorContainer
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Categorized:",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                    Text(
+                                        text = "${selectedCurrency.symbol}${String.format("%.2f", uiState.totalCategorizedBudget)}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = if (uiState.uncategorizedBudget >= 0) "Remaining:" else "Over budget:",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (uiState.uncategorizedBudget >= 0) 
+                                            MaterialTheme.colorScheme.onPrimaryContainer 
+                                        else 
+                                            MaterialTheme.colorScheme.onErrorContainer
+                                    )
+                                    Text(
+                                        text = "${selectedCurrency.symbol}${String.format("%.2f", kotlin.math.abs(uiState.uncategorizedBudget))}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (uiState.uncategorizedBudget >= 0) 
+                                            MaterialTheme.colorScheme.onPrimaryContainer 
+                                        else 
+                                            MaterialTheme.colorScheme.onErrorContainer
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
                 item {
                     Text(
                         text = "Categories",
@@ -303,13 +363,14 @@ fun BudgetScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = newCategoryBudget,
-                        onValueChange = { 
+                        onValueChange = { value -> 
                             // Apply same numeric validation as other budget fields
-                            if (it.matches(ValidationConstants.AMOUNT_VALIDATION_REGEX)) {
-                                newCategoryBudget = it
+                            if (value.matches(ValidationConstants.AMOUNT_VALIDATION_REGEX)) {
+                                newCategoryBudget = value
                             }
                         },
                         label = { Text("Budget Amount") },
+                        modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Decimal,
                             imeAction = ImeAction.Done
@@ -331,6 +392,21 @@ fun BudgetScreen(
                                 }
                             }
                         ),
+                        supportingText = if (uiState.hasTotalBudget) {
+                            {
+                                Text(
+                                    text = "Remaining Budget: ${selectedCurrency.symbol}${String.format("%.2f", uiState.uncategorizedBudget)}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (uiState.uncategorizedBudget >= 0)
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    else
+                                        MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                            }
+                        } else {
+                            { Text ("") }
+                        },
                         leadingIcon = {
                             Text(
                                 text = selectedCurrency.symbol,
