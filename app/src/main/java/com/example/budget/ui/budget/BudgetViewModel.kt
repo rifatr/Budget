@@ -228,21 +228,42 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
         viewModelScope.launch {
             try {
                 val totalBudget = _uiState.value.totalBudgetInput.toDoubleOrNull() ?: 0.0
-                val categoryBudgetsSum = _uiState.value.categoryBudgets.values.sum()
+                val currentCategoryBudget = _uiState.value.categoryBudgets[categoryId] ?: 0.0
+                val categoryName = _uiState.value.allCategories.find { it.id == categoryId }?.name ?: "Category"
                 
                 // Validate total budget is set
                 if (totalBudget <= 0.0) {
                     showErrorMessage("Please set a total budget first!")
+                    // Reset to saved value (which is 0 if no budget set)
+                    val savedBudget = budgetRepository.getBudgetForMonth(_uiState.value.selectedMonth, _uiState.value.selectedYear).first()
+                    val savedCategoryBudget = savedBudget?.categoryBudgets?.get(categoryId) ?: 0.0
+                    val updatedBudgets = _uiState.value.categoryBudgets.toMutableMap()
+                    updatedBudgets[categoryId] = savedCategoryBudget
+                    _uiState.value = _uiState.value.copy(categoryBudgets = updatedBudgets)
                     return@launch
                 }
                 
-                // Check if category budgets exceed total budget
-                if (categoryBudgetsSum > totalBudget) {
-                    val remaining = totalBudget - categoryBudgetsSum
-                    showErrorMessage("Category budgets exceed total budget by ${String.format("%.2f", -remaining)}!")
+                // Calculate what total would be with this category budget
+                val otherCategoriesTotal = _uiState.value.categoryBudgets
+                    .filterKeys { it != categoryId }
+                    .values.sum()
+                val newTotal = otherCategoriesTotal + currentCategoryBudget
+                
+                // Check if this category budget would exceed total budget
+                if (newTotal > totalBudget) {
+                    val excess = newTotal - totalBudget
+                    showErrorMessage("$categoryName budget exceeds limit by ${String.format("%.2f", excess)}!")
+                    
+                    // Reset to saved value from database
+                    val savedBudget = budgetRepository.getBudgetForMonth(_uiState.value.selectedMonth, _uiState.value.selectedYear).first()
+                    val savedCategoryBudget = savedBudget?.categoryBudgets?.get(categoryId) ?: 0.0
+                    val updatedBudgets = _uiState.value.categoryBudgets.toMutableMap()
+                    updatedBudgets[categoryId] = savedCategoryBudget
+                    _uiState.value = _uiState.value.copy(categoryBudgets = updatedBudgets)
                     return@launch
                 }
                 
+                // Save the valid budget
                 val newBudget = Budget(
                     id = _uiState.value.budget?.id ?: 0,
                     month = _uiState.value.selectedMonth,
@@ -253,14 +274,21 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
                 
                 budgetRepository.insertOrUpdateBudget(newBudget)
                 
-                // Find category name for feedback
-                val categoryName = _uiState.value.allCategories.find { it.id == categoryId }?.name ?: "Category"
-                val categoryBudgetAmount = _uiState.value.categoryBudgets[categoryId] ?: 0.0
-                
-                showSuccessMessage("$categoryName budget (${String.format("%.2f", categoryBudgetAmount)}) saved successfully!")
+                showSuccessMessage("$categoryName budget (${String.format("%.2f", currentCategoryBudget)}) saved successfully!")
                 
             } catch (e: Exception) {
                 showErrorMessage("Failed to save category budget: ${e.message}")
+                
+                // Reset to saved value on any error
+                try {
+                    val savedBudget = budgetRepository.getBudgetForMonth(_uiState.value.selectedMonth, _uiState.value.selectedYear).first()
+                    val savedCategoryBudget = savedBudget?.categoryBudgets?.get(categoryId) ?: 0.0
+                    val updatedBudgets = _uiState.value.categoryBudgets.toMutableMap()
+                    updatedBudgets[categoryId] = savedCategoryBudget
+                    _uiState.value = _uiState.value.copy(categoryBudgets = updatedBudgets)
+                } catch (resetError: Exception) {
+                    // If reset fails, just log it
+                }
             }
         }
     }
