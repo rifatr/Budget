@@ -248,7 +248,7 @@ fun BudgetScreen(
                                         onDone = {
                                             keyboardController?.hide()
                                             focusManager.clearFocus()
-                                            viewModel.saveBudget()
+                                            viewModel.saveCategoryBudget(category.id)
                                         }
                                     ),
                                     leadingIcon = {
@@ -264,7 +264,7 @@ fun BudgetScreen(
                                     onClick = {
                                         keyboardController?.hide()
                                         focusManager.clearFocus()
-                                        viewModel.saveBudget()
+                                        viewModel.saveCategoryBudget(category.id)
                                     },
                                     modifier = Modifier.align(Alignment.CenterEnd)
                                 ) {
@@ -445,6 +445,9 @@ fun BudgetScreen(
                         newCategoryName = ""
                         newCategoryBudget = ""
                         showDuplicateError = false
+                        if (newCategoryName.isNotBlank() || newCategoryBudget.isNotBlank()) {
+                            viewModel.showCancelMessage("Category creation cancelled")
+                        }
                     }
                 ) {
                     Text("Cancel")

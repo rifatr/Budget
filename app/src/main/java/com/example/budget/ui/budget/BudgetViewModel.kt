@@ -197,6 +197,59 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
         _uiState.value = _uiState.value.copy(showSuccessMessage = false)
     }
     
+    fun showCancelMessage(message: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                showSuccessMessage = true,
+                successMessage = "Cancelled: $message"
+            )
+            // Hide message after 2 seconds (shorter for cancel messages)
+            kotlinx.coroutines.delay(2000)
+            _uiState.value = _uiState.value.copy(showSuccessMessage = false)
+        }
+    }
+    
+    fun saveCategoryBudget(categoryId: Int) {
+        viewModelScope.launch {
+            try {
+                val totalBudget = _uiState.value.totalBudgetInput.toDoubleOrNull() ?: 0.0
+                val categoryBudgetsSum = _uiState.value.categoryBudgets.values.sum()
+                
+                // Validate total budget is set
+                if (totalBudget <= 0.0) {
+                    showErrorMessage("Please set a total budget first!")
+                    return@launch
+                }
+                
+                // Check if category budgets exceed total budget
+                if (categoryBudgetsSum > totalBudget) {
+                    val remaining = totalBudget - categoryBudgetsSum
+                    showErrorMessage("Category budgets exceed total budget by ${String.format("%.2f", -remaining)}!")
+                    return@launch
+                }
+                
+                val newBudget = Budget(
+                    id = _uiState.value.budget?.id ?: 0,
+                    month = _uiState.value.selectedMonth,
+                    year = _uiState.value.selectedYear,
+                    overallBudget = totalBudget,
+                    categoryBudgets = _uiState.value.categoryBudgets
+                )
+                
+                budgetRepository.insertOrUpdateBudget(newBudget)
+                
+                // Find category name for feedback
+                val categoryName = _uiState.value.allCategories.find { it.id == categoryId }?.name ?: "Category"
+                val categoryBudgetAmount = _uiState.value.categoryBudgets[categoryId] ?: 0.0
+                
+                showSuccessMessage("$categoryName budget (${String.format("%.2f", categoryBudgetAmount)}) saved successfully!")
+                
+            } catch (e: Exception) {
+                showErrorMessage("Failed to save category budget: ${e.message}")
+            }
+        }
+    }
+    
     private suspend fun showSuccessMessage(message: String) {
         _uiState.value = _uiState.value.copy(
             showSuccessMessage = true,
