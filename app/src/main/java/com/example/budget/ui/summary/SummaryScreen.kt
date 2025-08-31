@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.ui.AppViewModelProvider
-import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -106,10 +105,11 @@ private fun MonthYearSelector(
     onYearChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val months = (1..12).map { month ->
-        val calendar = Calendar.getInstance().apply { set(Calendar.MONTH, month - 1) }
-        SimpleDateFormat("MMMM", Locale.getDefault()).format(calendar.time) to month
-    }
+    val months = listOf(
+        "January" to 1, "February" to 2, "March" to 3, "April" to 4,
+        "May" to 5, "June" to 6, "July" to 7, "August" to 8,
+        "September" to 9, "October" to 10, "November" to 11, "December" to 12
+    )
     
     val currentYear = Calendar.getInstance().get(Calendar.YEAR)
     val years = (currentYear - 5..currentYear + 5).toList()
