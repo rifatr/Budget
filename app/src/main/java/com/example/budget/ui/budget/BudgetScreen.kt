@@ -88,16 +88,16 @@ fun BudgetScreen(
                         containerColor = if (isError) {
                             MaterialTheme.colorScheme.errorContainer
                         } else {
-                            MaterialTheme.colorScheme.secondaryContainer
+                            MaterialTheme.colorScheme.surfaceDim
                         }
                     ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp)
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(20.dp),
+                            .padding(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Beautiful gradient background circle for icon
@@ -135,17 +135,6 @@ fun BudgetScreen(
                         Column(
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text(
-                                text = if (isError) "Error" else "Success",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = if (isError) {
-                                    MaterialTheme.colorScheme.error
-                                } else {
-                                    MaterialTheme.colorScheme.primary
-                                },
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = cleanMessage,
                                 style = MaterialTheme.typography.bodyMedium,
@@ -378,58 +367,6 @@ fun BudgetScreen(
                                 }
                             }
                         }
-                    }
-                }
-            }
-        }
-    }
-
-
-
-    // Success Message Snackbar
-    if (uiState.showSuccessMessage) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 80.dp), // Add bottom padding to avoid overlap with FAB
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Done,
-                        contentDescription = "Success",
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = uiState.successMessage,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.weight(1f)
-                    )
-                    IconButton(
-                        onClick = { viewModel.dismissSuccessMessage() }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Dismiss",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
                     }
                 }
             }
