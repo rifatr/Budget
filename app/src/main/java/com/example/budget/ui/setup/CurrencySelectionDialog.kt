@@ -72,7 +72,7 @@ fun CurrencySelectionDialog(
                         .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(Currency.values()) { currency ->
+                    items(Currency.entries) { currency ->
                         CurrencySelectionItem(
                             currency = currency,
                             isSelected = selectedCurrency == currency,

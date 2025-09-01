@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -39,7 +38,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.material.icons.filled.Close
+import com.example.budget.ui.components.ConfirmationMessage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,6 +64,15 @@ fun ExpenseScreen(
                     }
                 }
             )
+        },
+        snackbarHost = {
+            if (uiState.showConfirmationMessage) {
+                ConfirmationMessage(
+                    message = uiState.confirmationMessage,
+                    isError = false,
+                    onDismiss = { viewModel.dismissConfirmationMessage() }
+                )
+            }
         }
     ) { innerPadding ->
         Column(
@@ -164,7 +172,7 @@ fun ExpenseScreen(
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
             ) {
                 Text(
-                    text = "Create Expense",
+                    text = "Add Expense",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -172,57 +180,7 @@ fun ExpenseScreen(
         }
     }
 
-    // Success Message Snackbar
-    if (uiState.showSuccessMessage) {
-        LaunchedEffect(uiState.showSuccessMessage) {
-            // Auto-dismiss is handled in ViewModel, but we can also add tap-to-dismiss
-        }
-        
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Done,
-                        contentDescription = "Success",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = uiState.successMessage,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.weight(1f)
-                    )
-                    IconButton(
-                        onClick = { viewModel.dismissSuccessMessage() }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Dismiss",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
-            }
-        }
-    }
+
 
     // Expense History Dialog
     if (uiState.showHistory) {

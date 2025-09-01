@@ -2,6 +2,7 @@ package com.example.budget.ui.budget
 
 import androidx.compose.foundation.layout.*
 import com.example.budget.ui.components.BeautifulSelector
+import com.example.budget.ui.components.ConfirmationMessage
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -9,11 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
 
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.foundation.background
-import androidx.compose.ui.unit.sp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -50,8 +46,8 @@ fun BudgetScreen(
     
     // Current month/year state
     val calendar = Calendar.getInstance()
-    var selectedMonth by remember { mutableStateOf(calendar.get(Calendar.MONTH) + 1) }
-    var selectedYear by remember { mutableStateOf(calendar.get(Calendar.YEAR)) }
+    var selectedMonth by remember { mutableIntStateOf(calendar.get(Calendar.MONTH) + 1) }
+    var selectedYear by remember { mutableIntStateOf(calendar.get(Calendar.YEAR)) }
     
     var showAddCategoryDialog by remember { mutableStateOf(false) }
     var newCategoryName by remember { mutableStateOf("") }
@@ -76,95 +72,12 @@ fun BudgetScreen(
             }
         },
         snackbarHost = {
-            // Beautiful Message Display with success/error distinction
-            if (uiState.showSuccessMessage) {
-                val isError = uiState.successMessage.startsWith("Error:")
-                val cleanMessage = if (isError) uiState.successMessage.removePrefix("Error: ") else uiState.successMessage
-                
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isError) {
-                            MaterialTheme.colorScheme.errorContainer
-                        } else {
-                            MaterialTheme.colorScheme.surfaceDim
-                        }
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Beautiful gradient background circle for icon
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .background(
-                                    color = if (isError) {
-                                        MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
-                                    } else {
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                                    },
-                                    shape = androidx.compose.foundation.shape.CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = if (isError) {
-                                    Icons.Default.Warning
-                                } else {
-                                    Icons.Default.CheckCircle
-                                },
-                                contentDescription = if (isError) "Error" else "Success",
-                                tint = if (isError) {
-                                    MaterialTheme.colorScheme.error
-                                } else {
-                                    MaterialTheme.colorScheme.primary
-                                },
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                        
-                        Spacer(modifier = Modifier.width(16.dp))
-                        
-                        Column(
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                text = cleanMessage,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = if (isError) {
-                                    MaterialTheme.colorScheme.onErrorContainer
-                                } else {
-                                    MaterialTheme.colorScheme.onSecondaryContainer
-                                },
-                                lineHeight = 20.sp
-                            )
-                        }
-                        
-                        IconButton(
-                            onClick = { viewModel.dismissSuccessMessage() },
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Dismiss",
-                                tint = if (isError) {
-                                    MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
-                                } else {
-                                    MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
-                                },
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                }
+            if (uiState.showConfirmationMessage) {
+                ConfirmationMessage(
+                    message = uiState.confirmationMessage,
+                    isError = uiState.isConfirmationError,
+                    onDismiss = { viewModel.dismissConfirmationMessage() }
+                )
             }
         }
     ) { innerPadding ->

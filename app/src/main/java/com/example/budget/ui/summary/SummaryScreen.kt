@@ -40,8 +40,8 @@ fun SummaryScreen(
     
     // Current month/year state
     val calendar = Calendar.getInstance()
-    var selectedMonth by remember { mutableStateOf(calendar.get(Calendar.MONTH) + 1) }
-    var selectedYear by remember { mutableStateOf(calendar.get(Calendar.YEAR)) }
+    var selectedMonth by remember { mutableIntStateOf(calendar.get(Calendar.MONTH) + 1) }
+    var selectedYear by remember { mutableIntStateOf(calendar.get(Calendar.YEAR)) }
 
     LaunchedEffect(selectedMonth, selectedYear) {
         viewModel.initialize(selectedMonth, selectedYear)

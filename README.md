@@ -25,12 +25,15 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 - **Category Management**: Create custom categories with duplicate prevention
 - **Input Validation**: 6 digits before decimal, 2 after with real-time feedback
 - **Expense History**: View, search, and delete past expenses with currency symbols
+- **Success Feedback**: Beautiful confirmation messages after adding expenses
 
 ### 💰 Budget Tracking
 - **Monthly Budgets**: Set overall and category-specific budget limits
 - **Visual Progress**: See budget vs spending with clear totals
 - **Smart Validation**: Prevent duplicate categories and invalid amounts
 - **Auto-Save**: Press Done to automatically save budget changes
+- **Confirmation System**: Success and error messages with beautiful UI feedback
+- **Real-time Updates**: Live display of remaining uncategorized budget
 
 ### 📈 Summary & Analytics
 - **Monthly Overview**: Budget vs actual spending comparison
@@ -78,6 +81,8 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 - **Currency System**: Enum-based with reactive updates
 - **Focus Management**: Smart keyboard and focus handling
 - **Input Validation**: Real-time validation with visual feedback
+- **Confirmation System**: Reusable ConfirmationMessage component for user feedback
+- **UI Components**: Shared components like BeautifulSelector for consistent design
 - **Data Layer**: Repository pattern with Room database
 - **UI Layer**: Composable screens with ViewModels
 
@@ -130,6 +135,7 @@ app/src/main/java/com/example/budget/
 │   ├── info/                  # App information and credits
 │   ├── settings/              # Data management (export/import)
 │   ├── setup/                 # Currency selection dialog
+│   ├── components/            # Reusable UI components (ConfirmationMessage, BeautifulSelector)
 │   ├── theme/                 # App theming and gradient colors
 │   ├── Navigation.kt          # Route definitions
 │   ├── BudgetAppNavigation.kt # Main navigation with swipe-enabled bottom tabs

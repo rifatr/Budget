@@ -15,8 +15,8 @@ import java.util.Locale
 // Validation Constants
 object ValidationConstants {
     const val CATEGORY_NAME_MAX_LENGTH = 24
-    const val AMOUNT_DIGITS_BEFORE_DECIMAL = 6
-    const val AMOUNT_DIGITS_AFTER_DECIMAL = 2
+    private const val AMOUNT_DIGITS_BEFORE_DECIMAL = 6
+    private const val AMOUNT_DIGITS_AFTER_DECIMAL = 2
     
     // Generate regex pattern for amount validation
     val AMOUNT_VALIDATION_REGEX = Regex("^\\d{0,$AMOUNT_DIGITS_BEFORE_DECIMAL}(\\.\\d{0,$AMOUNT_DIGITS_AFTER_DECIMAL})?\$")
@@ -29,8 +29,9 @@ data class BudgetUiState(
     val budget: Budget? = null,
     val totalBudgetInput: String = "",
     val categoryBudgets: Map<Int, Double> = emptyMap(),
-    val showSuccessMessage: Boolean = false,
-    val successMessage: String = ""
+    val showConfirmationMessage: Boolean = false,
+    val confirmationMessage: String = "",
+    val isConfirmationError: Boolean = false
 ) {
     // Calculate total categorized budget
     val totalCategorizedBudget: Double
@@ -207,19 +208,23 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
         }
     }
     
-    fun dismissSuccessMessage() {
-        _uiState.value = _uiState.value.copy(showSuccessMessage = false)
+    fun dismissConfirmationMessage() {
+        _uiState.value = _uiState.value.copy(
+            showConfirmationMessage = false,
+            isConfirmationError = false
+        )
     }
     
     fun showCancelMessage(message: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
-                showSuccessMessage = true,
-                successMessage = "Cancelled: $message"
+                showConfirmationMessage = true,
+                isConfirmationError = false,
+                confirmationMessage = "Cancelled: $message"
             )
             // Hide message after 2 seconds (shorter for cancel messages)
             kotlinx.coroutines.delay(2000)
-            _uiState.value = _uiState.value.copy(showSuccessMessage = false)
+            _uiState.value = _uiState.value.copy(showConfirmationMessage = false)
         }
     }
     
@@ -296,21 +301,23 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
     
     private suspend fun showSuccessMessage(message: String) {
         _uiState.value = _uiState.value.copy(
-            showSuccessMessage = true,
-            successMessage = message
+            showConfirmationMessage = true,
+            confirmationMessage = message,
+            isConfirmationError = false
         )
         // Hide message after 3 seconds
         kotlinx.coroutines.delay(3000)
-        _uiState.value = _uiState.value.copy(showSuccessMessage = false)
+        _uiState.value = _uiState.value.copy(showConfirmationMessage = false)
     }
     
     private suspend fun showErrorMessage(message: String) {
         _uiState.value = _uiState.value.copy(
-            showSuccessMessage = true,
-            successMessage = "Error: $message"
+            showConfirmationMessage = true,
+            confirmationMessage = message,
+            isConfirmationError = true
         )
         // Hide message after 4 seconds for errors (longer to read)
         kotlinx.coroutines.delay(4000)
-        _uiState.value = _uiState.value.copy(showSuccessMessage = false)
+        _uiState.value = _uiState.value.copy(showConfirmationMessage = false)
     }
 } 

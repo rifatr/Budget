@@ -23,8 +23,8 @@ data class ExpenseUiState(
     val expenseHistory: List<Expense> = emptyList(),
     val showHistory: Boolean = false,
     val categoryMap: Map<Int, String> = emptyMap(),
-    val showSuccessMessage: Boolean = false,
-    val successMessage: String = ""
+    val showConfirmationMessage: Boolean = false,
+    val confirmationMessage: String = ""
 )
 
 class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewModel() {
@@ -92,14 +92,14 @@ class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewMod
             _uiState.value = _uiState.value.copy(
                 amount = "",
                 description = "",
-                showSuccessMessage = true,
-                successMessage = "Expense of ${category.name} added successfully!"
+                showConfirmationMessage = true,
+                confirmationMessage = "Expense of ${category.name} added successfully!"
             )
             validateInput()
             
             // Hide success message after 3 seconds
             kotlinx.coroutines.delay(3000)
-            _uiState.value = _uiState.value.copy(showSuccessMessage = false)
+            _uiState.value = _uiState.value.copy(showConfirmationMessage = false)
         }
     }
 
@@ -134,7 +134,7 @@ class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewMod
         }
     }
     
-    fun dismissSuccessMessage() {
-        _uiState.value = _uiState.value.copy(showSuccessMessage = false)
+    fun dismissConfirmationMessage() {
+        _uiState.value = _uiState.value.copy(showConfirmationMessage = false)
     }
 } 
