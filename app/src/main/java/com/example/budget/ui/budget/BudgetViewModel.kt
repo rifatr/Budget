@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 // Validation Constants
 object ValidationConstants {
@@ -96,7 +97,7 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
                 // Check if category budgets exceed total budget
                 if (categoryBudgetsSum > totalBudget) {
                     val remaining = totalBudget - categoryBudgetsSum
-                    showErrorMessage("Category budgets exceed total budget by ${String.format("%.2f", -remaining)}!")
+                    showErrorMessage("Category budgets exceed total budget by ${String.format(Locale.US, "%.2f", -remaining)}!")
                     return@launch
                 }
                 
@@ -158,7 +159,7 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
                     }
                     
                     if (budgetAmount > remainingBudget) {
-                        showErrorMessage("Budget amount (${String.format("%.2f", budgetAmount)}) exceeds remaining budget (${String.format("%.2f", remainingBudget)})!")
+                        showErrorMessage("Budget amount (${String.format(Locale.US, "%.2f", budgetAmount)}) exceeds remaining budget (${String.format(Locale.US, "%.2f", remainingBudget)})!")
                         return@launch
                     }
                 }
@@ -194,7 +195,7 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
                 }
                 
                 val message = if (budgetAmount > 0.0) {
-                    "Category '$trimmedName' added with budget ${String.format("%.2f", budgetAmount)}!"
+                    "Category '$trimmedName' added with budget ${String.format(Locale.US, "%.2f", budgetAmount)}!"
                 } else {
                     "Category '$trimmedName' added successfully!"
                 }
@@ -252,7 +253,7 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
                 // Check if this category budget would exceed total budget
                 if (newTotal > totalBudget) {
                     val excess = newTotal - totalBudget
-                    showErrorMessage("$categoryName budget exceeds limit by ${String.format("%.2f", excess)}!")
+                    showErrorMessage("$categoryName budget exceeds limit by ${String.format(Locale.US, "%.2f", excess)}!")
                     
                     // Reset to saved value from database
                     val savedBudget = budgetRepository.getBudgetForMonth(_uiState.value.selectedMonth, _uiState.value.selectedYear).first()
@@ -274,7 +275,7 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
                 
                 budgetRepository.insertOrUpdateBudget(newBudget)
                 
-                showSuccessMessage("$categoryName budget (${String.format("%.2f", currentCategoryBudget)}) saved successfully!")
+                showSuccessMessage("$categoryName budget (${String.format(Locale.US, "%.2f", currentCategoryBudget)}) saved successfully!")
                 
             } catch (e: Exception) {
                 showErrorMessage("Failed to save category budget: ${e.message}")

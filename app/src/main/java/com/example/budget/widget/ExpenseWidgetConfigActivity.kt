@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.first
 import com.example.budget.BudgetApp
+import java.util.Locale
 import com.example.budget.R
 import com.example.budget.data.db.Expense
 import com.example.budget.ui.budget.ValidationConstants
@@ -266,7 +267,7 @@ class ExpenseWidgetConfigActivity : Activity() {
                     // Show toast and close widget immediately - DO NOT open app
                     Toast.makeText(
                         this@ExpenseWidgetConfigActivity,
-                        "✅ Expense added: ${currencySymbol}${String.format("%.2f", amount)}",
+                        "✅ Expense added: ${currencySymbol}${String.format(Locale.US, "%.2f", amount)}",
                         Toast.LENGTH_SHORT
                     ).show()
                     

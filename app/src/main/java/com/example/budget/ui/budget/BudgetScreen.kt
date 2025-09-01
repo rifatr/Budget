@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.ui.AppViewModelProvider
 import java.util.*
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -269,7 +270,7 @@ fun BudgetScreen(
                                         color = MaterialTheme.colorScheme.onPrimaryContainer
                                     )
                                     Text(
-                                        text = "${selectedCurrency.symbol}${String.format("%.2f", uiState.totalCategorizedBudget)}",
+                                        text = "${selectedCurrency.symbol}${String.format(Locale.US, "%.2f", uiState.totalCategorizedBudget)}",
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -289,7 +290,7 @@ fun BudgetScreen(
                                             MaterialTheme.colorScheme.onErrorContainer
                                     )
                                     Text(
-                                        text = "${selectedCurrency.symbol}${String.format("%.2f", kotlin.math.abs(uiState.uncategorizedBudget))}",
+                                        text = "${selectedCurrency.symbol}${String.format(Locale.US, "%.2f", kotlin.math.abs(uiState.uncategorizedBudget))}",
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Bold,
                                         color = if (uiState.uncategorizedBudget >= 0) 
@@ -442,7 +443,7 @@ fun BudgetScreen(
                         supportingText = if (uiState.hasTotalBudget) {
                             {
                                 Text(
-                                    text = "Remaining Budget: ${selectedCurrency.symbol}${String.format("%.2f", uiState.uncategorizedBudget)}",
+                                    text = "Remaining Budget: ${selectedCurrency.symbol}${String.format(Locale.US, "%.2f", uiState.uncategorizedBudget)}",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = if (uiState.uncategorizedBudget >= 0)
                                         MaterialTheme.colorScheme.onSurfaceVariant

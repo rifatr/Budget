@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.ui.AppViewModelProvider
 import java.util.*
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -180,10 +181,10 @@ fun SummaryRow(row: SummaryRow, currencySymbol: String) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(row.category.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("$currencySymbol${String.format("%.2f", row.budgeted)}", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
-                Text("$currencySymbol${String.format("%.2f", row.actual)}", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
+                Text("$currencySymbol${String.format(Locale.US, "%.2f", row.budgeted)}", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
+                Text("$currencySymbol${String.format(Locale.US, "%.2f", row.actual)}", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
                 Text(
-                    text = "$currencySymbol${String.format("%.2f", row.delta)}",
+                    text = "$currencySymbol${String.format(Locale.US, "%.2f", row.delta)}",
                     color = if (row.delta >= 0) positiveDeltaColor else negativeDeltaColor,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
@@ -220,10 +221,10 @@ fun SummaryTotals(uiState: SummaryUiState, currencySymbol: String) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text("Totals", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f))
-        Text("$currencySymbol${String.format("%.2f", totalBudgeted)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
-        Text("$currencySymbol${String.format("%.2f", totalActual)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
+        Text("$currencySymbol${String.format(Locale.US, "%.2f", totalBudgeted)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
+        Text("$currencySymbol${String.format(Locale.US, "%.2f", totalActual)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
         Text(
-            text = "$currencySymbol${String.format("%.2f", totalDelta)}",
+            text = "$currencySymbol${String.format(Locale.US, "%.2f", totalDelta)}",
             color = if (totalDelta >= 0) positiveDeltaColor else negativeDeltaColor,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
