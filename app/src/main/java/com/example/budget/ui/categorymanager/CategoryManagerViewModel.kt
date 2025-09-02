@@ -26,7 +26,10 @@ data class CategoryManagerUiState(
     val showConfirmationMessage: Boolean = false,
     val confirmationMessage: String = "",
     val isConfirmationError: Boolean = false,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    // Validation state for dialogs
+    val showDuplicateError: Boolean = false,
+    val duplicateErrorMessage: String = ""
 ) {
     val filteredAndSortedCategories: List<CategoryWithStats>
         get() {
@@ -216,6 +219,43 @@ class CategoryManagerViewModel(private val budgetRepository: BudgetRepository) :
         _uiState.value = _uiState.value.copy(
             showConfirmationMessage = false,
             isConfirmationError = false
+        )
+    }
+    
+    fun validateCategoryName(name: String, excludeCategoryId: Int? = null): Boolean {
+        val trimmedName = name.trim()
+        if (trimmedName.isBlank()) {
+            _uiState.value = _uiState.value.copy(
+                showDuplicateError = false,
+                duplicateErrorMessage = ""
+            )
+            return false
+        }
+        
+        val isDuplicate = _uiState.value.categories.any { categoryWithStats ->
+            categoryWithStats.category.name.equals(trimmedName, ignoreCase = true) &&
+            categoryWithStats.category.id != excludeCategoryId
+        }
+        
+        if (isDuplicate) {
+            _uiState.value = _uiState.value.copy(
+                showDuplicateError = true,
+                duplicateErrorMessage = "Category already exists"
+            )
+            return false
+        } else {
+            _uiState.value = _uiState.value.copy(
+                showDuplicateError = false,
+                duplicateErrorMessage = ""
+            )
+            return true
+        }
+    }
+    
+    fun clearValidationErrors() {
+        _uiState.value = _uiState.value.copy(
+            showDuplicateError = false,
+            duplicateErrorMessage = ""
         )
     }
 

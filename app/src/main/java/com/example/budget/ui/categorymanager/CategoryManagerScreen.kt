@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -20,12 +22,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.BudgetApp
 import com.example.budget.ui.AppViewModelProvider
+import com.example.budget.ui.budget.ValidationConstants
 import com.example.budget.ui.components.ConfirmationMessage
 import androidx.compose.runtime.collectAsState
 import java.util.Locale
@@ -199,7 +203,8 @@ fun CategoryManagerScreen(
             onAdd = { name ->
                 viewModel.addCategory(name)
                 showAddCategoryDialog = false
-            }
+            },
+            viewModel = viewModel
         )
     }
 
@@ -207,6 +212,7 @@ fun CategoryManagerScreen(
     if (showRenameCategoryDialog && categoryToRename != null) {
         RenameCategoryDialog(
             currentName = categoryToRename!!.category.name,
+            categoryId = categoryToRename!!.category.id,
             onDismiss = {
                 showRenameCategoryDialog = false
                 categoryToRename = null
@@ -215,7 +221,8 @@ fun CategoryManagerScreen(
                 viewModel.renameCategory(categoryToRename!!.category.id, newName)
                 showRenameCategoryDialog = false
                 categoryToRename = null
-            }
+            },
+            viewModel = viewModel
         )
     }
 
@@ -349,36 +356,76 @@ fun CategoryCard(
 @Composable
 fun AddCategoryDialog(
     onDismiss: () -> Unit,
-    onAdd: (String) -> Unit
+    onAdd: (String) -> Unit,
+    viewModel: CategoryManagerViewModel
 ) {
     var categoryName by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
+    
+    // Clear validation errors when dialog opens
+    LaunchedEffect(Unit) {
+        viewModel.clearValidationErrors()
+    }
     
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            viewModel.clearValidationErrors()
+            onDismiss()
+        },
         title = { Text("Add Category") },
         text = {
             OutlinedTextField(
                 value = categoryName,
-                onValueChange = { categoryName = it },
+                onValueChange = { newValue ->
+                    // Limit category name to max length
+                    if (newValue.length <= ValidationConstants.CATEGORY_NAME_MAX_LENGTH) {
+                        categoryName = newValue
+                        // Validate in real-time
+                        viewModel.validateCategoryName(newValue)
+                    }
+                },
                 label = { Text("Category Name") },
                 placeholder = { Text("e.g., Food, Transport") },
+                isError = uiState.showDuplicateError,
                 supportingText = {
-                    Text("${categoryName.length}/24 characters")
+                    if (uiState.showDuplicateError) {
+                        Text(
+                            text = uiState.duplicateErrorMessage,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    } else {
+                        Text("${categoryName.length}/${ValidationConstants.CATEGORY_NAME_MAX_LENGTH} characters")
+                    }
                 },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        if (categoryName.trim().isNotBlank() && !uiState.showDuplicateError) {
+                            onAdd(categoryName)
+                            viewModel.clearValidationErrors()
+                        }
+                    }
+                )
             )
         },
         confirmButton = {
             TextButton(
-                onClick = { onAdd(categoryName) },
-                enabled = categoryName.trim().isNotBlank()
+                onClick = { 
+                    onAdd(categoryName)
+                    viewModel.clearValidationErrors()
+                },
+                enabled = categoryName.trim().isNotBlank() && !uiState.showDuplicateError
             ) {
                 Text("Add")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = {
+                viewModel.clearValidationErrors()
+                onDismiss()
+            }) {
                 Text("Cancel")
             }
         }
@@ -388,36 +435,81 @@ fun AddCategoryDialog(
 @Composable
 fun RenameCategoryDialog(
     currentName: String,
+    categoryId: Int,
     onDismiss: () -> Unit,
-    onRename: (String) -> Unit
+    onRename: (String) -> Unit,
+    viewModel: CategoryManagerViewModel
 ) {
     var categoryName by remember { mutableStateOf(currentName) }
+    val uiState by viewModel.uiState.collectAsState()
+    
+    // Clear validation errors when dialog opens
+    LaunchedEffect(Unit) {
+        viewModel.clearValidationErrors()
+    }
     
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            viewModel.clearValidationErrors()
+            onDismiss()
+        },
         title = { Text("Rename Category") },
         text = {
             OutlinedTextField(
                 value = categoryName,
-                onValueChange = { categoryName = it },
+                onValueChange = { newValue ->
+                    // Limit category name to max length
+                    if (newValue.length <= ValidationConstants.CATEGORY_NAME_MAX_LENGTH) {
+                        categoryName = newValue
+                        // Validate in real-time, excluding current category
+                        viewModel.validateCategoryName(newValue, excludeCategoryId = categoryId)
+                    }
+                },
                 label = { Text("Category Name") },
+                isError = uiState.showDuplicateError,
                 supportingText = {
-                    Text("${categoryName.length}/24 characters")
+                    if (uiState.showDuplicateError) {
+                        Text(
+                            text = uiState.duplicateErrorMessage,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    } else {
+                        Text("${categoryName.length}/${ValidationConstants.CATEGORY_NAME_MAX_LENGTH} characters")
+                    }
                 },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        if (categoryName.trim().isNotBlank() && 
+                            categoryName.trim() != currentName && 
+                            !uiState.showDuplicateError) {
+                            onRename(categoryName)
+                            viewModel.clearValidationErrors()
+                        }
+                    }
+                )
             )
         },
         confirmButton = {
             TextButton(
-                onClick = { onRename(categoryName) },
-                enabled = categoryName.trim().isNotBlank() && categoryName.trim() != currentName
+                onClick = { 
+                    onRename(categoryName)
+                    viewModel.clearValidationErrors()
+                },
+                enabled = categoryName.trim().isNotBlank() && 
+                         categoryName.trim() != currentName && 
+                         !uiState.showDuplicateError
             ) {
                 Text("Rename")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = {
+                viewModel.clearValidationErrors()
+                onDismiss()
+            }) {
                 Text("Cancel")
             }
         }
