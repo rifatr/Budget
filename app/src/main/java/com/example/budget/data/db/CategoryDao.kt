@@ -27,6 +27,9 @@ interface CategoryDao {
     @Query("UPDATE categories SET usageCount = usageCount + 1 WHERE id = :categoryId")
     suspend fun incrementUsageCount(categoryId: Int)
 
+    @Query("UPDATE categories SET name = :newName WHERE id = :categoryId")
+    suspend fun updateCategoryName(categoryId: Int, newName: String)
+
     @Query("DELETE FROM categories")
     suspend fun clearAll()
 } 

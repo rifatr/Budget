@@ -35,6 +35,14 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 - **Confirmation System**: Success and error messages with beautiful UI feedback
 - **Real-time Updates**: Live display of remaining uncategorized budget
 
+### 📂 Category Management
+- **Dedicated Manager**: Full-featured category management from More screen
+- **CRUD Operations**: Add, rename, and delete categories with validation
+- **Usage Statistics**: View expense count and total spent per category
+- **Smart Delete Flow**: Single confirmation for empty categories, double confirmation for categories with expenses
+- **Search & Sort**: Real-time search and sort by name, usage, or total amount
+- **Bulk Operations**: Delete categories and all associated expenses safely
+
 ### 📈 Summary & Analytics
 - **Monthly Overview**: Budget vs actual spending comparison
 - **Visual Cards**: Beautiful card-based layout with totals and dividers
@@ -130,6 +138,7 @@ app/src/main/java/com/example/budget/
 ├── ui/
 │   ├── expense/               # Expense tracking UI and ViewModel
 │   ├── budget/                # Budget management UI and ViewModel
+│   ├── categorymanager/       # Category management UI and ViewModel
 │   ├── summary/               # Summary/analytics UI and ViewModel
 │   ├── more/                  # More screen with navigation
 │   ├── info/                  # App information and credits
@@ -251,13 +260,6 @@ app/src/main/java/com/example/budget/
 5. Tap "Add Expense" to save
 6. Success message shows with your currency symbol
 7. Automatically returns to home screen
-
-## 👨‍💻 Developer Information
-
-**Developer**: Lutfar Rahman  
-**Contact**: lutfarrahman@example.com  
-**Version**: 1.0.0  
-**Platform**: Android 7.0+ (API 24+)
 
 ### Tech Stack Details
 - **Minimum SDK**: 24 (Android 7.0)

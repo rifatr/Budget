@@ -19,6 +19,18 @@ interface ExpenseDao {
     @Query("SELECT * FROM expenses ORDER BY date DESC")
     fun getAllExpensesFlow(): Flow<List<Expense>>
 
+    @Query("SELECT * FROM expenses WHERE categoryId = :categoryId")
+    suspend fun getExpensesByCategory(categoryId: Int): List<Expense>
+
+    @Query("SELECT COUNT(*) FROM expenses WHERE categoryId = :categoryId")
+    suspend fun getExpenseCountByCategory(categoryId: Int): Int
+
+    @Query("SELECT COALESCE(SUM(amount), 0.0) FROM expenses WHERE categoryId = :categoryId")
+    suspend fun getTotalAmountByCategory(categoryId: Int): Double
+
+    @Query("DELETE FROM expenses WHERE categoryId = :categoryId")
+    suspend fun deleteExpensesByCategory(categoryId: Int)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExpense(expense: Expense)
 

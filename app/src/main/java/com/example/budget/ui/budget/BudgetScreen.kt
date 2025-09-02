@@ -58,6 +58,11 @@ fun BudgetScreen(
         viewModel.initialize(selectedMonth, selectedYear)
     }
 
+    // Refresh data when screen becomes visible (e.g., after returning from Category Manager)
+    LaunchedEffect(Unit) {
+        viewModel.refreshData()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(

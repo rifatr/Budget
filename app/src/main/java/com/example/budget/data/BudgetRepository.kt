@@ -19,8 +19,14 @@ class BudgetRepository(
     fun getAllCategories(): Flow<List<Category>> = categoryDao.getAllCategories()
     fun getAllCategoriesByUsage(): Flow<List<Category>> = categoryDao.getAllCategoriesByUsage()
     suspend fun insertCategory(category: Category) = categoryDao.insertCategory(category)
+    suspend fun updateCategoryName(categoryId: Int, newName: String) = categoryDao.updateCategoryName(categoryId, newName)
     suspend fun deleteCategory(category: Category) = categoryDao.deleteCategory(category)
     suspend fun incrementCategoryUsage(categoryId: Int) = categoryDao.incrementUsageCount(categoryId)
+    
+    // Category statistics
+    suspend fun getExpenseCountByCategory(categoryId: Int): Int = expenseDao.getExpenseCountByCategory(categoryId)
+    suspend fun getTotalAmountByCategory(categoryId: Int): Double = expenseDao.getTotalAmountByCategory(categoryId)
+    suspend fun deleteExpensesByCategory(categoryId: Int) = expenseDao.deleteExpensesByCategory(categoryId)
 
     // Expense operations
     fun getExpensesForMonth(startDate: Date, endDate: Date): Flow<List<Expense>> =

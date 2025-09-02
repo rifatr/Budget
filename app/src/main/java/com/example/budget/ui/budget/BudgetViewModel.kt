@@ -56,14 +56,28 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
 
     fun initialize(month: Int, year: Int) {
         _uiState.value = _uiState.value.copy(selectedMonth = month, selectedYear = year)
+        loadBudgetData(month, year)
+    }
+
+    fun refreshData() {
+        loadBudgetData(_uiState.value.selectedMonth, _uiState.value.selectedYear)
+    }
+
+    private fun loadBudgetData(month: Int, year: Int) {
         viewModelScope.launch {
             val categories = budgetRepository.getAllCategories().first()
             val budget = budgetRepository.getBudgetForMonth(month, year).first()
+            
+            // Clean up category budgets - remove budgets for deleted categories
+            val validCategoryIds = categories.map { it.id }.toSet()
+            val cleanedCategoryBudgets = (budget?.categoryBudgets ?: emptyMap())
+                .filterKeys { categoryId -> validCategoryIds.contains(categoryId) }
+            
             _uiState.value = _uiState.value.copy(
                 allCategories = categories,
                 budget = budget,
                 totalBudgetInput = budget?.overallBudget?.toString() ?: "",
-                categoryBudgets = budget?.categoryBudgets ?: emptyMap()
+                categoryBudgets = cleanedCategoryBudgets
             )
         }
     }

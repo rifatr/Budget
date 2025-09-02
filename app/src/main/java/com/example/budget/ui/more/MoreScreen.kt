@@ -54,6 +54,15 @@ fun MoreScreen(navController: NavController) {
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             
             MenuItem(
+                icon = Icons.Default.Category,
+                title = "Categories",
+                subtitle = "Add, rename, and delete categories",
+                onClick = { navController.navigate(Screen.CategoryManager.route) }
+            )
+            
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            
+            MenuItem(
                 icon = Icons.Default.Storage,
                 title = "Data",
                 subtitle = "Export & Import data",
