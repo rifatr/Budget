@@ -22,6 +22,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.budget.ui.budget.BudgetScreen
+import com.example.budget.ui.categorymanager.CategoryManagerScreen
 import com.example.budget.ui.expense.ExpenseScreen
 import com.example.budget.ui.info.InfoScreen
 import com.example.budget.ui.more.MoreScreen
@@ -135,6 +136,11 @@ fun BudgetAppNavigation(
                 }
                 composable(Screen.Settings.route) {
                     SettingsScreen(navController)
+                }
+                composable(Screen.CategoryManager.route) {
+                    CategoryManagerScreen(
+                        onNavigateBack = { navController.popBackStack() }
+                    )
                 }
             }
         }
