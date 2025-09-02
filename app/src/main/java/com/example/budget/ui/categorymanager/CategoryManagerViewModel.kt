@@ -22,6 +22,7 @@ data class CategoryManagerUiState(
     val categories: List<CategoryWithStats> = emptyList(),
     val searchQuery: String = "",
     val sortOption: SortOption = SortOption.BY_NAME,
+    val sortAscending: Boolean = true,
     val showConfirmationMessage: Boolean = false,
     val confirmationMessage: String = "",
     val isConfirmationError: Boolean = false,
@@ -37,11 +38,25 @@ data class CategoryManagerUiState(
                 }
             }
             
-            return when (sortOption) {
-                SortOption.BY_NAME -> filtered.sortedBy { it.category.name }
-                SortOption.BY_USAGE -> filtered.sortedByDescending { it.expenseCount }
-                SortOption.BY_AMOUNT -> filtered.sortedByDescending { it.totalAmount }
+            val sorted = when (sortOption) {
+                SortOption.BY_NAME -> if (sortAscending) {
+                    filtered.sortedBy { it.category.name }
+                } else {
+                    filtered.sortedByDescending { it.category.name }
+                }
+                SortOption.BY_USAGE -> if (sortAscending) {
+                    filtered.sortedBy { it.expenseCount }
+                } else {
+                    filtered.sortedByDescending { it.expenseCount }
+                }
+                SortOption.BY_AMOUNT -> if (sortAscending) {
+                    filtered.sortedBy { it.totalAmount }
+                } else {
+                    filtered.sortedByDescending { it.totalAmount }
+                }
             }
+            
+            return sorted
         }
 }
 
@@ -85,6 +100,17 @@ class CategoryManagerViewModel(private val budgetRepository: BudgetRepository) :
 
     fun updateSortOption(sortOption: SortOption) {
         _uiState.value = _uiState.value.copy(sortOption = sortOption)
+    }
+
+    fun toggleSort(sortOption: SortOption) {
+        val currentState = _uiState.value
+        if (currentState.sortOption == sortOption) {
+            // Same option clicked - toggle ascending/descending
+            _uiState.value = currentState.copy(sortAscending = !currentState.sortAscending)
+        } else {
+            // Different option clicked - switch to new option with ascending
+            _uiState.value = currentState.copy(sortOption = sortOption, sortAscending = true)
+        }
     }
 
     fun addCategory(name: String) {

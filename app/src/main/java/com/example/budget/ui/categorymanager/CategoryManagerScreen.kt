@@ -7,11 +7,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,7 +43,6 @@ fun CategoryManagerScreen(
 
     var showAddCategoryDialog by remember { mutableStateOf(false) }
     var showRenameCategoryDialog by remember { mutableStateOf(false) }
-    var showSortMenu by remember { mutableStateOf(false) }
     var categoryToRename by remember { mutableStateOf<CategoryWithStats?>(null) }
     var categoryToDelete by remember { mutableStateOf<CategoryWithStats?>(null) }
 
@@ -53,37 +53,6 @@ fun CategoryManagerScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    // Sort
-                    Box {
-                        IconButton(onClick = { showSortMenu = true }) {
-                            Icon(Icons.Default.Sort, contentDescription = "Sort")
-                        }
-                        DropdownMenu(
-                            expanded = showSortMenu,
-                            onDismissRequest = { showSortMenu = false }
-                        ) {
-                            SortOption.values().forEach { option ->
-                                DropdownMenuItem(
-                                    text = { Text(option.displayName) },
-                                    onClick = {
-                                        viewModel.updateSortOption(option)
-                                        showSortMenu = false
-                                    },
-                                    leadingIcon = {
-                                        if (uiState.sortOption == option) {
-                                            Icon(
-                                                Icons.Default.Sort,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.primary
-                                            )
-                                        }
-                                    }
-                                )
-                            }
-                        }
                     }
                 }
             )
@@ -151,37 +120,58 @@ fun CategoryManagerScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Search field
+                    // Search and Sort Controls
                     item {
-                        OutlinedTextField(
-                            value = uiState.searchQuery,
-                            onValueChange = { viewModel.updateSearchQuery(it) },
-                            label = { Text("Search categories") },
-                            placeholder = { Text("Type to search...") },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Default.Search,
-                                    contentDescription = "Search",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            },
-                            trailingIcon = {
-                                if (uiState.searchQuery.isNotBlank()) {
-                                    IconButton(
-                                        onClick = { viewModel.updateSearchQuery("") }
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Clear,
-                                            contentDescription = "Clear search",
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // Search field
+                            OutlinedTextField(
+                                value = uiState.searchQuery,
+                                onValueChange = { viewModel.updateSearchQuery(it) },
+                                label = { Text("Search categories") },
+                                placeholder = { Text("Type to search...") },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Search,
+                                        contentDescription = "Search",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                },
+                                trailingIcon = {
+                                    if (uiState.searchQuery.isNotBlank()) {
+                                        IconButton(
+                                            onClick = { viewModel.updateSearchQuery("") }
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Clear,
+                                                contentDescription = "Clear search",
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
                                     }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                singleLine = true
+                            )
+                            
+                            // Sort buttons
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                SortOption.values().forEach { option ->
+                                    SortButton(
+                                        sortOption = option,
+                                        isSelected = uiState.sortOption == option,
+                                        isAscending = uiState.sortAscending,
+                                        onClick = { viewModel.toggleSort(option) },
+                                        modifier = Modifier.weight(1f)
+                                    )
                                 }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            singleLine = true
-                        )
+                            }
+                        }
                     }
                     
                     items(uiState.filteredAndSortedCategories) { categoryWithStats ->
@@ -499,5 +489,55 @@ fun DeleteCategoryDialog(
                 }
             }
         )
+    }
+}
+
+@Composable
+fun SortButton(
+    sortOption: SortOption,
+    isSelected: Boolean,
+    isAscending: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier.height(40.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isSelected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            },
+            contentColor = if (isSelected) {
+                MaterialTheme.colorScheme.onPrimary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            }
+        ),
+        shape = RoundedCornerShape(8.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = when (sortOption) {
+                    SortOption.BY_NAME -> "Name"
+                    SortOption.BY_USAGE -> "Usage"
+                    SortOption.BY_AMOUNT -> "Amount"
+                },
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1
+            )
+            if (isSelected) {
+                Icon(
+                    imageVector = if (isAscending) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                    contentDescription = if (isAscending) "Ascending" else "Descending",
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
     }
 }

@@ -55,7 +55,7 @@ fun MoreScreen(navController: NavController) {
             
             MenuItem(
                 icon = Icons.Default.Category,
-                title = "Manage Categories",
+                title = "Categories",
                 subtitle = "Add, rename, and delete categories",
                 onClick = { navController.navigate(Screen.CategoryManager.route) }
             )
