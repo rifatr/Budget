@@ -362,6 +362,9 @@ fun AddCategoryDialog(
                 onValueChange = { categoryName = it },
                 label = { Text("Category Name") },
                 placeholder = { Text("e.g., Food, Transport") },
+                supportingText = {
+                    Text("${categoryName.length}/24 characters")
+                },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -398,6 +401,9 @@ fun RenameCategoryDialog(
                 value = categoryName,
                 onValueChange = { categoryName = it },
                 label = { Text("Category Name") },
+                supportingText = {
+                    Text("${categoryName.length}/24 characters")
+                },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
