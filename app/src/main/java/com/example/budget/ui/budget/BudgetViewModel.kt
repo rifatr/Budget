@@ -8,6 +8,7 @@ import com.example.budget.data.db.Category
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -57,14 +58,32 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
     fun initialize(month: Int, year: Int) {
         _uiState.value = _uiState.value.copy(selectedMonth = month, selectedYear = year)
         viewModelScope.launch {
-            val categories = budgetRepository.getAllCategories().first()
-            val budget = budgetRepository.getBudgetForMonth(month, year).first()
-            _uiState.value = _uiState.value.copy(
-                allCategories = categories,
-                budget = budget,
-                totalBudgetInput = budget?.overallBudget?.toString() ?: "",
-                categoryBudgets = budget?.categoryBudgets ?: emptyMap()
-            )
+            // Combine categories and budget flows for real-time updates
+            combine(
+                budgetRepository.getAllCategories(),
+                budgetRepository.getBudgetForMonth(month, year)
+            ) { categories, budget ->
+                Pair(categories, budget)
+            }.collect { (categories, budget) ->
+                // Clean up category budgets - remove budgets for deleted categories
+                val validCategoryIds = categories.map { it.id }.toSet()
+                val existingCategoryBudgets = budget?.categoryBudgets ?: emptyMap()
+                val cleanedCategoryBudgets = existingCategoryBudgets
+                    .filterKeys { categoryId -> validCategoryIds.contains(categoryId) }
+                
+                _uiState.value = _uiState.value.copy(
+                    allCategories = categories,
+                    budget = budget,
+                    totalBudgetInput = budget?.overallBudget?.toString() ?: "",
+                    categoryBudgets = cleanedCategoryBudgets
+                )
+                
+                // If categories were removed from budget, save the cleaned budget
+                if (budget != null && cleanedCategoryBudgets.size < existingCategoryBudgets.size) {
+                    val updatedBudget = budget.copy(categoryBudgets = cleanedCategoryBudgets)
+                    budgetRepository.insertOrUpdateBudget(updatedBudget)
+                }
+            }
         }
     }
 
