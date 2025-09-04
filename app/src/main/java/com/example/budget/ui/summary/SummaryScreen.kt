@@ -389,9 +389,7 @@ private fun SortButton(
 ) {
     var showSortMenu by remember { mutableStateOf(false) }
     
-    Box(
-        modifier = Modifier.wrapContentSize(Alignment.TopEnd)
-    ) {
+    Box {
         OutlinedButton(
             onClick = { showSortMenu = true }
         ) {
