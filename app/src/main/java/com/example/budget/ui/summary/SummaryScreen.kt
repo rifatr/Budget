@@ -6,7 +6,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -96,8 +99,17 @@ fun SummaryScreen(
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
                     }
+                    
+                    item {
+                        SearchAndSortSection(
+                            searchQuery = uiState.searchQuery,
+                            currentSort = uiState.currentSort,
+                            onSearchQueryChange = viewModel::updateSearchQuery,
+                            onSortChange = viewModel::updateSort
+                        )
+                    }
 
-                    items(uiState.summaryRows) { row ->
+                    items(uiState.filteredSummaryRows) { row ->
                         CategoryCard(
                             row = row,
                             currencySymbol = selectedCurrency.symbol,
@@ -368,5 +380,87 @@ fun CategoryCard(
                 )
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SearchAndSortSection(
+    searchQuery: String,
+    currentSort: SortOption,
+    onSearchQueryChange: (String) -> Unit,
+    onSortChange: (SortOption) -> Unit
+) {
+    var showSortMenu by remember { mutableStateOf(false) }
+    
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        // Search Bar
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChange,
+            label = { Text("Search categories") },
+            leadingIcon = {
+                Icon(Icons.Default.Search, contentDescription = "Search")
+            },
+            trailingIcon = {
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { onSearchQueryChange("") }) {
+                        Icon(Icons.Default.Clear, contentDescription = "Clear search")
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // Sort Button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            Box {
+                OutlinedButton(
+                    onClick = { showSortMenu = true }
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(getSortDisplayName(currentSort))
+                }
+                
+                DropdownMenu(
+                    expanded = showSortMenu,
+                    onDismissRequest = { showSortMenu = false }
+                ) {
+                    SortOption.values().forEach { sortOption ->
+                        DropdownMenuItem(
+                            text = { Text(getSortDisplayName(sortOption)) },
+                            onClick = {
+                                onSortChange(sortOption)
+                                showSortMenu = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+private fun getSortDisplayName(sortOption: SortOption): String {
+    return when (sortOption) {
+        SortOption.NAME_ASC -> "Name ↑"
+        SortOption.NAME_DESC -> "Name ↓"
+        SortOption.SPENT_ASC -> "Spent ↑"
+        SortOption.SPENT_DESC -> "Spent ↓"
+        SortOption.BUDGET_ASC -> "Budget ↑"
+        SortOption.BUDGET_DESC -> "Budget ↓"
+        SortOption.REMAINING_ASC -> "Remaining ↑"
+        SortOption.REMAINING_DESC -> "Remaining ↓"
     }
 } 
