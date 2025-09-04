@@ -35,7 +35,6 @@ fun CategoryExpenseDetailScreen(
     month: Int,
     year: Int,
     onNavigateBack: () -> Unit,
-    onNavigateToAddExpense: (Int) -> Unit = {},
     viewModel: CategoryExpenseDetailViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val context = LocalContext.current
@@ -129,7 +128,6 @@ fun CategoryExpenseDetailScreen(
                         ExpenseItem(
                             expense = expense,
                             currencySymbol = selectedCurrency.symbol,
-                            onEdit = { /* TODO: Implement edit */ },
                             onDelete = { 
                                 expenseToDelete = expense
                                 showDeleteConfirmation = true
@@ -276,7 +274,6 @@ fun CategorySummaryCard(
 fun ExpenseItem(
     expense: Expense,
     currencySymbol: String,
-    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())

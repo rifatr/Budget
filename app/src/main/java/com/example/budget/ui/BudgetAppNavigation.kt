@@ -15,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -29,7 +28,6 @@ import com.example.budget.ui.more.MoreScreen
 import com.example.budget.ui.settings.SettingsScreen
 import com.example.budget.ui.summary.SummaryScreen
 import kotlinx.coroutines.launch
-import java.util.*
 
 data class BottomNavItem(
     val screen: Screen,
@@ -37,7 +35,7 @@ data class BottomNavItem(
     val label: String
 )
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BudgetAppNavigation(
     navController: NavHostController = rememberNavController(),

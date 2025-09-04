@@ -76,7 +76,9 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
             _uiState.value = _uiState.value.copy(
                 allCategories = categories,
                 budget = budget,
-                totalBudgetInput = budget?.overallBudget?.toString() ?: "",
+                totalBudgetInput = budget?.overallBudget?.let { 
+                    String.format(Locale.US, "%.2f", it).removeSuffix(".00")
+                } ?: "",
                 categoryBudgets = cleanedCategoryBudgets
             )
         }
