@@ -27,10 +27,9 @@ data class SummaryUiState(
     val summary: Map<Category, SummaryRow>,
     val isLoading: Boolean = false,
     val summaryRows: List<SummaryRow> = emptyList(),
-    val filteredSummaryRows: List<SummaryRow> = emptyList(),
+    val sortedSummaryRows: List<SummaryRow> = emptyList(),
     val totalBudget: Double = 0.0,
     val totalSpent: Double = 0.0,
-    val searchQuery: String = "",
     val currentSort: SortOption = SortOption.NAME_ASC
 )
 
@@ -91,53 +90,37 @@ class SummaryViewModel(private val budgetRepository: BudgetRepository) : ViewMod
                     summary = summary,
                     isLoading = false,
                     summaryRows = summaryRows,
-                    filteredSummaryRows = summaryRows, // Will be updated by applyFiltersAndSort
+                    sortedSummaryRows = summaryRows, // Will be updated by applySorting
                     totalBudget = totalBudget,
                     totalSpent = totalSpent,
-                    searchQuery = currentState.searchQuery,
                     currentSort = currentState.currentSort
                 )
             }.collect {
                 _uiState.value = it
-                applyFiltersAndSort()
+                applySorting()
             }
         }
-    }
-    
-    fun updateSearchQuery(query: String) {
-        _uiState.value = _uiState.value.copy(searchQuery = query)
-        applyFiltersAndSort()
     }
     
     fun updateSort(sortOption: SortOption) {
         _uiState.value = _uiState.value.copy(currentSort = sortOption)
-        applyFiltersAndSort()
+        applySorting()
     }
     
-    private fun applyFiltersAndSort() {
+    private fun applySorting() {
         val currentState = _uiState.value
-        var filteredRows = currentState.summaryRows
-        
-        // Apply search filter
-        if (currentState.searchQuery.isNotBlank()) {
-            filteredRows = filteredRows.filter { row ->
-                row.category.name.contains(currentState.searchQuery, ignoreCase = true)
-            }
+        val sortedRows = when (currentState.currentSort) {
+            SortOption.NAME_ASC -> currentState.summaryRows.sortedBy { it.category.name.lowercase() }
+            SortOption.NAME_DESC -> currentState.summaryRows.sortedByDescending { it.category.name.lowercase() }
+            SortOption.SPENT_ASC -> currentState.summaryRows.sortedBy { it.actual }
+            SortOption.SPENT_DESC -> currentState.summaryRows.sortedByDescending { it.actual }
+            SortOption.BUDGET_ASC -> currentState.summaryRows.sortedBy { it.budgeted }
+            SortOption.BUDGET_DESC -> currentState.summaryRows.sortedByDescending { it.budgeted }
+            SortOption.REMAINING_ASC -> currentState.summaryRows.sortedBy { it.budgeted - it.actual }
+            SortOption.REMAINING_DESC -> currentState.summaryRows.sortedByDescending { it.budgeted - it.actual }
         }
         
-        // Apply sort
-        filteredRows = when (currentState.currentSort) {
-            SortOption.NAME_ASC -> filteredRows.sortedBy { it.category.name.lowercase() }
-            SortOption.NAME_DESC -> filteredRows.sortedByDescending { it.category.name.lowercase() }
-            SortOption.SPENT_ASC -> filteredRows.sortedBy { it.actual }
-            SortOption.SPENT_DESC -> filteredRows.sortedByDescending { it.actual }
-            SortOption.BUDGET_ASC -> filteredRows.sortedBy { it.budgeted }
-            SortOption.BUDGET_DESC -> filteredRows.sortedByDescending { it.budgeted }
-            SortOption.REMAINING_ASC -> filteredRows.sortedBy { it.budgeted - it.actual }
-            SortOption.REMAINING_DESC -> filteredRows.sortedByDescending { it.budgeted - it.actual }
-        }
-        
-        _uiState.value = _uiState.value.copy(filteredSummaryRows = filteredRows)
+        _uiState.value = _uiState.value.copy(sortedSummaryRows = sortedRows)
     }
 
     private fun getMonthDateRange(year: Int, month: Int): Pair<Date, Date> {

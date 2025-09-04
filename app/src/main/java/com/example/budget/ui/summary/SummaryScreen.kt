@@ -8,8 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -92,24 +90,25 @@ fun SummaryScreen(
                     }
                     
                     item {
-                        Text(
-                            text = "Categories",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
-                    
-                    item {
-                        SearchAndSortSection(
-                            searchQuery = uiState.searchQuery,
-                            currentSort = uiState.currentSort,
-                            onSearchQueryChange = viewModel::updateSearchQuery,
-                            onSortChange = viewModel::updateSort
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Categories",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            
+                            SortButton(
+                                currentSort = uiState.currentSort,
+                                onSortChange = viewModel::updateSort
+                            )
+                        }
                     }
 
-                    items(uiState.filteredSummaryRows) { row ->
+                    items(uiState.sortedSummaryRows) { row ->
                         CategoryCard(
                             row = row,
                             currencySymbol = selectedCurrency.symbol,
@@ -383,72 +382,36 @@ fun CategoryCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SearchAndSortSection(
-    searchQuery: String,
+private fun SortButton(
     currentSort: SortOption,
-    onSearchQueryChange: (String) -> Unit,
     onSortChange: (SortOption) -> Unit
 ) {
     var showSortMenu by remember { mutableStateOf(false) }
     
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        // Search Bar and Sort Button in same row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+    Box {
+        OutlinedButton(
+            onClick = { showSortMenu = true }
         ) {
-            // Search Bar (takes most space)
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = onSearchQueryChange,
-                label = { Text("Search categories") },
-                leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Search")
-                },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { onSearchQueryChange("") }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Clear search")
-                        }
-                    }
-                },
-                modifier = Modifier.weight(1f),
-                singleLine = true
-            )
-            
-            // Sort Button (compact)
-            Box {
-                OutlinedButton(
-                    onClick = { showSortMenu = true }
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort")
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(getSortDisplayName(currentSort))
-                }
-                
-                DropdownMenu(
-                    expanded = showSortMenu,
-                    onDismissRequest = { showSortMenu = false }
-                ) {
-                    SortOption.values().forEach { sortOption ->
-                        DropdownMenuItem(
-                            text = { Text(getSortDisplayName(sortOption)) },
-                            onClick = {
-                                onSortChange(sortOption)
-                                showSortMenu = false
-                            }
-                        )
-                    }
-                }
-            }
+            Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort")
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(getSortDisplayName(currentSort))
         }
         
-        Spacer(modifier = Modifier.height(16.dp))
+        DropdownMenu(
+            expanded = showSortMenu,
+            onDismissRequest = { showSortMenu = false }
+        ) {
+            SortOption.entries.forEach { sortOption ->
+                DropdownMenuItem(
+                    text = { Text(getSortDisplayName(sortOption)) },
+                    onClick = {
+                        onSortChange(sortOption)
+                        showSortMenu = false
+                    }
+                )
+            }
+        }
     }
 }
 
