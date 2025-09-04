@@ -206,33 +206,33 @@ fun OverallSummaryCard(
                     )
                     Text(
                         text = "$currencySymbol${String.format(Locale.US, "%.2f", totalSpent)}",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
                 
-                Icon(
-                    imageVector = if (isOverBudget) Icons.Default.TrendingUp else Icons.Default.TrendingDown,
-                    contentDescription = if (isOverBudget) "Over budget" else "Under budget",
-                    tint = if (isOverBudget) 
-                        MaterialTheme.colorScheme.error 
-                    else 
-                        MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp)
-                )
+                if (totalBudget > 0) {
+                    Column(
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Text(
+                            text = "Budget",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                        )
+                        Text(
+                            text = "$currencySymbol${String.format(Locale.US, "%.2f", totalBudget)}",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
             }
             
             if (totalBudget > 0) {
                 Spacer(modifier = Modifier.height(20.dp))
-                
-                Text(
-                    text = "Budget: $currencySymbol${String.format(Locale.US, "%.2f", totalBudget)}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
                 
                 LinearProgressIndicator(
                     progress = { progress },
@@ -291,7 +291,7 @@ fun CategoryCard(
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier.padding(15.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -329,7 +329,7 @@ fun CategoryCard(
                 ) {
                     Text(
                         text = "$currencySymbol${String.format(Locale.US, "%.2f", row.actual)}",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
