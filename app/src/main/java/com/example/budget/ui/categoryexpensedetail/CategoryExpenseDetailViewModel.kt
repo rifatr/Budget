@@ -102,11 +102,17 @@ class CategoryExpenseDetailViewModel(
     }
     
     private fun showConfirmationMessage(message: String, isError: Boolean) {
-        _uiState.value = _uiState.value.copy(
-            showConfirmationMessage = true,
-            confirmationMessage = message,
-            isConfirmationError = isError
-        )
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                showConfirmationMessage = true,
+                confirmationMessage = message,
+                isConfirmationError = isError
+            )
+            // Auto-dismiss after delay (same as BudgetViewModel)
+            val delayTime = if (isError) 4000L else 3000L // 4s for errors, 3s for success
+            kotlinx.coroutines.delay(delayTime)
+            _uiState.value = _uiState.value.copy(showConfirmationMessage = false)
+        }
     }
     
     fun dismissConfirmationMessage() {
