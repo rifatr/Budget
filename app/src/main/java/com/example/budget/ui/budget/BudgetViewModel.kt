@@ -76,9 +76,7 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
             _uiState.value = _uiState.value.copy(
                 allCategories = categories,
                 budget = budget,
-                totalBudgetInput = budget?.overallBudget?.let { 
-                    String.format(Locale.US, "%.2f", it).removeSuffix(".00")
-                } ?: "",
+                totalBudgetInput = budget?.overallBudget?.let { formatNumberForInput(it) } ?: "",
                 categoryBudgets = cleanedCategoryBudgets
             )
         }
@@ -231,8 +229,8 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
         )
     }
     
-    // Helper function to format budget amounts properly (avoid scientific notation)
-    fun formatBudgetAmount(amount: Double): String {
+    // Helper function to format numbers without scientific notation for input fields
+    fun formatNumberForInput(amount: Double): String {
         return String.format(Locale.US, "%.2f", amount).removeSuffix(".00")
     }
     

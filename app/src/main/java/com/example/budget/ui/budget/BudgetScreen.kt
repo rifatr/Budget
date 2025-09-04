@@ -249,7 +249,7 @@ fun BudgetScreen(
                                 modifier = Modifier.width(180.dp)
                             ) {
                                 OutlinedTextField(
-                                    value = uiState.categoryBudgets[category.id]?.let { viewModel.formatBudgetAmount(it) } ?: "",
+                                    value = uiState.categoryBudgets[category.id]?.let { viewModel.formatNumberForInput(it) } ?: "",
                                     onValueChange = { value ->
                                         viewModel.updateCategoryBudget(category.id, value)
                                     },
