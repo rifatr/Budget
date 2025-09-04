@@ -37,6 +37,9 @@ object AppViewModelProvider {
         initializer {
             CategoryManagerViewModel(budgetApplication().container.budgetRepository)
         }
+        initializer {
+            com.example.budget.ui.categoryexpensedetail.CategoryExpenseDetailViewModel(budgetApplication().container.budgetRepository)
+        }
     }
 }
 

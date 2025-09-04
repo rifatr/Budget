@@ -126,7 +126,7 @@ fun BudgetAppNavigation(
                 when (page) {
                     0 -> ExpenseScreen()
                     1 -> BudgetScreen()
-                    2 -> SummaryScreen()
+                    2 -> SummaryScreen(navController)
                     3 -> MoreScreen(navController)
                 }
             }
@@ -148,6 +148,20 @@ fun BudgetAppNavigation(
                 }
                 composable(Screen.CategoryManager.route) {
                     CategoryManagerScreen(
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+                composable("${Screen.CategoryExpenseDetail.route}/{categoryId}/{categoryName}/{month}/{year}") { backStackEntry ->
+                    val categoryId = backStackEntry.arguments?.getString("categoryId")?.toIntOrNull() ?: 0
+                    val categoryName = backStackEntry.arguments?.getString("categoryName") ?: ""
+                    val month = backStackEntry.arguments?.getString("month")?.toIntOrNull() ?: 1
+                    val year = backStackEntry.arguments?.getString("year")?.toIntOrNull() ?: 2024
+                    
+                    com.example.budget.ui.categoryexpensedetail.CategoryExpenseDetailScreen(
+                        categoryId = categoryId,
+                        categoryName = categoryName,
+                        month = month,
+                        year = year,
                         onNavigateBack = { navController.popBackStack() }
                     )
                 }

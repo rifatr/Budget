@@ -1,36 +1,37 @@
 package com.example.budget.ui.summary
 
-import androidx.compose.foundation.layout.Arrangement
-import com.example.budget.ui.components.BeautifulSelector
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.budget.ui.AppViewModelProvider
+import com.example.budget.ui.Screen
+import com.example.budget.ui.components.BeautifulSelector
 import java.util.*
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SummaryScreen(
+    navController: NavController = rememberNavController(),
     viewModel: SummaryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val context = LocalContext.current
@@ -78,19 +79,39 @@ fun SummaryScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     item {
-                        SummaryHeader()
+                        OverallSummaryCard(
+                            totalBudget = uiState.totalBudget,
+                            totalSpent = uiState.totalSpent,
+                            currencySymbol = selectedCurrency.symbol
+                        )
+                    }
+                    
+                    item {
+                        Text(
+                            text = "Categories",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
                     }
 
                     items(uiState.summaryRows) { row ->
-                        SummaryRow(row = row, currencySymbol = selectedCurrency.symbol)
+                        CategoryCard(
+                            row = row,
+                            currencySymbol = selectedCurrency.symbol,
+                            onClick = {
+                                navController.navigate(
+                                    "${Screen.CategoryExpenseDetail.route}/${row.category.id}/${row.category.name}/${selectedMonth}/${selectedYear}"
+                                )
+                            }
+                        )
                     }
-
+                    
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
-                        SummaryTotals(uiState = uiState, currencySymbol = selectedCurrency.symbol)
                     }
                 }
             }
@@ -149,56 +170,95 @@ private fun MonthYearSelector(
 
 
 @Composable
-fun SummaryHeader() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text("Category", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f))
-        Text("Budgeted", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
-        Text("Expense", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
-        Text("Delta", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
-    }
-}
-
-@Composable
-fun SummaryRow(row: SummaryRow, currencySymbol: String) {
-    val positiveDeltaColor = Color(0xFF388E3C) // A more subtle green
-    val negativeDeltaColor = MaterialTheme.colorScheme.error
-    val progress = if (row.budgeted > 0) (row.actual / row.budgeted).toFloat() else 0f
-
+fun OverallSummaryCard(
+    totalBudget: Double,
+    totalSpent: Double,
+    currencySymbol: String
+) {
+    val progress = if (totalBudget > 0) (totalSpent / totalBudget).coerceAtMost(1.0).toFloat() else 0f
+    val isOverBudget = totalSpent > totalBudget && totalBudget > 0
+    val remaining = totalBudget - totalSpent
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isOverBudget) 
+                MaterialTheme.colorScheme.errorContainer 
+            else 
+                MaterialTheme.colorScheme.primaryContainer
+        ),
+        shape = RoundedCornerShape(20.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier.padding(24.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(row.category.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("$currencySymbol${String.format(Locale.US, "%.2f", row.budgeted)}", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
-                Text("$currencySymbol${String.format(Locale.US, "%.2f", row.actual)}", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
-                Text(
-                    text = "$currencySymbol${String.format(Locale.US, "%.2f", row.delta)}",
-                    color = if (row.delta >= 0) positiveDeltaColor else negativeDeltaColor,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1.5f),
-                    textAlign = TextAlign.End,
-                    maxLines = 1
+                Column {
+                    Text(
+                        text = "Total Spent",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                    )
+                    Text(
+                        text = "$currencySymbol${String.format(Locale.US, "%.2f", totalSpent)}",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                
+                Icon(
+                    imageVector = if (isOverBudget) Icons.Default.TrendingUp else Icons.Default.TrendingDown,
+                    contentDescription = if (isOverBudget) "Over budget" else "Under budget",
+                    tint = if (isOverBudget) 
+                        MaterialTheme.colorScheme.error 
+                    else 
+                        MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
                 )
             }
-            if (row.budgeted > 0) {
+            
+            if (totalBudget > 0) {
+                Spacer(modifier = Modifier.height(20.dp))
+                
+                Text(
+                    text = "Budget: $currencySymbol${String.format(Locale.US, "%.2f", totalBudget)}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                )
+                
                 Spacer(modifier = Modifier.height(8.dp))
+                
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier.fillMaxWidth(),
-                    color = if (progress > 1f) negativeDeltaColor else MaterialTheme.colorScheme.primary,
+                    color = if (isOverBudget) 
+                        MaterialTheme.colorScheme.error 
+                    else 
+                        MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f)
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Text(
+                    text = if (isOverBudget) 
+                        "Over budget by $currencySymbol${String.format(Locale.US, "%.2f", -remaining)}"
+                    else 
+                        "Remaining: $currencySymbol${String.format(Locale.US, "%.2f", remaining)}",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium,
+                    color = if (isOverBudget) 
+                        MaterialTheme.colorScheme.error 
+                    else 
+                        MaterialTheme.colorScheme.onPrimaryContainer,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
@@ -206,31 +266,101 @@ fun SummaryRow(row: SummaryRow, currencySymbol: String) {
 }
 
 @Composable
-fun SummaryTotals(uiState: SummaryUiState, currencySymbol: String) {
-    val totalBudgeted = uiState.summary.values.sumOf { it.budgeted }
-    val totalActual = uiState.summary.values.sumOf { it.actual }
-    val totalDelta = totalBudgeted - totalActual
-    val positiveDeltaColor = Color(0xFF388E3C)
-    val negativeDeltaColor = MaterialTheme.colorScheme.error
-
-    Row(
+fun CategoryCard(
+    row: SummaryRow,
+    currencySymbol: String,
+    onClick: () -> Unit
+) {
+    val progress = if (row.budgeted > 0) (row.actual / row.budgeted).coerceAtMost(1.0).toFloat() else 0f
+    val isOverBudget = row.actual > row.budgeted && row.budgeted > 0
+    val statusColor = when {
+        row.budgeted == 0.0 -> MaterialTheme.colorScheme.outline
+        isOverBudget -> MaterialTheme.colorScheme.error
+        row.actual == 0.0 -> MaterialTheme.colorScheme.outline
+        else -> MaterialTheme.colorScheme.primary
+    }
+    
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp, bottom = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .clickable { onClick() },
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Text("Totals", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f))
-        Text("$currencySymbol${String.format(Locale.US, "%.2f", totalBudgeted)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
-        Text("$currencySymbol${String.format(Locale.US, "%.2f", totalActual)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.5f), textAlign = TextAlign.End, maxLines = 1)
-        Text(
-            text = "$currencySymbol${String.format(Locale.US, "%.2f", totalDelta)}",
-            color = if (totalDelta >= 0) positiveDeltaColor else negativeDeltaColor,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1.5f),
-            textAlign = TextAlign.End,
-            maxLines = 1
-        )
+        Column(
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = row.category.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+                    
+                    Text(
+                        text = when {
+                            row.budgeted == 0.0 -> "No budget set"
+                            row.actual == 0.0 -> "No expenses yet"
+                            isOverBudget -> "Over budget"
+                            else -> "On track"
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = statusColor
+                    )
+                }
+                
+                Column(
+                    horizontalAlignment = Alignment.End
+                ) {
+                    Text(
+                        text = "$currencySymbol${String.format(Locale.US, "%.2f", row.actual)}",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    
+                    if (row.budgeted > 0) {
+                        Text(
+                            text = "of $currencySymbol${String.format(Locale.US, "%.2f", row.budgeted)}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.width(8.dp))
+                
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = "View details",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            
+            if (row.budgeted > 0) {
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxWidth(),
+                    color = statusColor,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            }
+        }
     }
 } 
