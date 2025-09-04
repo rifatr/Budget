@@ -197,6 +197,10 @@ fun OverallSummaryCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Use the larger amount to determine consistent font size for both
+                val largerAmountForSizing = maxOf(totalSpent, totalBudget)
+                val consistentAmountTextStyle = getDynamicTextStyle(largerAmountForSizing, currencySymbol)
+                
                 Column {
                     Text(
                         text = "Total Spent",
@@ -205,7 +209,7 @@ fun OverallSummaryCard(
                     )
                     Text(
                         text = formatCurrency(totalSpent, currencySymbol),
-                        style = getDynamicTextStyle(totalSpent, currencySymbol),
+                        style = consistentAmountTextStyle,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
@@ -222,7 +226,7 @@ fun OverallSummaryCard(
                         )
                         Text(
                             text = formatCurrency(totalBudget, currencySymbol),
-                            style = getDynamicTextStyle(totalBudget, currencySymbol),
+                            style = consistentAmountTextStyle,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
