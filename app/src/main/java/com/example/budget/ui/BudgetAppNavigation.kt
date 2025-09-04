@@ -57,6 +57,10 @@ fun BudgetAppNavigation(
     )
     val coroutineScope = rememberCoroutineScope()
 
+    // Get current navigation state
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route
+    
     // Sync pager with navigation
     LaunchedEffect(startWithExpenseScreen) {
         if (startWithExpenseScreen) {
@@ -94,6 +98,11 @@ fun BudgetAppNavigation(
                         selected = pagerState.currentPage == index,
                         onClick = {
                             coroutineScope.launch {
+                                // If we're on a secondary screen (not hidden), pop back to main navigation
+                                if (currentRoute != null && currentRoute != "hidden") {
+                                    navController.popBackStack("hidden", inclusive = false)
+                                }
+                                // Then navigate to the selected tab
                                 pagerState.animateScrollToPage(index)
                             }
                         },
