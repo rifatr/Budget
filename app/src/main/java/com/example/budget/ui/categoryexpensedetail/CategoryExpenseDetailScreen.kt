@@ -107,7 +107,11 @@ fun CategoryExpenseDetailScreen(
                 
                 item {
                     Text(
-                        text = if (uiState.expenses.isEmpty()) "No expenses yet" else "${uiState.expenses.size} expenses",
+                        text = when {
+                            uiState.expenses.isEmpty() -> "No expenses yet"
+                            uiState.expenses.size == 1 -> "1 expense"
+                            else -> "${uiState.expenses.size} expenses"
+                        },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(vertical = 8.dp)
