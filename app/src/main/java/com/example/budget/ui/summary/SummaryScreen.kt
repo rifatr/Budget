@@ -382,32 +382,37 @@ fun CategoryCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SortButton(
     currentSort: SortOption,
     onSortChange: (SortOption) -> Unit
 ) {
-    var showSortMenu by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
     
-    Box {
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
         OutlinedButton(
-            onClick = { showSortMenu = true }
+            onClick = { expanded = true },
+            modifier = Modifier.menuAnchor()
         ) {
             Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort")
             Spacer(modifier = Modifier.width(4.dp))
             Text(getSortDisplayName(currentSort))
         }
         
-        DropdownMenu(
-            expanded = showSortMenu,
-            onDismissRequest = { showSortMenu = false }
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
         ) {
             SortOption.entries.forEach { sortOption ->
                 DropdownMenuItem(
                     text = { Text(getSortDisplayName(sortOption)) },
                     onClick = {
                         onSortChange(sortOption)
-                        showSortMenu = false
+                        expanded = false
                     }
                 )
             }
