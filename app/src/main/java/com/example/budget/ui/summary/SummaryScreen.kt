@@ -310,12 +310,14 @@ fun CategoryCard(
                     
                     Spacer(modifier = Modifier.height(4.dp))
                     
+                    // Show remaining budget - the key requirement!
+                    val remaining = row.budgeted - row.actual
                     Text(
                         text = when {
                             row.budgeted == 0.0 -> "No budget set"
                             row.actual == 0.0 -> "No expenses yet"
-                            isOverBudget -> "Over budget"
-                            else -> "On track"
+                            isOverBudget -> "$currencySymbol${String.format(Locale.US, "%.2f", -remaining)} over budget"
+                            else -> "$currencySymbol${String.format(Locale.US, "%.2f", remaining)} remaining"
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         color = statusColor
