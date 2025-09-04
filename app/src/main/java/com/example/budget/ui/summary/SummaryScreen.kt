@@ -23,7 +23,6 @@ import com.example.budget.ui.AppViewModelProvider
 import com.example.budget.ui.Screen
 import com.example.budget.ui.components.BeautifulSelector
 import com.example.budget.ui.utils.formatCurrency
-import com.example.budget.ui.utils.formatNumberWithCommas
 import com.example.budget.ui.utils.getDynamicTextStyle
 import java.util.*
 
@@ -198,8 +197,7 @@ fun OverallSummaryCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Use the larger amount to determine consistent font size for both
-                val largerAmountForSizing = maxOf(totalSpent, totalBudget)
-                val consistentAmountTextStyle = getDynamicTextStyle(largerAmountForSizing, currencySymbol)
+                val consistentAmountTextStyle = getDynamicTextStyle(maxOf(totalSpent, totalBudget), currencySymbol)
                 
                 Column {
                     Text(
