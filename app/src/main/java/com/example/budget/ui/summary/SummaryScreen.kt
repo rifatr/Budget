@@ -7,14 +7,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.TrendingDown
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -26,6 +22,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.budget.ui.AppViewModelProvider
 import com.example.budget.ui.Screen
 import com.example.budget.ui.components.BeautifulSelector
+import com.example.budget.ui.utils.formatCurrency
+import com.example.budget.ui.utils.formatNumberWithCommas
+import com.example.budget.ui.utils.getDynamicTextStyle
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -205,8 +204,8 @@ fun OverallSummaryCard(
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                     )
                     Text(
-                        text = "$currencySymbol${String.format(Locale.US, "%.2f", totalSpent)}",
-                        style = MaterialTheme.typography.headlineSmall,
+                        text = formatCurrency(totalSpent, currencySymbol),
+                        style = getDynamicTextStyle(totalSpent, currencySymbol),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
@@ -222,8 +221,8 @@ fun OverallSummaryCard(
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                         )
                         Text(
-                            text = "$currencySymbol${String.format(Locale.US, "%.2f", totalBudget)}",
-                            style = MaterialTheme.typography.headlineSmall,
+                            text = formatCurrency(totalBudget, currencySymbol),
+                            style = getDynamicTextStyle(totalBudget, currencySymbol),
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -248,9 +247,9 @@ fun OverallSummaryCard(
                 
                 Text(
                     text = if (isOverBudget) 
-                        "Over budget by $currencySymbol${String.format(Locale.US, "%.2f", -remaining)}"
+                        "Over budget by ${formatCurrency(-remaining, currencySymbol)}"
                     else 
-                        "Remaining: $currencySymbol${String.format(Locale.US, "%.2f", remaining)}",
+                        "Remaining: ${formatCurrency(remaining, currencySymbol)}",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Medium,
                     color = if (isOverBudget) 
@@ -316,8 +315,8 @@ fun CategoryCard(
                         text = when {
                             row.budgeted == 0.0 -> "No budget set"
                             row.actual == 0.0 -> "No expenses yet"
-                            isOverBudget -> "$currencySymbol${String.format(Locale.US, "%.2f", -remaining)} over budget"
-                            else -> "$currencySymbol${String.format(Locale.US, "%.2f", remaining)} remaining"
+                            isOverBudget -> "${formatCurrency(-remaining, currencySymbol)} over budget"
+                            else -> "${formatCurrency(remaining, currencySymbol)} remaining"
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         color = statusColor
@@ -328,7 +327,7 @@ fun CategoryCard(
                     horizontalAlignment = Alignment.End
                 ) {
                     Text(
-                        text = "$currencySymbol${String.format(Locale.US, "%.2f", row.actual)}",
+                        text = formatCurrency(row.actual, currencySymbol),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -336,7 +335,7 @@ fun CategoryCard(
                     
                     if (row.budgeted > 0) {
                         Text(
-                            text = "of $currencySymbol${String.format(Locale.US, "%.2f", row.budgeted)}",
+                            text = "of ${formatCurrency(row.budgeted, currencySymbol)}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

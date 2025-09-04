@@ -15,7 +15,7 @@ import java.util.Locale
 // Validation Constants
 object ValidationConstants {
     const val CATEGORY_NAME_MAX_LENGTH = 24
-    private const val AMOUNT_DIGITS_BEFORE_DECIMAL = 6
+    private const val AMOUNT_DIGITS_BEFORE_DECIMAL = 8
     private const val AMOUNT_DIGITS_AFTER_DECIMAL = 2
     
     // Generate regex pattern for amount validation

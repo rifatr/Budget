@@ -23,6 +23,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.BudgetApp
 import com.example.budget.data.db.Expense
 import com.example.budget.ui.AppViewModelProvider
+import com.example.budget.ui.utils.formatCurrency
+import com.example.budget.ui.utils.getDynamicTextStyle
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -168,8 +170,8 @@ fun CategorySummaryCard(
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = "$currencySymbol${String.format(Locale.US, "%.2f", spent)}",
-                        style = MaterialTheme.typography.headlineSmall,
+                        text = formatCurrency(spent, currencySymbol),
+                        style = getDynamicTextStyle(spent, currencySymbol),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
@@ -185,8 +187,8 @@ fun CategorySummaryCard(
                     )
                     if (budgeted > 0) {
                         Text(
-                            text = "$currencySymbol${String.format(Locale.US, "%.2f", budgeted)}",
-                            style = MaterialTheme.typography.headlineSmall,
+                            text = formatCurrency(budgeted, currencySymbol),
+                            style = getDynamicTextStyle(budgeted, currencySymbol),
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -211,9 +213,9 @@ fun CategorySummaryCard(
                 
                 Text(
                     text = if (isOverBudget) 
-                        "Over budget by $currencySymbol${String.format(Locale.US, "%.2f", -remaining)}"
+                        "Over budget by ${formatCurrency(-remaining, currencySymbol)}"
                     else 
-                        "Remaining: $currencySymbol${String.format(Locale.US, "%.2f", remaining)}",
+                        "Remaining: ${formatCurrency(remaining, currencySymbol)}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (isOverBudget) 
                         MaterialTheme.colorScheme.error 
@@ -265,7 +267,7 @@ fun ExpenseItem(
             }
             
             Text(
-                text = "$currencySymbol${String.format(Locale.US, "%.2f", expense.amount)}",
+                text = formatCurrency(expense.amount, currencySymbol),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
