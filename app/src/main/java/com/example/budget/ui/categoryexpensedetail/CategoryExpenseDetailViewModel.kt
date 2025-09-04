@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -69,13 +70,35 @@ class CategoryExpenseDetailViewModel(
         viewModelScope.launch {
             try {
                 budgetRepository.deleteExpenseById(expenseId)
-                showConfirmationMessage("Expense deleted successfully", isError = false)
                 // Refresh data after deletion
-                initialize(_uiState.value.categoryId, _uiState.value.month, _uiState.value.year)
+                refreshData()
+                // Show confirmation message after data refresh is complete
+                showConfirmationMessage("Expense deleted successfully", isError = false)
             } catch (e: Exception) {
                 showConfirmationMessage("Failed to delete expense", isError = true)
             }
         }
+    }
+    
+    private suspend fun refreshData() {
+        val currentState = _uiState.value
+        val (startDate, endDate) = getMonthDateRange(currentState.year, currentState.month)
+        
+        // Get fresh data
+        val budget = budgetRepository.getBudgetForMonth(currentState.month, currentState.year).first()
+        val expenses = budgetRepository.getExpensesForMonth(startDate, endDate).first()
+        
+        val categoryExpenses = expenses.filter { it.categoryId == currentState.categoryId }
+        val budgeted = budget?.categoryBudgets?.get(currentState.categoryId) ?: 0.0
+        val totalSpent = categoryExpenses.sumOf { it.amount }
+        
+        // Update only the data fields, preserve confirmation message state
+        _uiState.value = _uiState.value.copy(
+            budgeted = budgeted,
+            totalSpent = totalSpent,
+            expenses = categoryExpenses,
+            isLoading = false
+        )
     }
     
     private fun showConfirmationMessage(message: String, isError: Boolean) {
