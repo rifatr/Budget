@@ -107,7 +107,7 @@ fun CategoryExpenseDetailScreen(
                 
                 item {
                     Text(
-                        text = when {
+de                        text = when {
                             uiState.expenses.isEmpty() -> "No expenses yet"
                             uiState.expenses.size == 1 -> "1 expense"
                             else -> "${uiState.expenses.size} expenses"
