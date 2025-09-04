@@ -18,7 +18,10 @@ data class CategoryExpenseDetailUiState(
     val budgeted: Double = 0.0,
     val totalSpent: Double = 0.0,
     val expenses: List<Expense> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val showConfirmationMessage: Boolean = false,
+    val confirmationMessage: String = "",
+    val isConfirmationError: Boolean = false
 )
 
 class CategoryExpenseDetailViewModel(
@@ -66,12 +69,29 @@ class CategoryExpenseDetailViewModel(
         viewModelScope.launch {
             try {
                 budgetRepository.deleteExpenseById(expenseId)
+                showConfirmationMessage("Expense deleted successfully", isError = false)
                 // Refresh data after deletion
                 initialize(_uiState.value.categoryId, _uiState.value.month, _uiState.value.year)
             } catch (e: Exception) {
-                // Handle error - could add error state to UI if needed
+                showConfirmationMessage("Failed to delete expense", isError = true)
             }
         }
+    }
+    
+    private fun showConfirmationMessage(message: String, isError: Boolean) {
+        _uiState.value = _uiState.value.copy(
+            showConfirmationMessage = true,
+            confirmationMessage = message,
+            isConfirmationError = isError
+        )
+    }
+    
+    fun dismissConfirmationMessage() {
+        _uiState.value = _uiState.value.copy(
+            showConfirmationMessage = false,
+            confirmationMessage = "",
+            isConfirmationError = false
+        )
     }
     
     private fun getMonthDateRange(year: Int, month: Int): Pair<Date, Date> {
@@ -87,3 +107,4 @@ class CategoryExpenseDetailViewModel(
         return startDate to endDate
     }
 }
+

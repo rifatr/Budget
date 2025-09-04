@@ -20,6 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.BudgetApp
 import com.example.budget.data.db.Expense
 import com.example.budget.ui.AppViewModelProvider
+import com.example.budget.ui.components.ConfirmationMessage
 import com.example.budget.ui.utils.formatCurrency
 import com.example.budget.ui.utils.getDynamicTextStyle
 import java.text.SimpleDateFormat
@@ -40,6 +41,9 @@ fun CategoryExpenseDetailScreen(
     val app = context.applicationContext as BudgetApp
     val selectedCurrency by app.container.currencyPreferences.selectedCurrency.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
+    
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var expenseToDelete by remember { mutableStateOf<Expense?>(null) }
     
     LaunchedEffect(categoryId, month, year) {
         viewModel.initialize(categoryId, month, year)
@@ -69,6 +73,15 @@ fun CategoryExpenseDetailScreen(
                     }
                 }
             )
+        },
+        snackbarHost = {
+            if (uiState.showConfirmationMessage) {
+                ConfirmationMessage(
+                    message = uiState.confirmationMessage,
+                    isError = uiState.isConfirmationError,
+                    onDismiss = { viewModel.dismissConfirmationMessage() }
+                )
+            }
         }
     ) { innerPadding ->
         if (uiState.isLoading) {
@@ -116,12 +129,50 @@ fun CategoryExpenseDetailScreen(
                             expense = expense,
                             currencySymbol = selectedCurrency.symbol,
                             onEdit = { /* TODO: Implement edit */ },
-                            onDelete = { viewModel.deleteExpense(expense.id) }
+                            onDelete = { 
+                                expenseToDelete = expense
+                                showDeleteConfirmation = true
+                            }
                         )
                     }
                 }
             }
         }
+    }
+    
+    // Delete confirmation dialog
+    if (showDeleteConfirmation && expenseToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { 
+                showDeleteConfirmation = false
+                expenseToDelete = null
+            },
+            title = { Text("Delete Expense") },
+            text = { 
+                Text("Are you sure you want to delete this expense?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteExpense(expenseToDelete!!.id)
+                        showDeleteConfirmation = false
+                        expenseToDelete = null
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirmation = false
+                        expenseToDelete = null
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
