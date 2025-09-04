@@ -231,6 +231,11 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
         )
     }
     
+    // Helper function to format budget amounts properly (avoid scientific notation)
+    fun formatBudgetAmount(amount: Double): String {
+        return String.format(Locale.US, "%.2f", amount).removeSuffix(".00")
+    }
+    
     fun showCancelMessage(message: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
