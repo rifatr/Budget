@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -400,7 +402,13 @@ private fun SortButton(
         ) {
             Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort")
             Spacer(modifier = Modifier.width(4.dp))
-            Text(getSortDisplayName(currentSort))
+            Text(getSortDisplayText(currentSort))
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                imageVector = getSortDirectionIcon(currentSort),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp)
+            )
         }
         
         ExposedDropdownMenu(
@@ -409,7 +417,14 @@ private fun SortButton(
         ) {
             SortOption.entries.forEach { sortOption ->
                 DropdownMenuItem(
-                    text = { Text(getSortDisplayName(sortOption)) },
+                    text = { Text(getSortDisplayText(sortOption)) },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = getSortDirectionIcon(sortOption),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    },
                     onClick = {
                         onSortChange(sortOption)
                         expanded = false
@@ -420,15 +435,20 @@ private fun SortButton(
     }
 }
 
-private fun getSortDisplayName(sortOption: SortOption): String {
+private fun getSortDisplayText(sortOption: SortOption): String {
     return when (sortOption) {
-        SortOption.NAME_ASC -> "Name ↑"
-        SortOption.NAME_DESC -> "Name ↓"
-        SortOption.SPENT_ASC -> "Spent ↑"
-        SortOption.SPENT_DESC -> "Spent ↓"
-        SortOption.BUDGET_ASC -> "Budget ↑"
-        SortOption.BUDGET_DESC -> "Budget ↓"
-        SortOption.REMAINING_ASC -> "Remaining ↑"
-        SortOption.REMAINING_DESC -> "Remaining ↓"
+        SortOption.NAME_ASC, SortOption.NAME_DESC -> "Name"
+        SortOption.SPENT_ASC, SortOption.SPENT_DESC -> "Spent"
+        SortOption.BUDGET_ASC, SortOption.BUDGET_DESC -> "Budget"
+        SortOption.REMAINING_ASC, SortOption.REMAINING_DESC -> "Remaining"
+    }
+}
+
+private fun getSortDirectionIcon(sortOption: SortOption): androidx.compose.ui.graphics.vector.ImageVector {
+    return when (sortOption) {
+        SortOption.NAME_ASC, SortOption.SPENT_ASC, SortOption.BUDGET_ASC, SortOption.REMAINING_ASC -> 
+            Icons.Default.ArrowUpward
+        SortOption.NAME_DESC, SortOption.SPENT_DESC, SortOption.BUDGET_DESC, SortOption.REMAINING_DESC -> 
+            Icons.Default.ArrowDownward
     }
 } 
