@@ -55,16 +55,53 @@ fun MoreScreen(navController: NavController) {
             
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             
-            MenuItem(
-                icon = Icons.Default.ViewModule,
-                title = "Summary Layout",
-                subtitle = if (summaryLayoutType == SummaryLayoutType.CARDS) "Cards View" else "Table View",
-                onClick = { 
-                    val newLayoutType = if (summaryLayoutType == SummaryLayoutType.CARDS) 
-                        SummaryLayoutType.TABLE else SummaryLayoutType.CARDS
-                    app.container.summaryLayoutPreferences.setSummaryLayoutType(newLayoutType)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ViewModule,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = "Summary Layout",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = if (summaryLayoutType == SummaryLayoutType.CARDS) "Cards View" else "Table View",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
-            )
+                
+                // Toggle Switch
+                Switch(
+                    checked = summaryLayoutType == SummaryLayoutType.TABLE,
+                    onCheckedChange = { isTable ->
+                        val newLayoutType = if (isTable) SummaryLayoutType.TABLE else SummaryLayoutType.CARDS
+                        app.container.summaryLayoutPreferences.setSummaryLayoutType(newLayoutType)
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.colorScheme.primary,
+                        checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                        uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                )
+            }
             
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             
