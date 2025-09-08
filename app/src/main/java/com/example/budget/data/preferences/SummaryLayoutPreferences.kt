@@ -2,13 +2,10 @@ package com.example.budget.data.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.budget.data.SummaryLayoutType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-
-enum class SummaryLayoutType {
-    CARDS, TABLE
-}
 
 class SummaryLayoutPreferences(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

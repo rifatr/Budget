@@ -3,8 +3,8 @@ package com.example.budget.ui.summary
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budget.data.BudgetRepository
+import com.example.budget.data.SummaryLayoutType
 import com.example.budget.data.preferences.SummaryLayoutPreferences
-import com.example.budget.data.preferences.SummaryLayoutType
 import com.example.budget.data.db.Budget
 import com.example.budget.data.db.Category
 import com.example.budget.data.db.Expense

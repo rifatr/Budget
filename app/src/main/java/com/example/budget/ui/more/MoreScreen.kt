@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.budget.BudgetApp
-import com.example.budget.data.preferences.SummaryLayoutType
+import com.example.budget.data.SummaryLayoutType
 import com.example.budget.ui.Screen
 import com.example.budget.ui.setup.CurrencySelectionDialog
 import androidx.compose.ui.text.style.TextAlign

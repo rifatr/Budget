@@ -28,7 +28,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.budget.ui.AppViewModelProvider
 import com.example.budget.ui.Screen
 import com.example.budget.ui.components.BeautifulSelector
-import com.example.budget.data.preferences.SummaryLayoutType
+import com.example.budget.data.SummaryLayoutType
 import com.example.budget.ui.utils.formatCurrency
 import com.example.budget.ui.utils.getDynamicTextStyle
 import java.util.*
