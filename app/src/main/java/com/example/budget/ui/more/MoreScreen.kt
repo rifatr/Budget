@@ -29,6 +29,7 @@ fun MoreScreen(navController: NavController) {
     val selectedCurrency by app.container.currencyPreferences.selectedCurrency.collectAsState()
     val summaryLayoutType by app.container.summaryLayoutPreferences.summaryLayoutType.collectAsState()
     var showCurrencyDialog by remember { mutableStateOf(false) }
+    var isLayoutSectionExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -55,86 +56,79 @@ fun MoreScreen(navController: NavController) {
             
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             
-            Column(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(bottom = 12.dp)
+            MenuItem(
+                icon = Icons.Default.ViewModule,
+                title = "Summary Layout",
+                subtitle = if (summaryLayoutType == SummaryLayoutType.CARDS) "Cards View" else "Table View",
+                onClick = { isLayoutSectionExpanded = !isLayoutSectionExpanded },
+                trailingIcon = if (isLayoutSectionExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore
+            )
+            
+            // Collapsible layout options
+            if (isLayoutSectionExpanded) {
+                Column(
+                    modifier = Modifier.padding(start = 56.dp, end = 16.dp, bottom = 8.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ViewModule,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = "Summary Layout",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                
-                // Cards Option
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            app.container.summaryLayoutPreferences.setSummaryLayoutType(SummaryLayoutType.CARDS)
-                        }
-                        .padding(vertical = 8.dp, horizontal = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = summaryLayoutType == SummaryLayoutType.CARDS,
-                        onClick = {
-                            app.container.summaryLayoutPreferences.setSummaryLayoutType(SummaryLayoutType.CARDS)
-                        }
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            text = "Cards View",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                    // Cards Option
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                app.container.summaryLayoutPreferences.setSummaryLayoutType(SummaryLayoutType.CARDS)
+                            }
+                            .padding(vertical = 8.dp, horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = summaryLayoutType == SummaryLayoutType.CARDS,
+                            onClick = {
+                                app.container.summaryLayoutPreferences.setSummaryLayoutType(SummaryLayoutType.CARDS)
+                            }
                         )
-                        Text(
-                            text = "Modern card-based layout",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Cards View",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Modern card-based layout",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
-                }
-                
-                // Table Option
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            app.container.summaryLayoutPreferences.setSummaryLayoutType(SummaryLayoutType.TABLE)
-                        }
-                        .padding(vertical = 8.dp, horizontal = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = summaryLayoutType == SummaryLayoutType.TABLE,
-                        onClick = {
-                            app.container.summaryLayoutPreferences.setSummaryLayoutType(SummaryLayoutType.TABLE)
-                        }
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            text = "Table View",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                    
+                    // Table Option
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                app.container.summaryLayoutPreferences.setSummaryLayoutType(SummaryLayoutType.TABLE)
+                            }
+                            .padding(vertical = 8.dp, horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = summaryLayoutType == SummaryLayoutType.TABLE,
+                            onClick = {
+                                app.container.summaryLayoutPreferences.setSummaryLayoutType(SummaryLayoutType.TABLE)
+                            }
                         )
-                        Text(
-                            text = "Compact table with all data",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Table View",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Compact table with all data",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -240,7 +234,8 @@ private fun MenuItem(
     icon: ImageVector,
     title: String,
     subtitle: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    trailingIcon: ImageVector = Icons.Default.ChevronRight
 ) {
     Row(
         modifier = Modifier
@@ -269,9 +264,10 @@ private fun MenuItem(
             )
         }
         Icon(
-            imageVector = Icons.Default.ChevronRight,
+            imageVector = trailingIcon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp)
         )
     }
 } 
