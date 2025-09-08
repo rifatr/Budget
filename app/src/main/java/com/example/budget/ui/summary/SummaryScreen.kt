@@ -11,6 +11,8 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +28,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.budget.ui.AppViewModelProvider
 import com.example.budget.ui.Screen
 import com.example.budget.ui.components.BeautifulSelector
+import com.example.budget.data.SummaryLayoutType
 import com.example.budget.ui.utils.formatCurrency
 import com.example.budget.ui.utils.getDynamicTextStyle
 import java.util.*
@@ -110,16 +113,30 @@ fun SummaryScreen(
                         }
                     }
 
-                    items(uiState.sortedSummaryRows) { row ->
-                        CategoryCard(
-                            row = row,
-                            currencySymbol = selectedCurrency.symbol,
-                            onClick = {
-                                navController.navigate(
-                                    "${Screen.CategoryExpenseDetail.route}/${row.category.id}/${row.category.name}/${selectedMonth}/${selectedYear}"
-                                )
-                            }
-                        )
+                    if (uiState.layoutType == SummaryLayoutType.CARDS) {
+                        items(uiState.sortedSummaryRows) { row ->
+                            CategoryCard(
+                                row = row,
+                                currencySymbol = selectedCurrency.symbol,
+                                onClick = {
+                                    navController.navigate(
+                                        "${Screen.CategoryExpenseDetail.route}/${row.category.id}/${row.category.name}/${selectedMonth}/${selectedYear}"
+                                    )
+                                }
+                            )
+                        }
+                    } else {
+                        item {
+                            CategoryTable(
+                                summaryRows = uiState.sortedSummaryRows,
+                                currencySymbol = selectedCurrency.symbol,
+                                onCategoryClick = { row ->
+                                    navController.navigate(
+                                        "${Screen.CategoryExpenseDetail.route}/${row.category.id}/${row.category.name}/${selectedMonth}/${selectedYear}"
+                                    )
+                                }
+                            )
+                        }
                     }
                     
                     item {
@@ -450,5 +467,147 @@ private fun getSortDirectionIcon(sortOption: SortOption): androidx.compose.ui.gr
             Icons.Default.ArrowUpward
         SortOption.NAME_DESC, SortOption.SPENT_DESC, SortOption.BUDGET_DESC, SortOption.REMAINING_DESC -> 
             Icons.Default.ArrowDownward
+    }
+}
+
+@Composable
+fun CategoryTable(
+    summaryRows: List<SummaryRow>,
+    currencySymbol: String,
+    onCategoryClick: (SummaryRow) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column {
+            // Table Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Name",
+                    modifier = Modifier.weight(1.5f),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Spent",
+                    modifier = Modifier.weight(1.8f),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.End
+                )
+                Text(
+                    text = "Budget",
+                    modifier = Modifier.weight(1.8f),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.End
+                )
+                Text(
+                    text = "Remaining",
+                    modifier = Modifier.weight(2f),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.End
+                )
+            }
+            
+            // Table Rows
+            summaryRows.forEachIndexed { index, row ->
+                val isOverBudget = row.actual > row.budgeted && row.budgeted > 0
+                val remaining = row.budgeted - row.actual
+                val statusColor = when {
+                    row.budgeted == 0.0 -> MaterialTheme.colorScheme.outline
+                    isOverBudget -> MaterialTheme.colorScheme.error
+                    row.actual == 0.0 -> MaterialTheme.colorScheme.outline
+                    else -> MaterialTheme.colorScheme.primary
+                }
+                
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onCategoryClick(row) }
+                        .background(
+                            if (index % 2 == 0) 
+                                MaterialTheme.colorScheme.surface 
+                            else 
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Category Name
+                    Text(
+                        text = row.category.name,
+                        modifier = Modifier.weight(1.5f),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    
+                    // Spent Amount
+                    Text(
+                        text = formatCurrency(row.actual, currencySymbol),
+                        modifier = Modifier.weight(1.8f),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.End,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    
+                    // Budget Amount
+                    Text(
+                        text = if (row.budgeted > 0) formatCurrency(row.budgeted, currencySymbol) else "-",
+                        modifier = Modifier.weight(1.8f),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.End,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    
+                    // Remaining Amount
+                    Text(
+                        text = when {
+                            row.budgeted == 0.0 -> "-"
+                            isOverBudget -> formatCurrency(-remaining, currencySymbol)
+                            else -> formatCurrency(remaining, currencySymbol)
+                        },
+                        modifier = Modifier.weight(2f),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = statusColor,
+                        textAlign = TextAlign.End,
+                        fontWeight = if (isOverBudget) FontWeight.Bold else FontWeight.Normal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                
+                // Add divider between rows (except last row)
+                if (index < summaryRows.size - 1) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                    )
+                }
+            }
+        }
     }
 } 

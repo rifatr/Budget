@@ -25,7 +25,10 @@ object AppViewModelProvider {
 
         // Initializer for SummaryViewModel
         initializer {
-            SummaryViewModel(budgetApplication().container.budgetRepository)
+            SummaryViewModel(
+                budgetApplication().container.budgetRepository,
+                budgetApplication().container.appPreferences
+            )
         }
 
         // Initializer for SettingsViewModel

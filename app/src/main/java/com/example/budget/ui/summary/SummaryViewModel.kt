@@ -2,7 +2,9 @@ package com.example.budget.ui.summary
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.budget.data.AppPreferences
 import com.example.budget.data.BudgetRepository
+import com.example.budget.data.SummaryLayoutType
 import com.example.budget.data.db.Budget
 import com.example.budget.data.db.Category
 import com.example.budget.data.db.Expense
@@ -30,7 +32,8 @@ data class SummaryUiState(
     val sortedSummaryRows: List<SummaryRow> = emptyList(),
     val totalBudget: Double = 0.0,
     val totalSpent: Double = 0.0,
-    val currentSort: SortOption = SortOption.NAME_ASC
+    val currentSort: SortOption = SortOption.NAME_ASC,
+    val layoutType: SummaryLayoutType = SummaryLayoutType.CARDS
 )
 
 data class SummaryRow(
@@ -40,7 +43,10 @@ data class SummaryRow(
     val delta: Double
 )
 
-class SummaryViewModel(private val budgetRepository: BudgetRepository) : ViewModel() {
+class SummaryViewModel(
+    private val budgetRepository: BudgetRepository,
+    private val appPreferences: AppPreferences
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
         SummaryUiState(
@@ -63,8 +69,9 @@ class SummaryViewModel(private val budgetRepository: BudgetRepository) : ViewMod
             combine(
                 budgetRepository.getBudgetForMonth(month, year),
                 budgetRepository.getExpensesForMonth(startDate, endDate),
-                budgetRepository.getAllCategories()
-            ) { budget, expenses, categories ->
+                budgetRepository.getAllCategories(),
+                appPreferences.summaryLayoutType
+            ) { budget, expenses, categories, layoutType ->
                 val summary = categories.associateWith { category ->
                     val budgeted = budget?.categoryBudgets?.get(category.id) ?: 0.0
                     val actual = expenses.filter { it.categoryId == category.id }.sumOf { it.amount }
@@ -93,7 +100,8 @@ class SummaryViewModel(private val budgetRepository: BudgetRepository) : ViewMod
                     sortedSummaryRows = summaryRows, // Will be updated by applySorting
                     totalBudget = totalBudget,
                     totalSpent = totalSpent,
-                    currentSort = currentState.currentSort
+                    currentSort = currentState.currentSort,
+                    layoutType = layoutType
                 )
             }.collect {
                 _uiState.value = it

@@ -6,6 +6,7 @@ import com.example.budget.data.db.AppDatabase
 interface AppContainer {
     val budgetRepository: BudgetRepository
     val currencyPreferences: CurrencyPreferences
+    val appPreferences: AppPreferences
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
@@ -19,5 +20,9 @@ class AppDataContainer(private val context: Context) : AppContainer {
     
     override val currencyPreferences: CurrencyPreferences by lazy {
         CurrencyPreferences(context)
+    }
+    
+    override val appPreferences: AppPreferences by lazy {
+        AppPreferences(context)
     }
 } 
