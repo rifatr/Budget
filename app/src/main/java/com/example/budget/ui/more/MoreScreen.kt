@@ -1,5 +1,7 @@
 package com.example.budget.ui.more
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -55,17 +58,29 @@ fun MoreScreen(navController: NavController) {
             )
             
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-            
-            MenuItem(
+
+            AnimatedMenuItem(
                 icon = Icons.Default.ViewModule,
                 title = "Summary Layout",
                 subtitle = if (summaryLayoutType == SummaryLayoutType.CARDS) "Cards View" else "Table View",
                 onClick = { isLayoutSectionExpanded = !isLayoutSectionExpanded },
-                trailingIcon = if (isLayoutSectionExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore
+                isExpanded = isLayoutSectionExpanded
             )
             
-            // Collapsible layout options
-            if (isLayoutSectionExpanded) {
+            // Animated collapsible summary layout options
+            AnimatedVisibility(
+                visible = isLayoutSectionExpanded,
+                enter = expandVertically(
+                    animationSpec = tween(300, easing = EaseInOut)
+                ) + fadeIn(
+                    animationSpec = tween(300, easing = EaseInOut)
+                ),
+                exit = shrinkVertically(
+                    animationSpec = tween(300, easing = EaseInOut)
+                ) + fadeOut(
+                    animationSpec = tween(300, easing = EaseInOut)
+                )
+            ) {
                 Column(
                     modifier = Modifier.padding(start = 56.dp, end = 16.dp, bottom = 8.dp)
                 ) {
@@ -270,4 +285,57 @@ private fun MenuItem(
             modifier = Modifier.size(20.dp)
         )
     }
-} 
+}
+
+@Composable
+private fun AnimatedMenuItem(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    isExpanded: Boolean
+) {
+    val rotationAngle by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        animationSpec = tween(300, easing = EaseInOut),
+        label = "expand_icon_rotation"
+    )
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Icon(
+            imageVector = Icons.Default.ExpandMore,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .size(20.dp)
+                .graphicsLayer {
+                    rotationZ = rotationAngle
+                }
+        )
+    }
+}
