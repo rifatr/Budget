@@ -1,4 +1,4 @@
-package com.example.budget.data
+package com.example.budget.data.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -10,7 +10,7 @@ enum class SummaryLayoutType {
     CARDS, TABLE
 }
 
-class AppPreferences(context: Context) {
+class SummaryLayoutPreferences(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     
     private val _summaryLayoutType = MutableStateFlow(getSummaryLayoutType())
@@ -31,7 +31,7 @@ class AppPreferences(context: Context) {
     }
     
     companion object {
-        private const val PREFS_NAME = "app_preferences"
+        private const val PREFS_NAME = "summary_layout_preferences"
         private const val KEY_SUMMARY_LAYOUT = "summary_layout_type"
     }
 }

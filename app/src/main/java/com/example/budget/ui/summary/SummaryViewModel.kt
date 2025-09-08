@@ -2,9 +2,9 @@ package com.example.budget.ui.summary
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.budget.data.AppPreferences
 import com.example.budget.data.BudgetRepository
-import com.example.budget.data.SummaryLayoutType
+import com.example.budget.data.preferences.SummaryLayoutPreferences
+import com.example.budget.data.preferences.SummaryLayoutType
 import com.example.budget.data.db.Budget
 import com.example.budget.data.db.Category
 import com.example.budget.data.db.Expense
@@ -45,7 +45,7 @@ data class SummaryRow(
 
 class SummaryViewModel(
     private val budgetRepository: BudgetRepository,
-    private val appPreferences: AppPreferences
+    private val summaryLayoutPreferences: SummaryLayoutPreferences
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -70,7 +70,7 @@ class SummaryViewModel(
                 budgetRepository.getBudgetForMonth(month, year),
                 budgetRepository.getExpensesForMonth(startDate, endDate),
                 budgetRepository.getAllCategories(),
-                appPreferences.summaryLayoutType
+                summaryLayoutPreferences.summaryLayoutType
             ) { budget, expenses, categories, layoutType ->
                 val summary = categories.associateWith { category ->
                     val budgeted = budget?.categoryBudgets?.get(category.id) ?: 0.0

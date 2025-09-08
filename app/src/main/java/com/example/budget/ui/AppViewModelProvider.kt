@@ -27,7 +27,7 @@ object AppViewModelProvider {
         initializer {
             SummaryViewModel(
                 budgetApplication().container.budgetRepository,
-                budgetApplication().container.appPreferences
+                budgetApplication().container.summaryLayoutPreferences
             )
         }
 

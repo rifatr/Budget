@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.budget.BudgetApp
-import com.example.budget.data.SummaryLayoutType
+import com.example.budget.data.preferences.SummaryLayoutType
 import com.example.budget.ui.Screen
 import com.example.budget.ui.setup.CurrencySelectionDialog
 import androidx.compose.ui.text.style.TextAlign
@@ -27,7 +27,7 @@ fun MoreScreen(navController: NavController) {
     val context = LocalContext.current
     val app = context.applicationContext as BudgetApp
     val selectedCurrency by app.container.currencyPreferences.selectedCurrency.collectAsState()
-    val summaryLayoutType by app.container.appPreferences.summaryLayoutType.collectAsState()
+    val summaryLayoutType by app.container.summaryLayoutPreferences.summaryLayoutType.collectAsState()
     var showCurrencyDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -62,7 +62,7 @@ fun MoreScreen(navController: NavController) {
                 onClick = { 
                     val newLayoutType = if (summaryLayoutType == SummaryLayoutType.CARDS) 
                         SummaryLayoutType.TABLE else SummaryLayoutType.CARDS
-                    app.container.appPreferences.setSummaryLayoutType(newLayoutType)
+                    app.container.summaryLayoutPreferences.setSummaryLayoutType(newLayoutType)
                 }
             )
             
