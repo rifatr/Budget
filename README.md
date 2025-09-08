@@ -47,7 +47,7 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 
 ### 📈 Summary & Analytics
 - **Dual Layout Options**: Choose between modern Cards view or compact Table view
-- **Layout Preference**: Toggle between layouts in More > Summary Layout settings
+- **Layout Preference**: Expandable settings section in More > Summary Layout with smooth animations
 - **Monthly Overview**: Budget vs actual spending comparison with interactive elements
 - **Category Details**: Dedicated screen showing all expenses for a specific category
 - **Smart Formatting**: Dynamic font sizing and comma delimiters for large numbers
@@ -97,7 +97,8 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 ### Key Components
 - **Currency System**: Enum-based with reactive updates and smart formatting
 - **Preference Architecture**: Organized preference management with separation of concerns
-- **Layout System**: Dual layout support (Cards/Table) with user preference storage
+- **Layout System**: Dual layout support (Cards/Table) with animated collapsible settings
+- **Animation System**: Smooth Material 3 animations for expand/collapse interactions
 - **Focus Management**: Smart keyboard and focus handling
 - **Input Validation**: Real-time validation with visual feedback and inline error messages
 - **Confirmation System**: Reusable ConfirmationMessage component with auto-dismissal
@@ -244,7 +245,7 @@ app/src/main/java/com/example/budget/
 3. **Quick Entry**: Use home screen widget for instant expense logging
 4. **Check Progress**: View Summary tab for budget vs spending overview
 5. **View Details**: Tap category cards/rows in Summary to see individual expenses
-6. **Switch Layout**: Toggle between Cards and Table view in More > Summary Layout
+6. **Switch Layout**: Expand Summary Layout section in More tab to choose between Cards and Table view
 7. **Sort Categories**: Use sort button in Summary to organize by name, spent, budget, or remaining
 8. **Adjust Budgets**: Modify budgets in Budget tab with real-time validation
 9. **Manage Categories**: Use Category Manager from More tab for advanced category operations
