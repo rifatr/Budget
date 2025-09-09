@@ -126,6 +126,10 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
                 
                 budgetRepository.insertOrUpdateBudget(newBudget)
                 
+                // Refresh budget data to get the saved budget with correct ID
+                val savedBudget = budgetRepository.getBudgetForMonth(_uiState.value.selectedMonth, _uiState.value.selectedYear).first()
+                _uiState.value = _uiState.value.copy(budget = savedBudget)
+                
                 // Show success message
                 showSuccessMessage("Budget saved successfully!")
                 
@@ -207,6 +211,10 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
                         categoryBudgets = updatedCategoryBudgets
                     )
                     budgetRepository.insertOrUpdateBudget(newBudget)
+                    
+                    // Refresh budget data to get the saved budget with correct ID
+                    val savedBudget = budgetRepository.getBudgetForMonth(_uiState.value.selectedMonth, _uiState.value.selectedYear).first()
+                    _uiState.value = _uiState.value.copy(budget = savedBudget)
                 }
                 
                 val message = if (budgetAmount > 0.0) {
@@ -298,6 +306,10 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
                 )
                 
                 budgetRepository.insertOrUpdateBudget(newBudget)
+                
+                // Refresh budget data to get the saved budget with correct ID
+                val savedBudget = budgetRepository.getBudgetForMonth(_uiState.value.selectedMonth, _uiState.value.selectedYear).first()
+                _uiState.value = _uiState.value.copy(budget = savedBudget)
                 
                 showSuccessMessage("$categoryName budget (${String.format(Locale.US, "%.2f", currentCategoryBudget)}) saved successfully!")
                 
