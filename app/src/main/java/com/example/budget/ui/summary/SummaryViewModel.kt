@@ -3,6 +3,8 @@ package com.example.budget.ui.summary
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budget.data.BudgetRepository
+import com.example.budget.data.SummaryLayoutType
+import com.example.budget.data.preferences.SummaryLayoutPreferences
 import com.example.budget.data.db.Budget
 import com.example.budget.data.db.Category
 import com.example.budget.data.db.Expense
@@ -14,6 +16,10 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
 
+enum class SortOption {
+    NAME_ASC, NAME_DESC, SPENT_ASC, SPENT_DESC, BUDGET_ASC, BUDGET_DESC, REMAINING_ASC, REMAINING_DESC
+}
+
 data class SummaryUiState(
     val selectedMonth: Int,
     val selectedYear: Int,
@@ -23,8 +29,11 @@ data class SummaryUiState(
     val summary: Map<Category, SummaryRow>,
     val isLoading: Boolean = false,
     val summaryRows: List<SummaryRow> = emptyList(),
+    val sortedSummaryRows: List<SummaryRow> = emptyList(),
     val totalBudget: Double = 0.0,
-    val totalSpent: Double = 0.0
+    val totalSpent: Double = 0.0,
+    val currentSort: SortOption = SortOption.NAME_ASC,
+    val layoutType: SummaryLayoutType = SummaryLayoutType.CARDS
 )
 
 data class SummaryRow(
@@ -34,7 +43,10 @@ data class SummaryRow(
     val delta: Double
 )
 
-class SummaryViewModel(private val budgetRepository: BudgetRepository) : ViewModel() {
+class SummaryViewModel(
+    private val budgetRepository: BudgetRepository,
+    private val summaryLayoutPreferences: SummaryLayoutPreferences
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
         SummaryUiState(
@@ -57,8 +69,9 @@ class SummaryViewModel(private val budgetRepository: BudgetRepository) : ViewMod
             combine(
                 budgetRepository.getBudgetForMonth(month, year),
                 budgetRepository.getExpensesForMonth(startDate, endDate),
-                budgetRepository.getAllCategories()
-            ) { budget, expenses, categories ->
+                budgetRepository.getAllCategories(),
+                summaryLayoutPreferences.summaryLayoutType
+            ) { budget, expenses, categories, layoutType ->
                 val summary = categories.associateWith { category ->
                     val budgeted = budget?.categoryBudgets?.get(category.id) ?: 0.0
                     val actual = expenses.filter { it.categoryId == category.id }.sumOf { it.amount }
@@ -74,6 +87,7 @@ class SummaryViewModel(private val budgetRepository: BudgetRepository) : ViewMod
                 val totalBudget = budget?.overallBudget ?: 0.0
                 val totalSpent = expenses.sumOf { it.amount }
                 
+                val currentState = _uiState.value
                 SummaryUiState(
                     selectedMonth = month,
                     selectedYear = year,
@@ -83,13 +97,38 @@ class SummaryViewModel(private val budgetRepository: BudgetRepository) : ViewMod
                     summary = summary,
                     isLoading = false,
                     summaryRows = summaryRows,
+                    sortedSummaryRows = summaryRows, // Will be updated by applySorting
                     totalBudget = totalBudget,
-                    totalSpent = totalSpent
+                    totalSpent = totalSpent,
+                    currentSort = currentState.currentSort,
+                    layoutType = layoutType
                 )
             }.collect {
                 _uiState.value = it
+                applySorting()
             }
         }
+    }
+    
+    fun updateSort(sortOption: SortOption) {
+        _uiState.value = _uiState.value.copy(currentSort = sortOption)
+        applySorting()
+    }
+    
+    private fun applySorting() {
+        val currentState = _uiState.value
+        val sortedRows = when (currentState.currentSort) {
+            SortOption.NAME_ASC -> currentState.summaryRows.sortedBy { it.category.name.lowercase() }
+            SortOption.NAME_DESC -> currentState.summaryRows.sortedByDescending { it.category.name.lowercase() }
+            SortOption.SPENT_ASC -> currentState.summaryRows.sortedBy { it.actual }
+            SortOption.SPENT_DESC -> currentState.summaryRows.sortedByDescending { it.actual }
+            SortOption.BUDGET_ASC -> currentState.summaryRows.sortedBy { it.budgeted }
+            SortOption.BUDGET_DESC -> currentState.summaryRows.sortedByDescending { it.budgeted }
+            SortOption.REMAINING_ASC -> currentState.summaryRows.sortedBy { it.budgeted - it.actual }
+            SortOption.REMAINING_DESC -> currentState.summaryRows.sortedByDescending { it.budgeted - it.actual }
+        }
+        
+        _uiState.value = _uiState.value.copy(sortedSummaryRows = sortedRows)
     }
 
     private fun getMonthDateRange(year: Int, month: Int): Pair<Date, Date> {

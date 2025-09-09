@@ -25,7 +25,10 @@ object AppViewModelProvider {
 
         // Initializer for SummaryViewModel
         initializer {
-            SummaryViewModel(budgetApplication().container.budgetRepository)
+            SummaryViewModel(
+                budgetApplication().container.budgetRepository,
+                budgetApplication().container.summaryLayoutPreferences
+            )
         }
 
         // Initializer for SettingsViewModel
@@ -36,6 +39,9 @@ object AppViewModelProvider {
         // Initializer for CategoryManagerViewModel
         initializer {
             CategoryManagerViewModel(budgetApplication().container.budgetRepository)
+        }
+        initializer {
+            com.example.budget.ui.categoryexpensedetail.CategoryExpenseDetailViewModel(budgetApplication().container.budgetRepository)
         }
     }
 }

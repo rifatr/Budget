@@ -29,11 +29,13 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 
 ### 💰 Budget Tracking
 - **Monthly Budgets**: Set overall and category-specific budget limits
-- **Visual Progress**: See budget vs spending with clear totals
-- **Smart Validation**: Prevent duplicate categories and invalid amounts
+- **Visual Progress**: See budget vs spending with clear totals and rounded progress bars
+- **Smart Validation**: Prevent duplicate categories and invalid amounts with inline validation
 - **Auto-Save**: Press Done to automatically save budget changes
 - **Confirmation System**: Success and error messages with beautiful UI feedback
 - **Real-time Updates**: Live display of remaining uncategorized budget
+- **Number Formatting**: Proper display formatting prevents scientific notation in input fields
+- **Smart Input**: Large numbers display with comma delimiters for better readability
 
 ### 📂 Category Management
 - **Dedicated Manager**: Full-featured category management from More screen
@@ -44,8 +46,15 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 - **Bulk Operations**: Delete categories and all associated expenses safely
 
 ### 📈 Summary & Analytics
-- **Monthly Overview**: Budget vs actual spending comparison
-- **Visual Cards**: Beautiful card-based layout with totals and dividers
+- **Dual Layout Options**: Choose between modern Cards view or compact Table view
+- **Layout Preference**: Expandable settings section in More > Summary Layout with smooth animations
+- **Monthly Overview**: Budget vs actual spending comparison with interactive elements
+- **Category Details**: Dedicated screen showing all expenses for a specific category
+- **Smart Formatting**: Dynamic font sizing and comma delimiters for large numbers
+- **Sort & Filter**: Sort categories by name, spent amount, budget, or remaining budget
+- **Visual Progress**: Rounded progress indicators showing budget utilization
+- **Interactive Navigation**: Tap category cards/rows to view detailed expense breakdown
+- **Responsive Design**: Table layout optimized for large numbers with proper spacing
 - **Loading States**: Smooth loading indicators for better UX
 - **Empty States**: Helpful messages when no data is available
 
@@ -86,13 +95,17 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 - **Build System**: Gradle with Kotlin DSL
 
 ### Key Components
-- **Currency System**: Enum-based with reactive updates
+- **Currency System**: Enum-based with reactive updates and smart formatting
+- **Preference Architecture**: Organized preference management with separation of concerns
+- **Layout System**: Dual layout support (Cards/Table) with animated collapsible settings
+- **Animation System**: Smooth Material 3 animations for expand/collapse interactions
 - **Focus Management**: Smart keyboard and focus handling
-- **Input Validation**: Real-time validation with visual feedback
-- **Confirmation System**: Reusable ConfirmationMessage component for user feedback
-- **UI Components**: Shared components like BeautifulSelector for consistent design
+- **Input Validation**: Real-time validation with visual feedback and inline error messages
+- **Confirmation System**: Reusable ConfirmationMessage component with auto-dismissal
+- **UI Components**: Shared components like BeautifulSelector and CurrencyUtils for consistent design
+- **Number Formatting**: Dynamic font sizing and comma delimiters for large numbers
 - **Data Layer**: Repository pattern with Room database
-- **UI Layer**: Composable screens with ViewModels
+- **UI Layer**: Composable screens with ViewModels and proper state management
 
 ## 🚀 Getting Started
 
@@ -131,20 +144,25 @@ For release build (requires keystore setup):
 app/src/main/java/com/example/budget/
 ├── data/
 │   ├── db/                    # Room database (entities, DAOs, converters)
+│   ├── preferences/           # User preference management
+│   │   ├── CurrencyPreferences.kt    # Currency selection and first launch
+│   │   └── SummaryLayoutPreferences.kt # Summary layout preference (Cards/Table)
 │   ├── Currency.kt            # Currency enum and definitions
-│   ├── CurrencyPreferences.kt # Currency preference management
+│   ├── SummaryLayout.kt       # Summary layout type enum
 │   ├── BudgetRepository.kt    # Data access layer
 │   └── AppContainer.kt        # Dependency injection container
 ├── ui/
 │   ├── expense/               # Expense tracking UI and ViewModel
 │   ├── budget/                # Budget management UI and ViewModel
 │   ├── categorymanager/       # Category management UI and ViewModel
-│   ├── summary/               # Summary/analytics UI and ViewModel
-│   ├── more/                  # More screen with navigation
+│   ├── categoryexpensedetail/ # Category expense detail screen UI and ViewModel
+│   ├── summary/               # Summary/analytics UI with dual layout support and sort functionality
+│   ├── more/                  # More screen with navigation and preferences
 │   ├── info/                  # App information and credits
 │   ├── settings/              # Data management (export/import)
 │   ├── setup/                 # Currency selection dialog
 │   ├── components/            # Reusable UI components (ConfirmationMessage, BeautifulSelector)
+│   ├── utils/                 # Utility functions (CurrencyUtils for formatting)
 │   ├── theme/                 # App theming and gradient colors
 │   ├── Navigation.kt          # Route definitions
 │   ├── BudgetAppNavigation.kt # Main navigation with swipe-enabled bottom tabs
@@ -226,8 +244,12 @@ app/src/main/java/com/example/budget/
 2. **Navigate Tabs**: Swipe left/right between tabs or tap bottom navigation
 3. **Quick Entry**: Use home screen widget for instant expense logging
 4. **Check Progress**: View Summary tab for budget vs spending overview
-5. **Adjust Budgets**: Modify budgets in Budget tab as needed
-6. **Data Management**: Export backups or change currency in More tab
+5. **View Details**: Tap category cards/rows in Summary to see individual expenses
+6. **Switch Layout**: Expand Summary Layout section in More tab to choose between Cards and Table view
+7. **Sort Categories**: Use sort button in Summary to organize by name, spent, budget, or remaining
+8. **Adjust Budgets**: Modify budgets in Budget tab with real-time validation
+9. **Manage Categories**: Use Category Manager from More tab for advanced category operations
+10. **Data Management**: Export backups or change currency/preferences in More tab
 
 ## 🔄 Data Backup
 

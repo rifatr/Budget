@@ -15,7 +15,7 @@ import java.util.Locale
 // Validation Constants
 object ValidationConstants {
     const val CATEGORY_NAME_MAX_LENGTH = 24
-    private const val AMOUNT_DIGITS_BEFORE_DECIMAL = 6
+    private const val AMOUNT_DIGITS_BEFORE_DECIMAL = 8
     private const val AMOUNT_DIGITS_AFTER_DECIMAL = 2
     
     // Generate regex pattern for amount validation
@@ -76,7 +76,7 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
             _uiState.value = _uiState.value.copy(
                 allCategories = categories,
                 budget = budget,
-                totalBudgetInput = budget?.overallBudget?.toString() ?: "",
+                totalBudgetInput = budget?.overallBudget?.let { formatNumberForInput(it) } ?: "",
                 categoryBudgets = cleanedCategoryBudgets
             )
         }
@@ -227,6 +227,11 @@ class BudgetViewModel(private val budgetRepository: BudgetRepository) : ViewMode
             showConfirmationMessage = false,
             isConfirmationError = false
         )
+    }
+    
+    // Helper function to format numbers without scientific notation for input fields
+    fun formatNumberForInput(amount: Double): String {
+        return String.format(Locale.US, "%.2f", amount).removeSuffix(".00")
     }
     
     fun showCancelMessage(message: String) {

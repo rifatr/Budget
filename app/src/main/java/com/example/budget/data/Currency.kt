@@ -10,7 +10,7 @@ enum class Currency(val symbol: String, val displayName: String, val code: Strin
 
     companion object {
         fun fromCode(code: String): Currency {
-            return values().find { it.code == code } ?: DOLLAR
+            return entries.find { it.code == code } ?: DOLLAR
         }
     }
 } 

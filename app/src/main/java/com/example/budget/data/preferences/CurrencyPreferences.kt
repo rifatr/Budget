@@ -1,7 +1,8 @@
-package com.example.budget.data
+package com.example.budget.data.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.budget.data.Currency
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,8 +36,8 @@ class CurrencyPreferences(context: Context) {
     }
     
     companion object {
-        private const val PREFS_NAME = "budget_preferences"
+        private const val PREFS_NAME = "currency_preferences"
         private const val KEY_CURRENCY = "selected_currency"
         private const val KEY_FIRST_LAUNCH = "first_launch"
     }
-} 
+}

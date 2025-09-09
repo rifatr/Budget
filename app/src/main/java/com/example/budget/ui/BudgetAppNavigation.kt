@@ -15,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -29,7 +28,6 @@ import com.example.budget.ui.more.MoreScreen
 import com.example.budget.ui.settings.SettingsScreen
 import com.example.budget.ui.summary.SummaryScreen
 import kotlinx.coroutines.launch
-import java.util.*
 
 data class BottomNavItem(
     val screen: Screen,
@@ -37,7 +35,7 @@ data class BottomNavItem(
     val label: String
 )
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BudgetAppNavigation(
     navController: NavHostController = rememberNavController(),
@@ -126,7 +124,7 @@ fun BudgetAppNavigation(
                 when (page) {
                     0 -> ExpenseScreen()
                     1 -> BudgetScreen()
-                    2 -> SummaryScreen()
+                    2 -> SummaryScreen(navController)
                     3 -> MoreScreen(navController)
                 }
             }
@@ -148,6 +146,20 @@ fun BudgetAppNavigation(
                 }
                 composable(Screen.CategoryManager.route) {
                     CategoryManagerScreen(
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+                composable("${Screen.CategoryExpenseDetail.route}/{categoryId}/{categoryName}/{month}/{year}") { backStackEntry ->
+                    val categoryId = backStackEntry.arguments?.getString("categoryId")?.toIntOrNull() ?: 0
+                    val categoryName = backStackEntry.arguments?.getString("categoryName") ?: ""
+                    val month = backStackEntry.arguments?.getString("month")?.toIntOrNull() ?: 1
+                    val year = backStackEntry.arguments?.getString("year")?.toIntOrNull() ?: 2024
+                    
+                    com.example.budget.ui.categoryexpensedetail.CategoryExpenseDetailScreen(
+                        categoryId = categoryId,
+                        categoryName = categoryName,
+                        month = month,
+                        year = year,
                         onNavigateBack = { navController.popBackStack() }
                     )
                 }
