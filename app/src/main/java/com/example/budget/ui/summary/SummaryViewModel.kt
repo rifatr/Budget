@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budget.data.BudgetRepository
 import com.example.budget.data.SummaryLayoutType
+import com.example.budget.data.DateConstants
 import com.example.budget.data.preferences.SummaryLayoutPreferences
 import com.example.budget.data.db.Budget
 import com.example.budget.data.db.Category
@@ -65,7 +66,7 @@ class SummaryViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             
-            val (startDate, endDate) = getMonthDateRange(year, month)
+            val (startDate, endDate) = DateConstants.getMonthStartAndEndTimestamps(year, month)
             combine(
                 budgetRepository.getBudgetForMonth(month, year),
                 budgetRepository.getExpensesForMonth(startDate, endDate),
@@ -131,16 +132,4 @@ class SummaryViewModel(
         _uiState.value = _uiState.value.copy(sortedSummaryRows = sortedRows)
     }
 
-    private fun getMonthDateRange(year: Int, month: Int): Pair<Date, Date> {
-        val calendar = Calendar.getInstance()
-        calendar.set(year, month - 1, 1, 0, 0, 0)
-        val startDate = calendar.time
-        calendar.add(Calendar.MONTH, 1)
-        calendar.add(Calendar.DAY_OF_MONTH, -1)
-        calendar.set(Calendar.HOUR_OF_DAY, 23)
-        calendar.set(Calendar.MINUTE, 59)
-        calendar.set(Calendar.SECOND, 59)
-        val endDate = calendar.time
-        return startDate to endDate
-    }
 } 

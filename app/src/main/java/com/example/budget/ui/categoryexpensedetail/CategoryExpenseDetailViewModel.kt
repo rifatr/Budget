@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budget.data.BudgetRepository
 import com.example.budget.data.db.Expense
+import com.example.budget.data.DateConstants
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,7 +42,7 @@ class CategoryExpenseDetailViewModel(
                 year = year
             )
             
-            val (startDate, endDate) = getMonthDateRange(year, month)
+            val (startDate, endDate) = DateConstants.getMonthStartAndEndTimestamps(year, month)
             
             combine(
                 budgetRepository.getBudgetForMonth(month, year),
@@ -82,7 +83,7 @@ class CategoryExpenseDetailViewModel(
     
     private suspend fun refreshData() {
         val currentState = _uiState.value
-        val (startDate, endDate) = getMonthDateRange(currentState.year, currentState.month)
+        val (startDate, endDate) = DateConstants.getMonthStartAndEndTimestamps(currentState.year, currentState.month)
         
         // Get fresh data
         val budget = budgetRepository.getBudgetForMonth(currentState.month, currentState.year).first()
@@ -123,17 +124,5 @@ class CategoryExpenseDetailViewModel(
         )
     }
     
-    private fun getMonthDateRange(year: Int, month: Int): Pair<Date, Date> {
-        val calendar = Calendar.getInstance()
-        calendar.set(year, month - 1, 1, 0, 0, 0)
-        val startDate = calendar.time
-        calendar.add(Calendar.MONTH, 1)
-        calendar.add(Calendar.DAY_OF_MONTH, -1)
-        calendar.set(Calendar.HOUR_OF_DAY, 23)
-        calendar.set(Calendar.MINUTE, 59)
-        calendar.set(Calendar.SECOND, 59)
-        val endDate = calendar.time
-        return startDate to endDate
-    }
 }
 

@@ -27,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.ui.AppViewModelProvider
+import com.example.budget.data.DateConstants
 import java.util.*
 import java.util.Locale
 
@@ -45,9 +46,8 @@ fun BudgetScreen(
     val focusManager = LocalFocusManager.current
     
     // Current month/year state
-    val calendar = Calendar.getInstance()
-    var selectedMonth by remember { mutableIntStateOf(calendar.get(Calendar.MONTH) + 1) }
-    var selectedYear by remember { mutableIntStateOf(calendar.get(Calendar.YEAR)) }
+    var selectedMonth by remember { mutableIntStateOf(DateConstants.getCurrentMonth()) }
+    var selectedYear by remember { mutableIntStateOf(DateConstants.getCurrentYear()) }
     
     var showAddCategoryDialog by remember { mutableStateOf(false) }
     var newCategoryName by remember { mutableStateOf("") }
@@ -431,14 +431,8 @@ private fun MonthYearSelector(
     onYearChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val months = listOf(
-        "January" to 1, "February" to 2, "March" to 3, "April" to 4,
-        "May" to 5, "June" to 6, "July" to 7, "August" to 8,
-        "September" to 9, "October" to 10, "November" to 11, "December" to 12
-    )
-    
-    val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-    val years = (currentYear - 5..currentYear + 5).toList()
+    val months = DateConstants.MONTHS
+    val years = DateConstants.getAvailableYears()
 
     Row(
         modifier = modifier.fillMaxWidth(),
