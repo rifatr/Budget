@@ -20,7 +20,10 @@ object AppViewModelProvider {
 
         // Initializer for ExpenseViewModel
         initializer {
-            ExpenseViewModel(budgetApplication().container.budgetRepository)
+            ExpenseViewModel(
+                budgetApplication().container.budgetRepository,
+                budgetApplication().container.categoryPreferences
+            )
         }
 
         // Initializer for SummaryViewModel

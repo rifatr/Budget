@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.budget.data.BudgetRepository
 import com.example.budget.data.db.Category
 import com.example.budget.data.db.Expense
+import com.example.budget.data.preferences.CategoryPreferences
 import com.example.budget.ui.budget.ValidationConstants
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -27,19 +29,28 @@ data class ExpenseUiState(
     val confirmationMessage: String = ""
 )
 
-class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewModel() {
+class ExpenseViewModel(
+    private val budgetRepository: BudgetRepository,
+    private val categoryPreferences: CategoryPreferences
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExpenseUiState())
     val uiState: StateFlow<ExpenseUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            budgetRepository.getAllCategoriesByUsage().collect { categories ->
+            combine(
+                budgetRepository.getAllCategories(), // Use alphabetical order instead of usage-based
+                categoryPreferences.lastSelectedCategoryId
+            ) { categories, lastSelectedCategoryId ->
                 val currentCategory = _uiState.value.category
-                val updatedCategory = if (currentCategory != null && categories.contains(currentCategory)) {
-                    currentCategory // Keep current selection if it still exists
-                } else {
-                    categories.firstOrNull() // Pre-select most used category if no current selection or it was deleted
+                val updatedCategory = when {
+                    // Keep current selection if it still exists
+                    currentCategory != null && categories.contains(currentCategory) -> currentCategory
+                    // Try to select the last selected category if it exists
+                    lastSelectedCategoryId != null -> categories.find { it.id == lastSelectedCategoryId }
+                    // Fallback to first category alphabetically
+                    else -> categories.firstOrNull()
                 }
                 
                 _uiState.value = _uiState.value.copy(
@@ -47,7 +58,7 @@ class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewMod
                     category = updatedCategory
                 )
                 validateInput()
-            }
+            }.collect {}
         }
     }
 
@@ -58,6 +69,8 @@ class ExpenseViewModel(private val budgetRepository: BudgetRepository) : ViewMod
 
     fun onCategoryChange(newCategory: Category) {
         _uiState.value = _uiState.value.copy(category = newCategory)
+        // Save the selected category as the last selected
+        categoryPreferences.setLastSelectedCategoryId(newCategory.id)
         validateInput()
     }
 

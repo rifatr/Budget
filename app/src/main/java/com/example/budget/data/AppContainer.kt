@@ -4,11 +4,13 @@ import android.content.Context
 import com.example.budget.data.db.AppDatabase
 import com.example.budget.data.preferences.CurrencyPreferences
 import com.example.budget.data.preferences.SummaryLayoutPreferences
+import com.example.budget.data.preferences.CategoryPreferences
 
 interface AppContainer {
     val budgetRepository: BudgetRepository
     val currencyPreferences: CurrencyPreferences
     val summaryLayoutPreferences: SummaryLayoutPreferences
+    val categoryPreferences: CategoryPreferences
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
@@ -26,5 +28,9 @@ class AppDataContainer(private val context: Context) : AppContainer {
     
     override val summaryLayoutPreferences: SummaryLayoutPreferences by lazy {
         SummaryLayoutPreferences(context)
+    }
+    
+    override val categoryPreferences: CategoryPreferences by lazy {
+        CategoryPreferences(context)
     }
 } 
