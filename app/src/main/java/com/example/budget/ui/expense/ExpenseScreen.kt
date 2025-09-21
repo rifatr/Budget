@@ -26,6 +26,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.data.db.Category
 import com.example.budget.data.db.Expense
+import com.example.budget.data.ValidationConstants
 import com.example.budget.ui.AppViewModelProvider
 import java.text.SimpleDateFormat
 import java.util.*
@@ -150,10 +151,13 @@ fun ExpenseScreen(
                         keyboardController?.hide()
                         focusManager.clearFocus()
                     }
-                )
+                ),
+                supportingText = {
+                    Text("${uiState.description.length}/${ValidationConstants.EXPENSE_DESCRIPTION_MAX_LENGTH} characters")
+                }
             )
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             
             // Create button at the bottom
             Button(

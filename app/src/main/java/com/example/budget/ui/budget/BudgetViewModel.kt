@@ -3,6 +3,7 @@ package com.example.budget.ui.budget
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budget.data.BudgetRepository
+import com.example.budget.data.ValidationConstants
 import com.example.budget.data.db.Budget
 import com.example.budget.data.db.Category
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,16 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Locale
-
-// Validation Constants
-object ValidationConstants {
-    const val CATEGORY_NAME_MAX_LENGTH = 24
-    private const val AMOUNT_DIGITS_BEFORE_DECIMAL = 8
-    private const val AMOUNT_DIGITS_AFTER_DECIMAL = 2
-    
-    // Generate regex pattern for amount validation
-    val AMOUNT_VALIDATION_REGEX = Regex("^\\d{0,$AMOUNT_DIGITS_BEFORE_DECIMAL}(\\.\\d{0,$AMOUNT_DIGITS_AFTER_DECIMAL})?\$")
-}
 
 data class BudgetUiState(
     val selectedMonth: Int,

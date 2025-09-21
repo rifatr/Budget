@@ -14,7 +14,7 @@ import com.example.budget.BudgetApp
 import java.util.Locale
 import com.example.budget.R
 import com.example.budget.data.db.Expense
-import com.example.budget.ui.budget.ValidationConstants
+import com.example.budget.data.ValidationConstants
 import java.util.*
 
 class ExpenseWidgetConfigActivity : Activity() {

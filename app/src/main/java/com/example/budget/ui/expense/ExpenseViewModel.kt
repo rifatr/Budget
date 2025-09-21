@@ -3,10 +3,10 @@ package com.example.budget.ui.expense
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budget.data.BudgetRepository
+import com.example.budget.data.ValidationConstants
 import com.example.budget.data.db.Category
 import com.example.budget.data.db.Expense
 import com.example.budget.data.preferences.CategoryPreferences
-import com.example.budget.ui.budget.ValidationConstants
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -83,7 +83,10 @@ class ExpenseViewModel(
     }
 
     fun onDescriptionChange(newDescription: String) {
-        _uiState.value = _uiState.value.copy(description = newDescription)
+        // Limit description to specified length
+        if (newDescription.length <= ValidationConstants.EXPENSE_DESCRIPTION_MAX_LENGTH) {
+            _uiState.value = _uiState.value.copy(description = newDescription)
+        }
     }
 
     fun saveExpense() {
