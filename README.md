@@ -24,7 +24,12 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 - **Date Selection**: Interactive date picker with calendar icon
 - **Category Management**: Create custom categories with duplicate prevention
 - **Input Validation**: 6 digits before decimal, 2 after with real-time feedback
-- **Expense History**: View, search, and delete past expenses with currency symbols
+- **Latest Expenses Preview**: View last 5 expenses from selected month directly in Expense tab
+- **Full History Screen**: Dedicated expense history screen with month/year filtering
+- **Consistent Design**: Unified expense item layout across all screens
+- **Month-Based Filtering**: Automatically shows expenses for currently selected month
+- **Delete Functionality**: Remove expenses with confirmation dialogs and success feedback
+- **Scrollable Interface**: Smooth scrolling throughout expense entry and history
 - **Success Feedback**: Beautiful confirmation messages after adding expenses
 
 ### 💰 Budget Tracking

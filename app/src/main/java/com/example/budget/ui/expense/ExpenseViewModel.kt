@@ -3,6 +3,7 @@ package com.example.budget.ui.expense
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budget.data.BudgetRepository
+import com.example.budget.data.DateConstants
 import com.example.budget.data.ValidationConstants
 import com.example.budget.data.db.Category
 import com.example.budget.data.db.Expense
@@ -22,8 +23,7 @@ data class ExpenseUiState(
     val amount: String = "",
     val description: String = "",
     val isEntryValid: Boolean = false,
-    val expenseHistory: List<Expense> = emptyList(),
-    val showHistory: Boolean = false,
+    val latestExpenses: List<Expense> = emptyList(),
     val categoryMap: Map<Int, String> = emptyMap(),
     val showConfirmationMessage: Boolean = false,
     val confirmationMessage: String = ""
@@ -55,16 +55,21 @@ class ExpenseViewModel(
                 
                 _uiState.value = _uiState.value.copy(
                     allCategories = categories,
-                    category = updatedCategory
+                    category = updatedCategory,
+                    categoryMap = categories.associate { it.id to it.name }
                 )
                 validateInput()
             }.collect {}
         }
+        
+        // Load latest expenses
+        loadLatestExpenses()
     }
 
     fun onDateChange(newDate: Date) {
         _uiState.value = _uiState.value.copy(date = newDate)
         validateInput()
+        loadLatestExpenses() // Reload expenses when date changes
     }
 
     fun onCategoryChange(newCategory: Category) {
@@ -104,6 +109,9 @@ class ExpenseViewModel(
             budgetRepository.insertExpense(newExpense)
             budgetRepository.incrementCategoryUsage(category.id)
             
+            // Refresh latest expenses
+            loadLatestExpenses()
+            
             // Show success message
             _uiState.value = _uiState.value.copy(
                 amount = "",
@@ -124,31 +132,25 @@ class ExpenseViewModel(
             _uiState.value = copy(isEntryValid = category != null && amount.isNotBlank() && amount.toDoubleOrNull() != null)
         }
     }
-
-    fun showExpenseHistory() {
+    
+    private fun loadLatestExpenses() {
         viewModelScope.launch {
-            val allExpenses = budgetRepository.getAllExpenses().first()
-            val categories = budgetRepository.getAllCategories().first()
-            val categoryMap = categories.associate { it.id to it.name }
+            val currentDate = _uiState.value.date
+            val calendar = java.util.Calendar.getInstance()
+            calendar.time = currentDate
+            val currentMonth = calendar.get(java.util.Calendar.MONTH) + 1
+            val currentYear = calendar.get(java.util.Calendar.YEAR)
+            
+            val (monthStart, monthEnd) = DateConstants.getMonthStartAndEndTimestamps(currentYear, currentMonth)
+            val monthExpenses = budgetRepository.getExpensesForMonth(monthStart, monthEnd).first()
+            val latestExpenses = monthExpenses.sortedByDescending { it.date }.take(5)
             
             _uiState.value = _uiState.value.copy(
-                expenseHistory = allExpenses.sortedByDescending { it.date },
-                categoryMap = categoryMap,
-                showHistory = true
+                latestExpenses = latestExpenses
             )
         }
     }
 
-    fun hideExpenseHistory() {
-        _uiState.value = _uiState.value.copy(showHistory = false)
-    }
-
-    fun deleteExpense(expense: Expense) {
-        viewModelScope.launch {
-            budgetRepository.deleteExpense(expense)
-            showExpenseHistory() // Refresh the list
-        }
-    }
     
     fun dismissConfirmationMessage() {
         _uiState.value = _uiState.value.copy(showConfirmationMessage = false)

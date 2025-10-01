@@ -5,8 +5,8 @@ import java.util.Date
 
 object DateConstants {
     // Fixed year range for data consistency and accessibility
-    const val MIN_YEAR = 2020
-    const val MAX_YEAR = 2080
+    private const val MIN_YEAR = 2020
+    private const val MAX_YEAR = 2080
     
     // Month names mapping
     val MONTHS = listOf(

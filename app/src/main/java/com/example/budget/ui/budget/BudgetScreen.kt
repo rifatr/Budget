@@ -3,6 +3,7 @@ package com.example.budget.ui.budget
 import androidx.compose.foundation.layout.*
 import com.example.budget.ui.components.BeautifulSelector
 import com.example.budget.ui.components.ConfirmationMessage
+import com.example.budget.data.ValidationConstants
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.gestures.detectTapGestures

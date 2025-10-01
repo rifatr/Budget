@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.budget.ui.budget.BudgetScreen
 import com.example.budget.ui.categorymanager.CategoryManagerScreen
 import com.example.budget.ui.expense.ExpenseScreen
+import com.example.budget.ui.expensehistory.ExpenseHistoryScreen
 import com.example.budget.ui.info.InfoScreen
 import com.example.budget.ui.more.MoreScreen
 import com.example.budget.ui.settings.SettingsScreen
@@ -122,7 +123,7 @@ fun BudgetAppNavigation(
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 when (page) {
-                    0 -> ExpenseScreen()
+                    0 -> ExpenseScreen(navController)
                     1 -> BudgetScreen()
                     2 -> SummaryScreen(navController)
                     3 -> MoreScreen(navController)
@@ -160,6 +161,11 @@ fun BudgetAppNavigation(
                         categoryName = categoryName,
                         month = month,
                         year = year,
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+                composable(Screen.ExpenseHistory.route) {
+                    ExpenseHistoryScreen(
                         onNavigateBack = { navController.popBackStack() }
                     )
                 }
