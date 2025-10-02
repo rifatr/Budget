@@ -67,10 +67,10 @@ object DateConstants {
      * Get month number from month name.
      * 
      * @param monthName The month name (e.g., "January", "February", etc.)
-     * @return Month number (1-12, where 1 = January)
+     * @return Month number (0-12, where 1 = January, 0 - Unknown (for fallback))
      */
     fun getMonthNumber(monthName: String): Int {
-        return MONTHS.find { it.first == monthName }?.second ?: 1
+        return MONTHS.find { it.first == monthName }?.second ?: 0
     }
     
     /**
