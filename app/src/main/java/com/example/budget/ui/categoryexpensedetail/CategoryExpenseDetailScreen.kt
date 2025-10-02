@@ -24,6 +24,7 @@ import com.example.budget.ui.AppViewModelProvider
 import com.example.budget.ui.components.ConfirmationMessage
 import com.example.budget.ui.utils.formatCurrency
 import com.example.budget.ui.utils.getDynamicTextStyle
+import com.example.budget.data.DateConstants
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -61,7 +62,7 @@ fun CategoryExpenseDetailScreen(
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = "${getMonthName(month)} $year",
+                            text = "${DateConstants.getMonthName(month)} $year",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -292,13 +293,15 @@ fun ExpenseItem(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(
-                    text = expense.description ?: "No description",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                if (!expense.description.isNullOrBlank()) {
+                    Text(
+                        text = expense.description,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
                 Text(
                     text = dateFormat.format(expense.date),
                     style = MaterialTheme.typography.bodyMedium,
@@ -327,23 +330,5 @@ fun ExpenseItem(
                 )
             }
         }
-    }
-}
-
-private fun getMonthName(month: Int): String {
-    return when (month) {
-        1 -> "January"
-        2 -> "February"
-        3 -> "March"
-        4 -> "April"
-        5 -> "May"
-        6 -> "June"
-        7 -> "July"
-        8 -> "August"
-        9 -> "September"
-        10 -> "October"
-        11 -> "November"
-        12 -> "December"
-        else -> "Unknown"
     }
 }

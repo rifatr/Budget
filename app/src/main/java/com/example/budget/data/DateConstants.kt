@@ -52,4 +52,38 @@ object DateConstants {
         
         return monthStartTimestamp to monthEndTimestamp
     }
+    
+    /**
+     * Get month name from month number.
+     * 
+     * @param month The month number (1-12, where 1 = January)
+     * @return Month name as String (e.g., "January", "February", etc.)
+     */
+    fun getMonthName(month: Int): String {
+        return MONTHS.find { it.second == month }?.first ?: "Unknown"
+    }
+    
+    /**
+     * Get month number from month name.
+     * 
+     * @param monthName The month name (e.g., "January", "February", etc.)
+     * @return Month number (1-12, where 1 = January)
+     */
+    fun getMonthNumber(monthName: String): Int {
+        return MONTHS.find { it.first == monthName }?.second ?: 1
+    }
+    
+    /**
+     * Get month name and year from a Date object.
+     * 
+     * @param date The Date object
+     * @return Formatted string like "January 2024"
+     */
+    fun getMonthYearString(date: Date): String {
+        val calendar = Calendar.getInstance()
+        calendar.time = date
+        val month = calendar.get(Calendar.MONTH) + 1
+        val year = calendar.get(Calendar.YEAR)
+        return "${getMonthName(month)} $year"
+    }
 }

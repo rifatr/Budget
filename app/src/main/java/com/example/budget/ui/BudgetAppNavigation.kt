@@ -20,6 +20,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
+import com.example.budget.data.DateConstants
 import com.example.budget.ui.budget.BudgetScreen
 import com.example.budget.ui.categorymanager.CategoryManagerScreen
 import com.example.budget.ui.expense.ExpenseScreen
@@ -164,8 +167,18 @@ fun BudgetAppNavigation(
                         onNavigateBack = { navController.popBackStack() }
                     )
                 }
-                composable(Screen.ExpenseHistory.route) {
+                composable(
+                    route = Screen.ExpenseHistory.routeWithArgs,
+                    arguments = listOf(
+                        navArgument("month") { type = NavType.IntType },
+                        navArgument("year") { type = NavType.IntType }
+                    )
+                ) { backStackEntry ->
+                    val month = backStackEntry.arguments?.getInt("month") ?: DateConstants.getCurrentMonth()
+                    val year = backStackEntry.arguments?.getInt("year") ?: DateConstants.getCurrentYear()
                     ExpenseHistoryScreen(
+                        initialMonth = month,
+                        initialYear = year,
                         onNavigateBack = { navController.popBackStack() }
                     )
                 }

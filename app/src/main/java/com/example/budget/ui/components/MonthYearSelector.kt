@@ -25,11 +25,10 @@ fun MonthYearSelector(
         Box(modifier = Modifier.weight(1f)) {
             BeautifulSelector(
                 label = "Month",
-                value = months.find { it.second == selectedMonth }?.first ?: "January",
+                value = DateConstants.getMonthName(selectedMonth),
                 options = months.map { it.first },
                 onSelectionChange = { selectedMonthName ->
-                    val monthValue = months.find { it.first == selectedMonthName }?.second ?: 1
-                    onMonthChange(monthValue)
+                    onMonthChange(DateConstants.getMonthNumber(selectedMonthName))
                 }
             )
         }

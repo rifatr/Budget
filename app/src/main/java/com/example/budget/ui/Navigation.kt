@@ -9,5 +9,8 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
     object CategoryManager : Screen("category_manager")
     object CategoryExpenseDetail : Screen("category_expense_detail")
-    object ExpenseHistory : Screen("expense_history")
+    object ExpenseHistory : Screen("expense_history") {
+        fun createRoute(month: Int, year: Int) = "expense_history/$month/$year"
+        const val routeWithArgs = "expense_history/{month}/{year}"
+    }
 } 

@@ -186,16 +186,10 @@ fun ExpenseScreen(
             }
 
 
-            val calendar = Calendar.getInstance()
-            calendar.time = uiState.date
-            val currentMonth = calendar.get(Calendar.MONTH) + 1
-            val currentYear = calendar.get(Calendar.YEAR)
-            val monthName = DateConstants.MONTHS.find { it.second == currentMonth }?.first ?: "Unknown"
-
             if (uiState.latestExpenses.isNotEmpty()) {
                 item {
                       Text(
-                          text = "Latest Expenses of $monthName $currentYear",
+                          text = "Latest Expenses of ${DateConstants.getMonthYearString(uiState.date)}",
                           style = MaterialTheme.typography.titleMedium,
                           fontWeight = FontWeight.SemiBold,
                           color = MaterialTheme.colorScheme.onSurface,
@@ -213,19 +207,26 @@ fun ExpenseScreen(
              }
              else {
                  item {
-                     Text(
-                         text = "No expenses in $monthName $currentYear",
-                         style = MaterialTheme.typography.titleMedium,
-                         fontWeight = FontWeight.SemiBold,
-                         color = MaterialTheme.colorScheme.onSurface,
-                         modifier = Modifier.padding(top = 10.dp)
-                     )
+                       Text(
+                           text = "No expenses in ${DateConstants.getMonthYearString(uiState.date)}",
+                           style = MaterialTheme.typography.titleMedium,
+                           fontWeight = FontWeight.SemiBold,
+                           color = MaterialTheme.colorScheme.onSurface,
+                           modifier = Modifier.padding(top = 10.dp)
+                       )
                  }
              }
             
             item {
+                val calendar = Calendar.getInstance()
+                calendar.time = uiState.date
+                val currentMonth = calendar.get(Calendar.MONTH) + 1
+                val currentYear = calendar.get(Calendar.YEAR)
+                
                 OutlinedButton(
-                    onClick = { navController.navigate(Screen.ExpenseHistory.route) },
+                    onClick = { 
+                        navController.navigate(Screen.ExpenseHistory.createRoute(currentMonth, currentYear))
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp)
                 ) {

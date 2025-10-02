@@ -29,6 +29,8 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseHistoryScreen(
+    initialMonth: Int = DateConstants.getCurrentMonth(),
+    initialYear: Int = DateConstants.getCurrentYear(),
     onNavigateBack: () -> Unit,
     viewModel: ExpenseHistoryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
@@ -36,6 +38,11 @@ fun ExpenseHistoryScreen(
     val app = context.applicationContext as com.example.budget.BudgetApp
     val selectedCurrency by app.container.currencyPreferences.selectedCurrency.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
+    
+    // Initialize with passed month and year
+    LaunchedEffect(initialMonth, initialYear) {
+        viewModel.updateMonthYear(initialMonth, initialYear)
+    }
 
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var expenseToDelete by remember { mutableStateOf<Expense?>(null) }
