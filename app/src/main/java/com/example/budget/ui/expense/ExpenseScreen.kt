@@ -239,10 +239,8 @@ fun ExpenseScreen(
             }
         }
     }
-
-
-
 }
+
 
 @Composable
 fun DateSelector(date: Date, onDateChange: (Date) -> Unit) {
@@ -252,21 +250,39 @@ fun DateSelector(date: Date, onDateChange: (Date) -> Unit) {
     val calendar = Calendar.getInstance()
     calendar.time = date
 
-    val datePickerDialog = android.app.DatePickerDialog(
-        context,
-        { _, year, month, dayOfMonth ->
-            val newDate = Calendar.getInstance().apply {
-                set(year, month, dayOfMonth)
-            }.time
-            onDateChange(newDate)
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    )
+    fun showDatePickerDialog() {
+        val currentCalendar = Calendar.getInstance()
+        currentCalendar.time = date
+        
+        val dialog = android.app.DatePickerDialog(
+            context,
+            null, // We'll set up our own listener
+            currentCalendar.get(Calendar.YEAR),
+            currentCalendar.get(Calendar.MONTH),
+            currentCalendar.get(Calendar.DAY_OF_MONTH)
+        )
+        
+        // Remove the OK and Cancel buttons and set up instant selection
+        dialog.setOnShowListener {
+            dialog.getButton(android.app.DatePickerDialog.BUTTON_POSITIVE)?.visibility = android.view.View.GONE
+            dialog.getButton(android.app.DatePickerDialog.BUTTON_NEGATIVE)?.visibility = android.view.View.GONE
+            
+            // Get the DatePicker widget and set up instant selection
+            val datePicker = dialog.datePicker
+            datePicker.setOnDateChangedListener { _, year, month, dayOfMonth ->
+                val newDate = Calendar.getInstance().apply {
+                    set(year, month, dayOfMonth)
+                }.time
+                onDateChange(newDate)
+                dialog.dismiss() // Auto-dismiss after selection
+            }
+        }
+        
+        dialog.show()
+    }
 
     Button(
-        onClick = { datePickerDialog.show() },
+        onClick = { showDatePickerDialog() },
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -303,6 +319,7 @@ fun DateSelector(date: Date, onDateChange: (Date) -> Unit) {
         }
     }
 }
+
 
 @Composable
 fun CategorySelector(

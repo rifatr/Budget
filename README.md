@@ -21,13 +21,15 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 
 ### 📊 Expense Management
 - **Smart Input**: Tap-to-dismiss keyboard with proper field navigation
-- **Date Selection**: Interactive date picker with calendar icon
+- **Instant Date Selection**: Fast native date picker with one-touch selection (no OK button required)
 - **Category Management**: Create custom categories with duplicate prevention
 - **Input Validation**: 6 digits before decimal, 2 after with real-time feedback
 - **Latest Expenses Preview**: View last 5 expenses from selected month directly in Expense tab
 - **Full History Screen**: Dedicated expense history screen with month/year filtering
+- **Smart Navigation**: "View Full History" opens directly to the currently selected month
 - **Consistent Design**: Unified expense item layout across all screens
 - **Month-Based Filtering**: Automatically shows expenses for currently selected month
+- **Real-time Updates**: Latest expenses update instantly when expenses are deleted from any screen
 - **Delete Functionality**: Remove expenses with confirmation dialogs and success feedback
 - **Scrollable Interface**: Smooth scrolling throughout expense entry and history
 - **Success Feedback**: Beautiful confirmation messages after adding expenses
@@ -101,6 +103,9 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 
 ### Key Components
 - **Currency System**: Enum-based with reactive updates and smart formatting
+- **Date Utilities**: Centralized DateConstants with month name utilities and date formatting functions
+- **Instant Date Picker**: Custom native DatePickerDialog with one-touch selection and auto-dismiss
+- **Shared Components**: Reusable MonthYearSelector component eliminating code duplication
 - **Preference Architecture**: Organized preference management with separation of concerns
 - **Layout System**: Dual layout support (Cards/Table) with animated collapsible settings
 - **Animation System**: Smooth Material 3 animations for expand/collapse interactions
@@ -109,6 +114,7 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 - **Confirmation System**: Reusable ConfirmationMessage component with auto-dismissal
 - **UI Components**: Shared components like BeautifulSelector and CurrencyUtils for consistent design
 - **Number Formatting**: Dynamic font sizing and comma delimiters for large numbers
+- **Reactive Updates**: Flow-based expense observation for instant UI updates across screens
 - **Data Layer**: Repository pattern with Room database
 - **UI Layer**: Composable screens with ViewModels and proper state management
 
