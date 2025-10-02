@@ -9,6 +9,9 @@ object ValidationConstants {
     const val CATEGORY_NAME_MAX_LENGTH = 24
     const val EXPENSE_DESCRIPTION_MAX_LENGTH = 150
     
+    // UI display limits
+    const val LATEST_EXPENSES_COUNT = 5
+    
     // Amount validation
     private const val AMOUNT_DIGITS_BEFORE_DECIMAL = 8
     private const val AMOUNT_DIGITS_AFTER_DECIMAL = 2

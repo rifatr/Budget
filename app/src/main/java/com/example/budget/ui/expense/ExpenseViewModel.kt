@@ -62,14 +62,18 @@ class ExpenseViewModel(
             }.collect {}
         }
         
-        // Load latest expenses
-        loadLatestExpenses()
+        // Observe expenses changes automatically
+        observeLatestExpenses()
     }
 
     fun onDateChange(newDate: Date) {
         _uiState.value = _uiState.value.copy(date = newDate)
         validateInput()
-        loadLatestExpenses() // Reload expenses when date changes
+        // Refresh latest expenses for the new date
+        viewModelScope.launch {
+            val allExpenses = budgetRepository.getAllExpenses().first()
+            updateLatestExpensesFromList(allExpenses)
+        }
     }
 
     fun onCategoryChange(newCategory: Category) {
@@ -109,9 +113,6 @@ class ExpenseViewModel(
             budgetRepository.insertExpense(newExpense)
             budgetRepository.incrementCategoryUsage(category.id)
             
-            // Refresh latest expenses
-            loadLatestExpenses()
-            
             // Show success message
             _uiState.value = _uiState.value.copy(
                 amount = "",
@@ -133,24 +134,35 @@ class ExpenseViewModel(
         }
     }
     
-    private fun loadLatestExpenses() {
+    private fun observeLatestExpenses() {
         viewModelScope.launch {
-            val currentDate = _uiState.value.date
-            val calendar = java.util.Calendar.getInstance()
-            calendar.time = currentDate
-            val currentMonth = calendar.get(java.util.Calendar.MONTH) + 1
-            val currentYear = calendar.get(java.util.Calendar.YEAR)
-            
-            val (monthStart, monthEnd) = DateConstants.getMonthStartAndEndTimestamps(currentYear, currentMonth)
-            val monthExpenses = budgetRepository.getExpensesForMonth(monthStart, monthEnd).first()
-            val latestExpenses = monthExpenses.sortedByDescending { it.date }.take(5)
-            
-            _uiState.value = _uiState.value.copy(
-                latestExpenses = latestExpenses
-            )
+            // Observe all expenses and filter/update when they change
+            budgetRepository.getAllExpenses().collect { allExpenses ->
+                updateLatestExpensesFromList(allExpenses)
+            }
         }
     }
-
+    
+    private fun updateLatestExpensesFromList(allExpenses: List<Expense>) {
+        val currentDate = _uiState.value.date
+        val calendar = java.util.Calendar.getInstance()
+        calendar.time = currentDate
+        val currentMonth = calendar.get(java.util.Calendar.MONTH) + 1
+        val currentYear = calendar.get(java.util.Calendar.YEAR)
+        
+        val (monthStart, monthEnd) = DateConstants.getMonthStartAndEndTimestamps(currentYear, currentMonth)
+        
+        // Filter expenses for current month and get latest expenses
+        val monthExpenses = allExpenses.filter { expense ->
+            expense.date.time >= monthStart.time && expense.date.time <= monthEnd.time
+        }
+        val latestExpenses = monthExpenses.sortedByDescending { it.date }.take(ValidationConstants.LATEST_EXPENSES_COUNT)
+        
+        _uiState.value = _uiState.value.copy(
+            latestExpenses = latestExpenses
+        )
+    }
+    
     
     fun dismissConfirmationMessage() {
         _uiState.value = _uiState.value.copy(showConfirmationMessage = false)

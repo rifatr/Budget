@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.data.db.Category
 import com.example.budget.data.db.Expense
 import com.example.budget.data.ValidationConstants
+import com.example.budget.data.DateConstants
 import com.example.budget.ui.AppViewModelProvider
 import java.text.SimpleDateFormat
 import java.util.*
@@ -183,40 +184,56 @@ fun ExpenseScreen(
                     )
                 }
             }
-            
-            // Latest Expenses Section
+
+
+            val calendar = Calendar.getInstance()
+            calendar.time = uiState.date
+            val currentMonth = calendar.get(Calendar.MONTH) + 1
+            val currentYear = calendar.get(Calendar.YEAR)
+            val monthName = DateConstants.MONTHS.find { it.second == currentMonth }?.first ?: "Unknown"
+
             if (uiState.latestExpenses.isNotEmpty()) {
                 item {
-                    Text(
-                        text = "Latest Expenses",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(top = 10.dp)
-                    )
+                      Text(
+                          text = "Latest Expenses of $monthName $currentYear",
+                          style = MaterialTheme.typography.titleMedium,
+                          fontWeight = FontWeight.SemiBold,
+                          color = MaterialTheme.colorScheme.onSurface,
+                          modifier = Modifier.padding(top = 10.dp)
+                      )
                 }
                 
-                items(uiState.latestExpenses.take(5)) { expense ->
+                items(uiState.latestExpenses.take(ValidationConstants.LATEST_EXPENSES_COUNT)) { expense ->
                     LatestExpenseItem(
                         expense = expense,
                         categoryMap = uiState.categoryMap,
                         currencySymbol = selectedCurrency.symbol
                     )
                 }
-                
-                item {
-                    // View Full History Button
-                    OutlinedButton(
-                        onClick = { navController.navigate(Screen.ExpenseHistory.route) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = "View Full History",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+             }
+             else {
+                 item {
+                     Text(
+                         text = "No expenses in $monthName $currentYear",
+                         style = MaterialTheme.typography.titleMedium,
+                         fontWeight = FontWeight.SemiBold,
+                         color = MaterialTheme.colorScheme.onSurface,
+                         modifier = Modifier.padding(top = 10.dp)
+                     )
+                 }
+             }
+            
+            item {
+                OutlinedButton(
+                    onClick = { navController.navigate(Screen.ExpenseHistory.route) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "View Full History",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
