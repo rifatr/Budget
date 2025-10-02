@@ -1,4 +1,4 @@
-# 💰 Budget Tracker
+# Budget Tracker
 
 A beautiful, comprehensive Android expense tracking app built with Jetpack Compose and modern Android development practices. Track your monthly budgets, log expenses, and monitor your financial health with an intuitive and polished interface.
 
@@ -21,15 +21,17 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 
 ### 📊 Expense Management
 - **Smart Input**: Tap-to-dismiss keyboard with proper field navigation
+- **Character Limits**: 150-character limit for expense descriptions with real-time validation and character count
 - **Instant Date Selection**: Fast native date picker with one-touch selection (no OK button required)
-- **Category Management**: Create custom categories with duplicate prevention
-- **Input Validation**: 6 digits before decimal, 2 after with real-time feedback
+- **Smart Category Selection**: Categories sorted lexicographically with last selected category pre-selected
+- **Input Validation**: 8 digits before decimal, 2 after with real-time feedback and centralized validation
 - **Latest Expenses Preview**: View last 5 expenses from selected month directly in Expense tab
-- **Full History Screen**: Dedicated expense history screen with month/year filtering
+- **Full History Screen**: Dedicated expense history screen with month/year filtering and delete functionality
 - **Smart Navigation**: "View Full History" opens directly to the currently selected month
-- **Consistent Design**: Unified expense item layout across all screens
+- **Consistent Design**: Unified expense item layout with category, amount, description, and date
 - **Month-Based Filtering**: Automatically shows expenses for currently selected month
-- **Real-time Updates**: Latest expenses update instantly when expenses are deleted from any screen
+- **Real-time Updates**: Latest expenses update instantly across all screens when expenses are added or deleted
+- **Cross-Screen Synchronization**: Changes in expense history automatically reflect in latest expenses
 - **Delete Functionality**: Remove expenses with confirmation dialogs and success feedback
 - **Scrollable Interface**: Smooth scrolling throughout expense entry and history
 - **Success Feedback**: Beautiful confirmation messages after adding expenses
@@ -46,11 +48,12 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 
 ### 📂 Category Management
 - **Dedicated Manager**: Full-featured category management from More screen
-- **CRUD Operations**: Add, rename, and delete categories with validation
+- **CRUD Operations**: Add, rename, and delete categories with 24-character name limit and validation
 - **Usage Statistics**: View expense count and total spent per category
 - **Smart Delete Flow**: Single confirmation for empty categories, double confirmation for categories with expenses
 - **Search & Sort**: Real-time search and sort by name, usage, or total amount
 - **Bulk Operations**: Delete categories and all associated expenses safely
+- **Centralized Validation**: Consistent validation rules across all category operations
 
 ### 📈 Summary & Analytics
 - **Dual Layout Options**: Choose between modern Cards view or compact Table view
@@ -103,19 +106,22 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 
 ### Key Components
 - **Currency System**: Enum-based with reactive updates and smart formatting
-- **Date Utilities**: Centralized DateConstants with month name utilities and date formatting functions
-- **Instant Date Picker**: Custom native DatePickerDialog with one-touch selection and auto-dismiss
-- **Shared Components**: Reusable MonthYearSelector component eliminating code duplication
+- **Date Utilities**: Centralized DateConstants with fixed year ranges (2020-2080), month name utilities, and date formatting functions
+- **Instant Date Picker**: Custom native DatePickerDialog with one-touch selection and auto-dismiss (no OK button)
+- **Shared Components**: Reusable MonthYearSelector component eliminating code duplication across screens
+- **Validation System**: Centralized ValidationConstants with character limits and input validation rules
+- **Category Preferences**: Last selected category persistence with lexicographical sorting
 - **Preference Architecture**: Organized preference management with separation of concerns
 - **Layout System**: Dual layout support (Cards/Table) with animated collapsible settings
 - **Animation System**: Smooth Material 3 animations for expand/collapse interactions
 - **Focus Management**: Smart keyboard and focus handling
-- **Input Validation**: Real-time validation with visual feedback and inline error messages
+- **Input Validation**: Real-time validation with visual feedback, character counting, and inline error messages
 - **Confirmation System**: Reusable ConfirmationMessage component with auto-dismissal
 - **UI Components**: Shared components like BeautifulSelector and CurrencyUtils for consistent design
 - **Number Formatting**: Dynamic font sizing and comma delimiters for large numbers
 - **Reactive Updates**: Flow-based expense observation for instant UI updates across screens
-- **Data Layer**: Repository pattern with Room database
+- **Cross-Screen Synchronization**: Real-time data updates between expense entry, latest expenses, and history screens
+- **Data Layer**: Repository pattern with Room database and proper migration handling
 - **UI Layer**: Composable screens with ViewModels and proper state management
 
 ## 🚀 Getting Started
@@ -154,35 +160,39 @@ For release build (requires keystore setup):
 ```
 app/src/main/java/com/example/budget/
 ├── data/
-│   ├── db/                    # Room database (entities, DAOs, converters)
-│   ├── preferences/           # User preference management
-│   │   ├── CurrencyPreferences.kt    # Currency selection and first launch
-│   │   └── SummaryLayoutPreferences.kt # Summary layout preference (Cards/Table)
-│   ├── Currency.kt            # Currency enum and definitions
-│   ├── SummaryLayout.kt       # Summary layout type enum
-│   ├── BudgetRepository.kt    # Data access layer
-│   └── AppContainer.kt        # Dependency injection container
+│   ├── db/                             # Room database (entities, DAOs, converters)
+│   ├── preferences/                    # User preference management
+│   │   ├── CurrencyPreferences.kt      # Currency selection and first launch
+│   │   ├── SummaryLayoutPreferences.kt # Summary layout preference (Cards/Table)
+│   │   └── CategoryPreferences.kt      # Last selected category persistence
+│   ├── Currency.kt                     # Currency enum and definitions
+│   ├── SummaryLayout.kt                # Summary layout type enum
+│   ├── DateConstants.kt                # Centralized date utilities and constants
+│   ├── ValidationConstants.kt          # Centralized validation rules and limits
+│   ├── BudgetRepository.kt             # Data access layer
+│   └── AppContainer.kt                 # Dependency injection container
 ├── ui/
-│   ├── expense/               # Expense tracking UI and ViewModel
-│   ├── budget/                # Budget management UI and ViewModel
-│   ├── categorymanager/       # Category management UI and ViewModel
-│   ├── categoryexpensedetail/ # Category expense detail screen UI and ViewModel
-│   ├── summary/               # Summary/analytics UI with dual layout support and sort functionality
-│   ├── more/                  # More screen with navigation and preferences
-│   ├── info/                  # App information and credits
-│   ├── settings/              # Data management (export/import)
-│   ├── setup/                 # Currency selection dialog
-│   ├── components/            # Reusable UI components (ConfirmationMessage, BeautifulSelector)
-│   ├── utils/                 # Utility functions (CurrencyUtils for formatting)
-│   ├── theme/                 # App theming and gradient colors
-│   ├── Navigation.kt          # Route definitions
-│   ├── BudgetAppNavigation.kt # Main navigation with swipe-enabled bottom tabs
-│   └── AppViewModelProvider.kt # ViewModel factory
+│   ├── expense/                        # Expense tracking UI and ViewModel with latest expenses preview
+│   ├── expensehistory/                 # Dedicated expense history screen UI and ViewModel
+│   ├── budget/                         # Budget management UI and ViewModel
+│   ├── categorymanager/                # Category management UI and ViewModel
+│   ├── categoryexpensedetail/          # Category expense detail screen UI and ViewModel
+│   ├── summary/                        # Summary/analytics UI with dual layout support and sort functionality
+│   ├── more/                           # More screen with navigation and preferences
+│   ├── info/                           # App information and credits
+│   ├── settings/                       # Data management (export/import)
+│   ├── setup/                          # Currency selection dialog
+│   ├── components/                     # Reusable UI components (ConfirmationMessage, BeautifulSelector, MonthYearSelector)
+│   ├── utils/                          # Utility functions (CurrencyUtils for formatting)
+│   ├── theme/                          # App theming and gradient colors
+│   ├── Navigation.kt                   # Route definitions with parameterized routes
+│   ├── BudgetAppNavigation.kt          # Main navigation with swipe-enabled bottom tabs
+│   └── AppViewModelProvider.kt         # ViewModel factory
 ├── widget/
-│   ├── ExpenseWidgetProvider.kt      # Widget provider and lifecycle
-│   └── ExpenseWidgetConfigActivity.kt # Widget quick expense entry UI
-├── BudgetApp.kt               # Application class with DI setup
-└── MainActivity.kt            # Main activity with currency setup
+│   ├── ExpenseWidgetProvider.kt        # Widget provider and lifecycle
+│   └── ExpenseWidgetConfigActivity.kt  # Widget quick expense entry UI
+├── BudgetApp.kt                        # Application class with DI setup
+└── MainActivity.kt                     # Main activity with currency setup
 ```
 
 ## 🎯 Key Features in Detail
@@ -251,16 +261,18 @@ app/src/main/java/com/example/budget/
 5. Begin logging expenses in Expense tab
 
 ### Daily Usage
-1. **Add Expense**: Use Expense tab with date picker and category selection
+1. **Add Expense**: Use Expense tab with instant date picker and smart category selection (last selected pre-selected)
 2. **Navigate Tabs**: Swipe left/right between tabs or tap bottom navigation
 3. **Quick Entry**: Use home screen widget for instant expense logging
-4. **Check Progress**: View Summary tab for budget vs spending overview
-5. **View Details**: Tap category cards/rows in Summary to see individual expenses
-6. **Switch Layout**: Expand Summary Layout section in More tab to choose between Cards and Table view
-7. **Sort Categories**: Use sort button in Summary to organize by name, spent, budget, or remaining
-8. **Adjust Budgets**: Modify budgets in Budget tab with real-time validation
-9. **Manage Categories**: Use Category Manager from More tab for advanced category operations
-10. **Data Management**: Export backups or change currency/preferences in More tab
+4. **View Recent**: See last 5 expenses from current month directly in Expense tab
+5. **Full History**: Tap "View Full History" to see all expenses with month/year filtering and delete options
+6. **Check Progress**: View Summary tab for budget vs spending overview
+7. **View Details**: Tap category cards/rows in Summary to see individual expenses
+8. **Switch Layout**: Expand Summary Layout section in More tab to choose between Cards and Table view
+9. **Sort Categories**: Use sort button in Summary to organize by name, spent, budget, or remaining
+10. **Adjust Budgets**: Modify budgets in Budget tab with real-time validation
+11. **Manage Categories**: Use Category Manager from More tab for advanced category operations with character limits
+12. **Data Management**: Export backups or change currency/preferences in More tab
 
 ## 🔄 Data Backup
 
