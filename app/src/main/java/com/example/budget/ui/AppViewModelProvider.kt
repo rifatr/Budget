@@ -8,6 +8,7 @@ import com.example.budget.BudgetApp
 import com.example.budget.ui.budget.BudgetViewModel
 import com.example.budget.ui.categorymanager.CategoryManagerViewModel
 import com.example.budget.ui.expense.ExpenseViewModel
+import com.example.budget.ui.expensehistory.ExpenseHistoryViewModel
 import com.example.budget.ui.settings.SettingsViewModel
 import com.example.budget.ui.summary.SummaryViewModel
 
@@ -45,6 +46,11 @@ object AppViewModelProvider {
         }
         initializer {
             com.example.budget.ui.categoryexpensedetail.CategoryExpenseDetailViewModel(budgetApplication().container.budgetRepository)
+        }
+        
+        // Initializer for ExpenseHistoryViewModel
+        initializer {
+            ExpenseHistoryViewModel(budgetApplication().container.budgetRepository)
         }
     }
 }

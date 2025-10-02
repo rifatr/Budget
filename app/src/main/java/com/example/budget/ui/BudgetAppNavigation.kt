@@ -20,9 +20,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
+import com.example.budget.data.DateConstants
 import com.example.budget.ui.budget.BudgetScreen
 import com.example.budget.ui.categorymanager.CategoryManagerScreen
 import com.example.budget.ui.expense.ExpenseScreen
+import com.example.budget.ui.expensehistory.ExpenseHistoryScreen
 import com.example.budget.ui.info.InfoScreen
 import com.example.budget.ui.more.MoreScreen
 import com.example.budget.ui.settings.SettingsScreen
@@ -122,7 +126,7 @@ fun BudgetAppNavigation(
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 when (page) {
-                    0 -> ExpenseScreen()
+                    0 -> ExpenseScreen(navController)
                     1 -> BudgetScreen()
                     2 -> SummaryScreen(navController)
                     3 -> MoreScreen(navController)
@@ -160,6 +164,21 @@ fun BudgetAppNavigation(
                         categoryName = categoryName,
                         month = month,
                         year = year,
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+                composable(
+                    route = Screen.ExpenseHistory.routeWithArgs,
+                    arguments = listOf(
+                        navArgument("month") { type = NavType.IntType },
+                        navArgument("year") { type = NavType.IntType }
+                    )
+                ) { backStackEntry ->
+                    val month = backStackEntry.arguments?.getInt("month") ?: DateConstants.getCurrentMonth()
+                    val year = backStackEntry.arguments?.getInt("year") ?: DateConstants.getCurrentYear()
+                    ExpenseHistoryScreen(
+                        initialMonth = month,
+                        initialYear = year,
                         onNavigateBack = { navController.popBackStack() }
                     )
                 }

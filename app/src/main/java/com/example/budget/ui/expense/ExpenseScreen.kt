@@ -5,8 +5,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
@@ -22,11 +20,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.data.db.Category
 import com.example.budget.data.db.Expense
 import com.example.budget.data.ValidationConstants
+import com.example.budget.data.DateConstants
 import com.example.budget.ui.AppViewModelProvider
 import java.text.SimpleDateFormat
 import java.util.*
@@ -39,11 +37,15 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.ui.text.style.TextAlign
+import androidx.navigation.NavController
 import com.example.budget.ui.components.ConfirmationMessage
+import com.example.budget.ui.utils.formatCurrency
+import com.example.budget.ui.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseScreen(
+    navController: NavController,
     viewModel: ExpenseViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val context = LocalContext.current
@@ -58,12 +60,7 @@ fun ExpenseScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Expense") },
-                actions = {
-                    IconButton(onClick = { viewModel.showExpenseHistory() }) {
-                        Icon(Icons.Default.History, contentDescription = "Expense History")
-                    }
-                }
+                title = { Text("Expense") }
             )
         },
         snackbarHost = {
@@ -76,151 +73,210 @@ fun ExpenseScreen(
             }
         }
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
-                .padding(innerPadding)
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp)
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         keyboardController?.hide()
                         focusManager.clearFocus()
                     })
                 },
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(vertical = 16.dp)
         ) {
-            // Date and Category side by side
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Date selector on the left
-                Box(modifier = Modifier.weight(1f)) {
-                    DateSelector(
-                        date = uiState.date,
-                        onDateChange = { viewModel.onDateChange(it) }
+            item {
+                // Date and Category side by side
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Date selector on the left
+                    Box(modifier = Modifier.weight(1f)) {
+                        DateSelector(
+                            date = uiState.date,
+                            onDateChange = { viewModel.onDateChange(it) }
+                        )
+                    }
+                    
+                    // Category selector on the right
+                    Box(modifier = Modifier.weight(1f)) {
+                        CategorySelector(
+                            categories = uiState.allCategories,
+                            selectedCategory = uiState.category,
+                            onCategoryChange = { viewModel.onCategoryChange(it) }
+                        )
+                    }
+                }
+            }
+            
+            item {
+                // Amount field
+                OutlinedTextField(
+                    value = uiState.amount,
+                    onValueChange = { viewModel.onAmountChange(it) },
+                    label = { Text("Amount") },
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = uiState.amount.toDoubleOrNull() == null && uiState.amount.isNotBlank(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    ),
+                    leadingIcon = {
+                        Text(
+                            text = selectedCurrency.symbol,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                )
+            }
+            
+            item {
+                // Description field
+                OutlinedTextField(
+                    value = uiState.description,
+                    onValueChange = { viewModel.onDescriptionChange(it) },
+                    label = { Text("Description (Optional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 2,
+                    maxLines = 3,
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+                        }
+                    ),
+                    supportingText = {
+                        Text("${uiState.description.length}/${ValidationConstants.EXPENSE_DESCRIPTION_MAX_LENGTH} characters")
+                    }
+                )
+            }
+            
+            item {
+                // Create button
+                Button(
+                    onClick = { 
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                        viewModel.saveExpense()
+                    },
+                    enabled = uiState.isEntryValid,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(),
+                    shape = RoundedCornerShape(8.dp),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                ) {
+                    Text(
+                        text = "Add Expense",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            val monthYearString = DateConstants.getMonthYearString(uiState.date)
+
+            if (uiState.latestExpenses.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "Latest Expenses of $monthYearString",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(top = 10.dp)
                     )
                 }
                 
-                // Category selector on the right
-                Box(modifier = Modifier.weight(1f)) {
-                    CategorySelector(
-                        categories = uiState.allCategories,
-                        selectedCategory = uiState.category,
-                        onCategoryChange = { viewModel.onCategoryChange(it) }
+                items(uiState.latestExpenses.take(ValidationConstants.LATEST_EXPENSES_COUNT)) { expense ->
+                    LatestExpenseItem(
+                        expense = expense,
+                        categoryMap = uiState.categoryMap,
+                        currencySymbol = selectedCurrency.symbol
+                    )
+                }
+             }
+            else {
+                item {
+                    Text(
+                        text = "No expenses in $monthYearString",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(top = 10.dp)
                     )
                 }
             }
             
-            // Amount field
-            OutlinedTextField(
-                value = uiState.amount,
-                onValueChange = { viewModel.onAmountChange(it) },
-                label = { Text("Amount") },
-                modifier = Modifier.fillMaxWidth(),
-                isError = uiState.amount.toDoubleOrNull() == null && uiState.amount.isNotBlank(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Decimal,
-                    imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(
-                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                ),
-                leadingIcon = {
+            item {
+                OutlinedButton(
+                    onClick = { 
+                        val calendar = Calendar.getInstance().apply { time = uiState.date }
+                        val currentMonth = calendar.get(Calendar.MONTH) + 1
+                        val currentYear = calendar.get(Calendar.YEAR)
+                        navController.navigate(Screen.ExpenseHistory.createRoute(currentMonth, currentYear))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
                     Text(
-                        text = selectedCurrency.symbol,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "View Full History",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
                     )
                 }
-            )
-            
-            // Description field
-            OutlinedTextField(
-                value = uiState.description,
-                onValueChange = { viewModel.onDescriptionChange(it) },
-                label = { Text("Description (Optional)") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 2,
-                maxLines = 3,
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        keyboardController?.hide()
-                        focusManager.clearFocus()
-                    }
-                ),
-                supportingText = {
-                    Text("${uiState.description.length}/${ValidationConstants.EXPENSE_DESCRIPTION_MAX_LENGTH} characters")
-                }
-            )
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // Create button at the bottom
-            Button(
-                onClick = { 
-                    keyboardController?.hide()
-                    focusManager.clearFocus()
-                    viewModel.saveExpense()
-                    // Don't navigate back, just save and reset
-                },
-                enabled = uiState.isEntryValid,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(),
-                shape = RoundedCornerShape(8.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
-            ) {
-                Text(
-                    text = "Add Expense",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
             }
         }
     }
-
-
-
-    // Expense History Dialog
-    if (uiState.showHistory) {
-        ExpenseHistoryDialog(
-            expenses = uiState.expenseHistory,
-            categoryMap = uiState.categoryMap,
-            currencySymbol = selectedCurrency.symbol,
-            onDismiss = { viewModel.hideExpenseHistory() },
-            onDeleteExpense = { viewModel.deleteExpense(it) }
-        )
-    }
 }
+
 
 @Composable
 fun DateSelector(date: Date, onDateChange: (Date) -> Unit) {
     val context = LocalContext.current
     val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
 
-    val calendar = Calendar.getInstance()
-    calendar.time = date
+    fun showDatePickerDialog() {
+        val calendar = Calendar.getInstance().apply { time = date }
+        
+        val dialog = android.app.DatePickerDialog(
+            context,
+            null, // We'll set up our own listener
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        
+        // Remove the OK button and set up instant selection
+        dialog.setOnShowListener {
+            dialog.getButton(android.app.DatePickerDialog.BUTTON_POSITIVE)?.visibility = android.view.View.GONE
 
-    val datePickerDialog = android.app.DatePickerDialog(
-        context,
-        { _, year, month, dayOfMonth ->
-            val newDate = Calendar.getInstance().apply {
-                set(year, month, dayOfMonth)
-            }.time
-            onDateChange(newDate)
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    )
+            // Get the DatePicker widget and set up instant selection
+            val datePicker = dialog.datePicker
+            datePicker.setOnDateChangedListener { _, year, month, dayOfMonth ->
+                val newDate = Calendar.getInstance().apply {
+                    set(year, month, dayOfMonth)
+                }.time
+                onDateChange(newDate)
+                dialog.dismiss() // Auto-dismiss after selection
+            }
+        }
+        
+        dialog.show()
+    }
 
     Button(
-        onClick = { datePickerDialog.show() },
+        onClick = { showDatePickerDialog() },
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -257,6 +313,7 @@ fun DateSelector(date: Date, onDateChange: (Date) -> Unit) {
         }
     }
 }
+
 
 @Composable
 fun CategorySelector(
@@ -352,92 +409,24 @@ fun CategorySelector(
     }
 }
 
-@Composable
-fun ExpenseHistoryDialog(
-    expenses: List<Expense>,
-    categoryMap: Map<Int, String>,
-    currencySymbol: String,
-    onDismiss: () -> Unit,
-    onDeleteExpense: (Expense) -> Unit
-) {
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.8f)
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "Expense History",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    TextButton(onClick = onDismiss) {
-                        Text("Close")
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                if (expenses.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "No expenses recorded yet",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                } else {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(expenses) { expense ->
-                            ExpenseHistoryItem(
-                                expense = expense,
-                                categoryMap = categoryMap,
-                                currencySymbol = currencySymbol,
-                                onDeleteExpense = onDeleteExpense
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
-fun ExpenseHistoryItem(
+fun LatestExpenseItem(
     expense: Expense,
     categoryMap: Map<Int, String>,
-    currencySymbol: String,
-    onDeleteExpense: (Expense) -> Unit
+    currencySymbol: String
 ) {
-    val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
     
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
@@ -445,12 +434,28 @@ fun ExpenseHistoryItem(
             ) {
                 Text(
                     text = categoryMap[expense.categoryId] ?: "Unknown",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "Amount: ${currencySymbol}${String.format(Locale.US, "%.2f", expense.amount)}",
                     style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (!expense.description.isNullOrBlank()) {
+                    Text(
+                        text = expense.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = formatCurrency(expense.amount, currencySymbol),
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -459,28 +464,7 @@ fun ExpenseHistoryItem(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                if (!expense.description.isNullOrBlank()) {
-                    Text(
-                        text = expense.description,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-            
-            IconButton(
-                onClick = { onDeleteExpense(expense) },
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = MaterialTheme.colorScheme.errorContainer
-                )
-            ) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = "Delete expense"
-                )
             }
         }
     }
-} 
+}

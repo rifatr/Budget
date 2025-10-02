@@ -5,8 +5,8 @@ import java.util.Date
 
 object DateConstants {
     // Fixed year range for data consistency and accessibility
-    const val MIN_YEAR = 2020
-    const val MAX_YEAR = 2080
+    private const val MIN_YEAR = 2020
+    private const val MAX_YEAR = 2080
     
     // Month names mapping
     val MONTHS = listOf(
@@ -51,5 +51,39 @@ object DateConstants {
         val monthEndTimestamp = calendar.time
         
         return monthStartTimestamp to monthEndTimestamp
+    }
+    
+    /**
+     * Get month name from month number.
+     * 
+     * @param month The month number (1-12, where 1 = January)
+     * @return Month name as String (e.g., "January", "February", etc.)
+     */
+    fun getMonthName(month: Int): String {
+        return MONTHS.find { it.second == month }?.first ?: "Unknown"
+    }
+    
+    /**
+     * Get month number from month name.
+     * 
+     * @param monthName The month name (e.g., "January", "February", etc.)
+     * @return Month number (0-12, where 1 = January, 0 - Unknown (for fallback))
+     */
+    fun getMonthNumber(monthName: String): Int {
+        return MONTHS.find { it.first == monthName }?.second ?: 0
+    }
+    
+    /**
+     * Get month name and year from a Date object.
+     * 
+     * @param date The Date object
+     * @return Formatted string like "January 2024"
+     */
+    fun getMonthYearString(date: Date): String {
+        val calendar = Calendar.getInstance()
+        calendar.time = date
+        val month = calendar.get(Calendar.MONTH) + 1
+        val year = calendar.get(Calendar.YEAR)
+        return "${getMonthName(month)} $year"
     }
 }

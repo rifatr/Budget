@@ -19,7 +19,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.budget"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 3
         versionName = "1.2"

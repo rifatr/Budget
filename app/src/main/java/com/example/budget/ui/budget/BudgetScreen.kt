@@ -1,8 +1,9 @@
 package com.example.budget.ui.budget
 
 import androidx.compose.foundation.layout.*
-import com.example.budget.ui.components.BeautifulSelector
+import com.example.budget.ui.components.MonthYearSelector
 import com.example.budget.ui.components.ConfirmationMessage
+import com.example.budget.data.ValidationConstants
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -28,7 +29,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.ui.AppViewModelProvider
 import com.example.budget.data.DateConstants
-import java.util.*
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -423,46 +423,5 @@ fun BudgetScreen(
     }
 }
 
-@Composable
-private fun MonthYearSelector(
-    selectedMonth: Int,
-    selectedYear: Int,
-    onMonthChange: (Int) -> Unit,
-    onYearChange: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val months = DateConstants.MONTHS
-    val years = DateConstants.getAvailableYears()
-
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        // Month Selector
-        Box(modifier = Modifier.weight(1f)) {
-            BeautifulSelector(
-                label = "Month",
-                value = months.find { it.second == selectedMonth }?.first ?: "January",
-                options = months.map { it.first },
-                onSelectionChange = { selectedMonthName ->
-                    val monthValue = months.find { it.first == selectedMonthName }?.second ?: 1
-                    onMonthChange(monthValue)
-                }
-            )
-        }
-
-        // Year Selector
-        Box(modifier = Modifier.weight(1f)) {
-            BeautifulSelector(
-                label = "Year",
-                value = selectedYear.toString(),
-                options = years.map { it.toString() },
-                onSelectionChange = { selectedYearString ->
-                    onYearChange(selectedYearString.toInt())
-                }
-            )
-        }
-    }
-}
 
  
