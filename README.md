@@ -128,7 +128,7 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 
 ### Prerequisites
 - Android Studio Hedgehog or later
-- Android SDK 24 or higher (Android 7.0+)
+- Android SDK 26 or higher (Android 8.0+)
 - Kotlin 1.9.22
 
 ### Installation
@@ -307,7 +307,7 @@ app/src/main/java/com/example/budget/
 7. Automatically returns to home screen
 
 ### Tech Stack Details
-- **Minimum SDK**: 24 (Android 7.0)
+- **Minimum SDK**: 26 (Android 8.0)
 - **Target SDK**: 34 (Android 14)
 - **Compile SDK**: 34
 - **Java Compatibility**: Java 8

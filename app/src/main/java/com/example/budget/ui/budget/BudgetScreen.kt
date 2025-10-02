@@ -1,7 +1,6 @@
 package com.example.budget.ui.budget
 
 import androidx.compose.foundation.layout.*
-import com.example.budget.ui.components.BeautifulSelector
 import com.example.budget.ui.components.MonthYearSelector
 import com.example.budget.ui.components.ConfirmationMessage
 import com.example.budget.data.ValidationConstants
@@ -30,7 +29,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budget.ui.AppViewModelProvider
 import com.example.budget.data.DateConstants
-import java.util.*
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -185,16 +185,17 @@ fun ExpenseScreen(
                 }
             }
 
+            val monthYearString = DateConstants.getMonthYearString(uiState.date)
 
             if (uiState.latestExpenses.isNotEmpty()) {
                 item {
-                      Text(
-                          text = "Latest Expenses of ${DateConstants.getMonthYearString(uiState.date)}",
-                          style = MaterialTheme.typography.titleMedium,
-                          fontWeight = FontWeight.SemiBold,
-                          color = MaterialTheme.colorScheme.onSurface,
-                          modifier = Modifier.padding(top = 10.dp)
-                      )
+                    Text(
+                        text = "Latest Expenses of $monthYearString",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(top = 10.dp)
+                    )
                 }
                 
                 items(uiState.latestExpenses.take(ValidationConstants.LATEST_EXPENSES_COUNT)) { expense ->
@@ -205,26 +206,24 @@ fun ExpenseScreen(
                     )
                 }
              }
-             else {
-                 item {
-                       Text(
-                           text = "No expenses in ${DateConstants.getMonthYearString(uiState.date)}",
-                           style = MaterialTheme.typography.titleMedium,
-                           fontWeight = FontWeight.SemiBold,
-                           color = MaterialTheme.colorScheme.onSurface,
-                           modifier = Modifier.padding(top = 10.dp)
-                       )
-                 }
-             }
+            else {
+                item {
+                    Text(
+                        text = "No expenses in $monthYearString",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(top = 10.dp)
+                    )
+                }
+            }
             
             item {
-                val calendar = Calendar.getInstance()
-                calendar.time = uiState.date
-                val currentMonth = calendar.get(Calendar.MONTH) + 1
-                val currentYear = calendar.get(Calendar.YEAR)
-                
                 OutlinedButton(
                     onClick = { 
+                        val calendar = Calendar.getInstance().apply { time = uiState.date }
+                        val currentMonth = calendar.get(Calendar.MONTH) + 1
+                        val currentYear = calendar.get(Calendar.YEAR)
                         navController.navigate(Screen.ExpenseHistory.createRoute(currentMonth, currentYear))
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -247,26 +246,21 @@ fun DateSelector(date: Date, onDateChange: (Date) -> Unit) {
     val context = LocalContext.current
     val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
 
-    val calendar = Calendar.getInstance()
-    calendar.time = date
-
     fun showDatePickerDialog() {
-        val currentCalendar = Calendar.getInstance()
-        currentCalendar.time = date
+        val calendar = Calendar.getInstance().apply { time = date }
         
         val dialog = android.app.DatePickerDialog(
             context,
             null, // We'll set up our own listener
-            currentCalendar.get(Calendar.YEAR),
-            currentCalendar.get(Calendar.MONTH),
-            currentCalendar.get(Calendar.DAY_OF_MONTH)
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
         )
         
-        // Remove the OK and Cancel buttons and set up instant selection
+        // Remove the OK button and set up instant selection
         dialog.setOnShowListener {
             dialog.getButton(android.app.DatePickerDialog.BUTTON_POSITIVE)?.visibility = android.view.View.GONE
-            dialog.getButton(android.app.DatePickerDialog.BUTTON_NEGATIVE)?.visibility = android.view.View.GONE
-            
+
             // Get the DatePicker widget and set up instant selection
             val datePicker = dialog.datePicker
             datePicker.setOnDateChangedListener { _, year, month, dayOfMonth ->
