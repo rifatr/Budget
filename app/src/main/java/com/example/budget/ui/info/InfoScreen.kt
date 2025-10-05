@@ -1,5 +1,9 @@
 package com.example.budget.ui.info
 
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -7,12 +11,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -22,6 +26,14 @@ import java.util.Calendar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InfoScreen(navController: NavController) {
+    val context = LocalContext.current
+    
+    // Get version from PackageManager
+    val appVersion = try {
+        context.packageManager.getPackageInfo(context.packageName, 0).versionName
+    } catch (e: PackageManager.NameNotFoundException) {
+        "0" // Fallback version
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -73,7 +85,7 @@ fun InfoScreen(navController: NavController) {
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = "Version 1.0.0",
+                        text = "Version $appVersion",
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
@@ -153,7 +165,14 @@ fun InfoScreen(navController: NavController) {
                     HorizontalDivider()
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.clickable {
+                            val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+                                data = Uri.parse("mailto:rifatrraazz@gmail.com")
+                                putExtra(Intent.EXTRA_SUBJECT, "ManiTrack App Feedback")
+                            }
+                            context.startActivity(Intent.createChooser(emailIntent, "Send Email"))
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Email,
@@ -161,8 +180,9 @@ fun InfoScreen(navController: NavController) {
                             tint = MaterialTheme.colorScheme.secondary
                         )
                         Text(
-                            text = "mlrifat370@gmail.com",
-                            style = MaterialTheme.typography.bodyLarge
+                            text = "Email",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -178,7 +198,7 @@ fun InfoScreen(navController: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "© ${Calendar.getInstance().get(Calendar.YEAR)} Budget Tracker",
+                        text = "© ${Calendar.getInstance().get(Calendar.YEAR)} ManiTrack",
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center
                     )
@@ -190,6 +210,9 @@ fun InfoScreen(navController: NavController) {
                     )
                 }
             }
+            
+            // Add bottom padding
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 } 
