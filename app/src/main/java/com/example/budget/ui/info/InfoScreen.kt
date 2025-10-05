@@ -68,7 +68,7 @@ fun InfoScreen(navController: NavController) {
                     }
                     HorizontalDivider()
                     Text(
-                        text = "Budget Tracker",
+                        text = "ManiTrack",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -77,7 +77,7 @@ fun InfoScreen(navController: NavController) {
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = "A simple and beautiful expense tracking app to help you manage your monthly budgets and track expenses by category.",
+                        text = "A simple and beautiful app that helps you to track expenses, set monthly budgets, and monitor your financial health with ease. It offers features like multi-currency support, detailed summaries, category management, and real-time updates across all sections. It also includes a convenient home screen widget for quick and effortless expense entry.",
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Justify
                     )
@@ -161,7 +161,7 @@ fun InfoScreen(navController: NavController) {
                             tint = MaterialTheme.colorScheme.secondary
                         )
                         Text(
-                            text = "lutfar.rahman@chaldal.net",
+                            text = "mlrifat370@gmail.com",
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }

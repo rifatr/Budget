@@ -1,4 +1,4 @@
-# Budget Tracker
+# ManiTrack
 
 A beautiful, comprehensive Android expense tracking app built with Jetpack Compose and modern Android development practices. Track your monthly budgets, log expenses, and monitor your financial health with an intuitive and polished interface.
 
@@ -293,7 +293,7 @@ app/src/main/java/com/example/budget/
 ### Adding Widget to Home Screen
 1. Long press on your home screen
 2. Tap "Widgets" 
-3. Find "Budget Tracker" in the list
+3. Find "ManiTrack" in the list
 4. Drag the "Expense Widget" to your home screen
 5. Widget appears as a compact blue circular button
 
