@@ -1,7 +1,6 @@
 package com.example.budget.ui.info
 
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ContactPhone
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Info
@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.budget.ui.utils.VersionUtils
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,12 +29,8 @@ import java.util.Calendar
 fun InfoScreen(navController: NavController) {
     val context = LocalContext.current
     
-    // Get version from PackageManager
-    val appVersion = try {
-        context.packageManager.getPackageInfo(context.packageName, 0).versionName
-    } catch (e: PackageManager.NameNotFoundException) {
-        "0" // Fallback version
-    }
+    // Get version using centralized utility
+    val appVersion = VersionUtils.getAppVersion(context)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -127,11 +124,11 @@ fun InfoScreen(navController: NavController) {
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = "Software Engineer, Chaldal Engineering",
+                        text = "Software Engineer",
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = "Passionate about creating beautiful and functional mobile applications using modern Android development practices.",
+                        text = "Passionate about problem solving and creating useful and functional applications using modern development practices.",
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Justify
                     )
@@ -152,7 +149,7 @@ fun InfoScreen(navController: NavController) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Email,
+                            imageVector = Icons.Default.ContactPhone,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary
                         )
@@ -191,19 +188,23 @@ fun InfoScreen(navController: NavController) {
             // Copyright Section
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
                         text = "© ${Calendar.getInstance().get(Calendar.YEAR)} ManiTrack",
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "All rights reserved",
+                        text = "Made in Bangladesh",
                         style = MaterialTheme.typography.bodySmall,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant

@@ -22,6 +22,7 @@ import com.example.budget.BudgetApp
 import com.example.budget.data.SummaryLayoutType
 import com.example.budget.ui.Screen
 import com.example.budget.ui.setup.CurrencySelectionDialog
+import com.example.budget.ui.utils.VersionUtils
 import androidx.compose.ui.text.style.TextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +34,9 @@ fun MoreScreen(navController: NavController) {
     val summaryLayoutType by app.container.summaryLayoutPreferences.summaryLayoutType.collectAsState()
     var showCurrencyDialog by remember { mutableStateOf(false) }
     var isLayoutSectionExpanded by remember { mutableStateOf(false) }
+    
+    // Get version using centralized utility
+    val appVersion = VersionUtils.getAppVersion(context)
 
     Scaffold(
         topBar = {
@@ -62,7 +66,7 @@ fun MoreScreen(navController: NavController) {
             AnimatedMenuItem(
                 icon = Icons.Default.ViewModule,
                 title = "Summary Layout",
-                subtitle = if (summaryLayoutType == SummaryLayoutType.CARDS) "Cards View" else "Table View",
+                subtitle = if (summaryLayoutType == SummaryLayoutType.CARDS) "Card View" else "Table View",
                 onClick = { isLayoutSectionExpanded = !isLayoutSectionExpanded },
                 isExpanded = isLayoutSectionExpanded
             )
@@ -184,7 +188,7 @@ fun MoreScreen(navController: NavController) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 16.dp, vertical = 24.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
@@ -201,7 +205,7 @@ fun MoreScreen(navController: NavController) {
                         modifier = Modifier.fillMaxWidth()
                     )
                     Text(
-                        text = "Version 1.0.0",
+                        text = "Version $appVersion",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
