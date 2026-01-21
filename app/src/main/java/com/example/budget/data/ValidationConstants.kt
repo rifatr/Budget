@@ -1,7 +1,7 @@
 package com.example.budget.data
 
 /**
- * Centralized validation constants for the Budget application.
+ * Centralized validation constants for the ManiTrack application.
  * Contains all input validation limits and patterns used across the app.
  */
 object ValidationConstants {

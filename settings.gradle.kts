@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Budget"
+rootProject.name = "ManiTrack"
 include(":app") 

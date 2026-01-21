@@ -1,27 +1,36 @@
 package com.example.budget.ui.info
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ContactPhone
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.budget.ui.utils.VersionUtils
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InfoScreen(navController: NavController) {
+    val context = LocalContext.current
+    
+    // Get version using centralized utility
+    val appVersion = VersionUtils.getAppVersion(context)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -68,16 +77,16 @@ fun InfoScreen(navController: NavController) {
                     }
                     HorizontalDivider()
                     Text(
-                        text = "Budget Tracker",
+                        text = "ManiTrack",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = "Version 1.0.0",
+                        text = "Version $appVersion",
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = "A simple and beautiful expense tracking app to help you manage your monthly budgets and track expenses by category.",
+                        text = "A simple and beautiful app that helps you to track expenses, set monthly budgets, and monitor your financial health with ease. It offers features like multi-currency support, detailed summaries, category management, and real-time updates across all sections. It also includes a convenient home screen widget for quick and effortless expense entry.",
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Justify
                     )
@@ -115,11 +124,11 @@ fun InfoScreen(navController: NavController) {
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = "Software Engineer, Chaldal Engineering",
+                        text = "Software Engineer",
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = "Passionate about creating beautiful and functional mobile applications using modern Android development practices.",
+                        text = "Passionate about problem solving and creating useful and functional applications using modern development practices.",
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Justify
                     )
@@ -140,7 +149,7 @@ fun InfoScreen(navController: NavController) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Email,
+                            imageVector = Icons.Default.ContactPhone,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary
                         )
@@ -153,7 +162,14 @@ fun InfoScreen(navController: NavController) {
                     HorizontalDivider()
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.clickable {
+                            val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+                                data = Uri.parse("mailto:rifatrraazz@gmail.com")
+                                putExtra(Intent.EXTRA_SUBJECT, "ManiTrack App Feedback")
+                            }
+                            context.startActivity(Intent.createChooser(emailIntent, "Send Email"))
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Email,
@@ -161,8 +177,9 @@ fun InfoScreen(navController: NavController) {
                             tint = MaterialTheme.colorScheme.secondary
                         )
                         Text(
-                            text = "lutfar.rahman@chaldal.net",
-                            style = MaterialTheme.typography.bodyLarge
+                            text = "Email",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -171,25 +188,32 @@ fun InfoScreen(navController: NavController) {
             // Copyright Section
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "© ${Calendar.getInstance().get(Calendar.YEAR)} Budget Tracker",
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center
+                        text = "© ${Calendar.getInstance().get(Calendar.YEAR)} ManiTrack",
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "All rights reserved",
+                        text = "Made in Bangladesh",
                         style = MaterialTheme.typography.bodySmall,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
+            
+            // Add bottom padding
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 } 

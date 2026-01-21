@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Budget</string>
+    <string name="app_name">ManiTrack</string>
     
     <!-- Widget Strings -->
     <string name="expense_widget_description">Quick expense entry widget</string>
