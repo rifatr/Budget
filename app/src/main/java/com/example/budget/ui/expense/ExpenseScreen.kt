@@ -415,7 +415,7 @@ fun CategorySelector(
                 )
             }
             
-            // New Category button
+            // Manage Categories button
             DropdownMenuItem(
                 text = { 
                     Row(
