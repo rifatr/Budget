@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.budget.data.BudgetRepository
 import com.example.budget.data.DateConstants
 import com.example.budget.data.db.Expense
+import com.example.budget.data.db.sortedByDateAndId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -50,7 +51,7 @@ class ExpenseHistoryViewModel(
             )
             
             val expenses = budgetRepository.getExpensesForMonth(monthStart, monthEnd).first()
-            val sortedExpenses = expenses.sortedByDescending { it.date }
+            val sortedExpenses = expenses.sortedByDateAndId()
             val totalExpenses = expenses.sumOf { it.amount }
             
             _uiState.value = _uiState.value.copy(

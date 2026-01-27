@@ -31,7 +31,8 @@ class BudgetRepository(
     // Expense operations
     fun getExpensesForMonth(startDate: Date, endDate: Date): Flow<List<Expense>> =
         expenseDao.getExpensesForMonth(startDate, endDate)
-    fun getAllExpenses(): Flow<List<Expense>> = expenseDao.getAllExpensesFlow()
+    fun getLatestExpensesForMonth(startDate: Date, endDate: Date, limit: Int): Flow<List<Expense>> =
+        expenseDao.getLatestExpensesForMonth(startDate, endDate, limit)
     suspend fun insertExpense(expense: Expense) = expenseDao.insertExpense(expense)
     suspend fun deleteExpense(expense: Expense) = expenseDao.deleteExpense(expense)
     suspend fun deleteExpenseById(expenseId: Int) = expenseDao.deleteExpenseById(expenseId)
@@ -58,4 +59,4 @@ class BudgetRepository(
         budgetData.expenses.forEach { expenseDao.insertExpense(it) }
         budgetData.budgets.forEach { budgetDao.insertOrUpdateBudget(it) }
     }
-} 
+}

@@ -26,4 +26,11 @@ data class Expense(
     val categoryId: Int,
     val amount: Double,
     val description: String?
-) 
+)
+
+/**
+ * Common sorting for expenses: Date descending, then ID descending.
+ * This ensures most recent expenses (including those added same-day) appear first.
+ */
+fun List<Expense>.sortedByDateAndId(): List<Expense> = 
+    this.sortedWith(compareByDescending<Expense> { it.date }.thenByDescending { it.id }) 

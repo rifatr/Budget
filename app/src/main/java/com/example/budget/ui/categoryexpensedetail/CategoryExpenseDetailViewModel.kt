@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budget.data.BudgetRepository
 import com.example.budget.data.db.Expense
+import com.example.budget.data.db.sortedByDateAndId
 import com.example.budget.data.DateConstants
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,7 +59,7 @@ class CategoryExpenseDetailViewModel(
                     year = year,
                     budgeted = budgeted,
                     totalSpent = totalSpent,
-                    expenses = categoryExpenses.sortedByDescending { it.date },
+                    expenses = categoryExpenses.sortedByDateAndId(),
                     isLoading = false
                 )
             }.collect {
@@ -97,7 +98,7 @@ class CategoryExpenseDetailViewModel(
         _uiState.value = _uiState.value.copy(
             budgeted = budgeted,
             totalSpent = totalSpent,
-            expenses = categoryExpenses,
+            expenses = categoryExpenses.sortedByDateAndId(),
             isLoading = false
         )
     }
