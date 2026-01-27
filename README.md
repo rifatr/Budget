@@ -47,6 +47,8 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 - **Smart Input**: Large numbers display with comma delimiters for better readability
 
 ### 📂 Category Management
+- **Pre-created Categories**: Three initial categories (Food, Transport, Shopping) automatically created on first install or after clearing data
+- **Quick Access**: "Manage Categories" button directly in expense category dropdown for instant category management
 - **Dedicated Manager**: Full-featured category management from More screen
 - **CRUD Operations**: Add, rename, and delete categories with 24-character name limit and validation
 - **Usage Statistics**: View expense count and total spent per category
@@ -54,6 +56,7 @@ A beautiful, comprehensive Android expense tracking app built with Jetpack Compo
 - **Search & Sort**: Real-time search and sort by name, usage, or total amount
 - **Bulk Operations**: Delete categories and all associated expenses safely
 - **Centralized Validation**: Consistent validation rules across all category operations
+- **Flexible Management**: Initial categories can be modified or deleted like any other category
 
 ### 📈 Summary & Analytics
 - **Dual Layout Options**: Choose between modern Cards view or compact Table view
@@ -256,23 +259,24 @@ app/src/main/java/com/example/budget/
 ### First Time Setup
 1. Launch the app
 2. Select your preferred currency (defaults to Taka)
-3. Start by creating expense categories in Budget tab
-4. Set your monthly budget amounts
+3. Three initial categories (Food, Transport, Shopping) are automatically created
+4. Set your monthly budget amounts in Budget tab
 5. Begin logging expenses in Expense tab
 
 ### Daily Usage
 1. **Add Expense**: Use Expense tab with instant date picker and smart category selection (last selected pre-selected)
-2. **Navigate Tabs**: Swipe left/right between tabs or tap bottom navigation
-3. **Quick Entry**: Use home screen widget for instant expense logging
-4. **View Recent**: See last 5 expenses from current month directly in Expense tab
-5. **Full History**: Tap "View Full History" to see all expenses with month/year filtering and delete options
-6. **Check Progress**: View Summary tab for budget vs spending overview
-7. **View Details**: Tap category cards/rows in Summary to see individual expenses
-8. **Switch Layout**: Expand Summary Layout section in More tab to choose between Cards and Table view
-9. **Sort Categories**: Use sort button in Summary to organize by name, spent, budget, or remaining
-10. **Adjust Budgets**: Modify budgets in Budget tab with real-time validation
-11. **Manage Categories**: Use Category Manager from More tab for advanced category operations with character limits
-12. **Data Management**: Export backups or change currency/preferences in More tab
+2. **Quick Category Creation**: Tap "Manage Categories" button at the bottom of category dropdown for instant access to category manager
+3. **Navigate Tabs**: Swipe left/right between tabs or tap bottom navigation
+4. **Quick Entry**: Use home screen widget for instant expense logging
+5. **View Recent**: See last 5 expenses from current month directly in Expense tab
+6. **Full History**: Tap "View Full History" to see all expenses with month/year filtering and delete options
+7. **Check Progress**: View Summary tab for budget vs spending overview
+8. **View Details**: Tap category cards/rows in Summary to see individual expenses
+9. **Switch Layout**: Expand Summary Layout section in More tab to choose between Cards and Table view
+10. **Sort Categories**: Use sort button in Summary to organize by name, spent, budget, or remaining
+11. **Adjust Budgets**: Modify budgets in Budget tab with real-time validation
+12. **Manage Categories**: Use Category Manager from More tab for advanced category operations with character limits
+13. **Data Management**: Export backups or change currency/preferences in More tab
 
 ## 🔄 Data Backup
 
@@ -316,7 +320,7 @@ app/src/main/java/com/example/budget/
 ## 🔮 Future Enhancements
 
 - **Data Visualization**: Charts and graphs for spending trends
-- **Categories**: Pre-built category icons and smart suggestions
+- **Category Icons**: Use icon for each category
 - **Recurring Expenses**: Support for recurring transactions
 - **Cloud Sync**: Backup to cloud storage
 - **Dark Mode**: Enhanced dark theme support
