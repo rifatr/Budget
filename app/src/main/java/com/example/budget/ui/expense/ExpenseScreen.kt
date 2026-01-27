@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -106,7 +107,8 @@ fun ExpenseScreen(
                         CategorySelector(
                             categories = uiState.allCategories,
                             selectedCategory = uiState.category,
-                            onCategoryChange = { viewModel.onCategoryChange(it) }
+                            onCategoryChange = { viewModel.onCategoryChange(it) },
+                            navController = navController
                         )
                     }
                 }
@@ -319,7 +321,8 @@ fun DateSelector(date: Date, onDateChange: (Date) -> Unit) {
 fun CategorySelector(
     categories: List<Category>,
     selectedCategory: Category?,
-    onCategoryChange: (Category) -> Unit
+    onCategoryChange: (Category) -> Unit,
+    navController: NavController
 ) {
     var expanded by remember { mutableStateOf(false) }
     val configuration = LocalConfiguration.current
@@ -354,7 +357,7 @@ fun CategorySelector(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = selectedCategory?.name ?: "Create in Budget menu",
+                        text = selectedCategory?.name ?: "",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.weight(1f),
@@ -362,13 +365,12 @@ fun CategorySelector(
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
                     )
-                    if (selectedCategory != null) {
-                        Icon(
-                            imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                            contentDescription = if (expanded) "Collapse" else "Expand",
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
         }
@@ -405,6 +407,36 @@ fun CategorySelector(
                         .height(48.dp)
                 )
             }
+            
+            if (categories.isNotEmpty()) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 4.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+            }
+            
+            // Manage Categories button
+            DropdownMenuItem(
+                text = { 
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Manage Categories",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                },
+                onClick = {
+                    expanded = false
+                    navController.navigate(Screen.CategoryManager.route)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+            )
         }
     }
 }
